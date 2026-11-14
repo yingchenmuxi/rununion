@@ -1,0 +1,19 @@
+{
+  "name": "running-club-backend",
+  "version": "1.0.0",
+  "description": "长跑社跑步数据后端：提供注册登录、跑步记录、社团总览接口",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "fast-xml-parser": "^5.11.2",
+    "tesseract.js": "^7.0.0"
+  }
+}
