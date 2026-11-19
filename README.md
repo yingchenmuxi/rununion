@@ -139,7 +139,7 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
 
     node scripts/publish-rununion.mjs "说明这次改了什么"
 
-它会复制项目到 `E:\_src\rununion`（跳过 node_modules、构建产物、本地 server、日志和环境文件），有变化就提交，然后推送 develop 和 main。只复制、不提交时用 `node scripts/sync-rununion.mjs`。
+它会复制项目到 `E:\_src\rununion`（跳过 node_modules、构建产物、本地 server、日志和环境文件），有变化就提交，然后只推送 develop（main 保持原样）。只复制、不提交时用 `node scripts/sync-rununion.mjs`。
 
 ## 目录
 

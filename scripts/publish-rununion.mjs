@@ -41,6 +41,6 @@ if (staged.status === 1) {
 }
 
 const gitEnv = { GCM_INTERACTIVE: 'Never' };
+// 只更新 develop；main 保持仓库原状。
 run('git', ['push', 'origin', 'develop:develop'], target, gitEnv);
-run('git', ['push', 'origin', 'develop:main'], target, gitEnv);
 run('git', ['log', '--oneline', '-1'], target);
