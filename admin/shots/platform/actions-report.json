@@ -1,0 +1,106 @@
+{
+  "login": {
+    "path": "/platform",
+    "toast": "登录成功，已进入平台总后台。",
+    "modal": null,
+    "h1": "全国社团，今天在发生什么？"
+  },
+  "systemLayout": {
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "tableClient": 609,
+    "tableScroll": 609
+  },
+  "recordBefore": {
+    "text": "2026/11/17 梁子轩 广州天河少年跑团 21.1 km 84 分钟 4'00\" /km 手动记录 公开 半马测试。 更正",
+    "rows": 12
+  },
+  "recordOpen": {
+    "ok": true
+  },
+  "recordModal": {
+    "path": "/platform/records",
+    "toast": "",
+    "modal": "更正跑步记录 梁子轩 · 广州天河少年跑团 日期 可见性 社团可见 私密 公开 距离（km） 时长（分钟） 备注 按当前输入计算：约 3'59\" /km。保存后会更新成员端记录，并写入平台操作日志。 取消 保存更正",
+    "h1": "跑步记录"
+  },
+  "recordFields": {
+    "date": "2026-11-17",
+    "distance": "21.1",
+    "duration": "84",
+    "note": "半马测试。"
+  },
+  "distanceSet": {
+    "ok": true,
+    "value": "21.5"
+  },
+  "noteSet": {
+    "ok": true,
+    "value": "平台复核：按计时器原始记录更正，原填写有误。"
+  },
+  "recordAfter": {
+    "firstRow": "2026/11/17 梁子轩 广州天河少年跑团 21.5 km 84 分钟 3'54\" /km 手动记录 公开 平台复核：按计时器原始记录更正，原填写有误。 更正",
+    "toast": "记录已更正，操作已写入审计日志。"
+  },
+  "toModeration": {
+    "ok": true
+  },
+  "moderationBefore": {
+    "pending": 3,
+    "stats": true
+  },
+  "reportOpen": {
+    "ok": true
+  },
+  "moderationModal": {
+    "path": "/platform/moderation",
+    "toast": "",
+    "modal": "处理这条举报 记录异常 · 梁子轩 · 21.1 km 配速 4'00\" /km，且单次距离从 5 km 直接跳到半马，疑似代跑或误填。 广州天河少年跑团 · 举报人 同团成员 · 11/17 21:10 处理说明* 写清核实过程、已采取的动作和后续要求。 已联系社团负责人核实，要求限期整改并补充材料。 内容/记录已下线或更正，并通知相关成员。 未发现违规，举报不成立，已向举报人说明。 取消 确认",
+    "h1": "审核与举报"
+  },
+  "quickNote": {
+    "ok": true,
+    "text": "已联系社团负责人核实，要求限期整改并补充材料。"
+  },
+  "moderationAfter": {
+    "cards": 2,
+    "toast": "举报已处理，说明和操作人已写入审计日志。",
+    "text": "青 青跑团 平台总后台 管理范围 全国社团 · 平台治理 总览 学校与社团 全部用户 内容与活动 跑步记录 审核与举报 系统与权限 平台示例数据，变更只在本次会话生效 V0.1 · 平台治理 青跑团 审核与举报 示例数据 周 周明 退出 审核与举报 高风险优先处理。每一次处理都要写清依据和后续动作，平台会保留完整记录。"
+  },
+  "systemTab": "操作日志 10",
+  "accountName": {
+    "ok": true,
+    "value": "测试管理员"
+  },
+  "accountEmail": {
+    "ok": true,
+    "value": "qa-platform@qingrun.local"
+  },
+  "accountAfterCreate": {
+    "rows": 4,
+    "newRow": "测 测试管理员 qa-platform@qingrun.local 运营管理员 尚未登录 等待首次登录 启用中 停用",
+    "toast": "管理员账号已创建。V0.1 只写入账号记录，不会发送邀请邮件。"
+  },
+  "disableClick": {
+    "ok": true
+  },
+  "disableConfirm": {
+    "ok": true
+  },
+  "accountAfterDisable": {
+    "newRow": "测 测试管理员 qa-platform@qingrun.local 运营管理员 尚未登录 等待首次登录 已停用 启用",
+    "toast": "管理员账号已创建。V0.1 只写入账号记录，不会发送邀请邮件。"
+  },
+  "logs": {
+    "count": 12,
+    "rows": [
+      "2026/11/18 · 刚刚 周明 停用管理员 测试管理员 qa-platform@qingrun.local 10.24.8.16",
+      "2026/11/18 · 刚刚 周明 新增管理员 测试管理员 角色：运营管理员 10.24.8.16",
+      "2026/11/18 · 刚刚 周明 处理举报 rep-001 · 梁子轩 · 21.1 km 已联系社团负责人核实，要求限期整改并补充材料。 10.24.8.16",
+      "2026/11/18 · 刚刚 周明 更正跑步记录 梁子轩 · 2026-11-17 距离 21.1 → 21.5 km；可见性 public → public 10.24.8.16",
+      "2026/11/17 · 15 小时前 周明 审核通过社团 上海浦江少年跑团 入驻资料、场地说明和监护人同意模板齐全。 10.24.8.16",
+      "2026/11/17 · 12 小时前 周明 更正跑步记录 run-p-007 将 21.1 km 改为 12.0 km，备注补充“误填半马距离”。 10.24.8.16"
+    ]
+  },
+  "events": []
+}

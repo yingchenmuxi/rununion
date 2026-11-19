@@ -1,27 +1,26 @@
-# ===== 后端 =====
-# 第三方依赖，克隆后用 npm install 重新安装
-backend/node_modules/
+# Dependencies
+**/node_modules*/
 
-# 本地数据库与备份（可用 node seed_articles.js 重新生成）
-backend/data/
+# Build output
+**/dist/
+**/.expo/
+**/.vite/
+**/web-build/
+**/*.tsbuildinfo
 
-# 用户运行时上传的文件；只保留知识库自带的示例配图
-backend/uploads/*
-!backend/uploads/art_*.jpg
-!backend/uploads/article_*.jpg
+# Local PocketBase runtime (binary + data)
+server/
 
-# 日志与临时文件
+# Browser automation profiles
+.edge-*/
+.edge-*
+
+# Logs and local env
 *.log
-server.log
-server_err.log
-
-# 环境变量文件（可能含密钥，不要上传）
 .env
 .env.*
+!.env.example
 
-# ===== 客户端（Flutter 自身规则见 client/.gitignore）=====
-client/android/build/
-
-# ===== 系统文件 =====
-Thumbs.db
+# OS files
 .DS_Store
+Thumbs.db

@@ -1,0 +1,81 @@
+{
+  "results": [
+    {
+      "width": 1280,
+      "name": "users",
+      "h1": "全部用户",
+      "doc": 1265,
+      "inner": 1280,
+      "tableClient": 951,
+      "tableScroll": 951,
+      "pager": {
+        "left": 301,
+        "right": 1212,
+        "width": 911
+      }
+    },
+    {
+      "width": 1280,
+      "name": "records",
+      "h1": "跑步记录",
+      "doc": 1265,
+      "inner": 1280,
+      "tableClient": 951,
+      "tableScroll": 1120,
+      "pager": {
+        "left": 301,
+        "right": 1212,
+        "width": 911
+      }
+    },
+    {
+      "width": 1280,
+      "name": "system",
+      "h1": "系统与权限",
+      "doc": 1265,
+      "inner": 1280,
+      "tableClient": 951,
+      "tableScroll": 951,
+      "pager": null
+    },
+    {
+      "width": 1024,
+      "name": "users",
+      "h1": "全部用户",
+      "doc": 1009,
+      "inner": 1024,
+      "tableClient": 695,
+      "tableScroll": 940,
+      "pager": {
+        "left": 301,
+        "right": 956,
+        "width": 655
+      }
+    },
+    {
+      "width": 1024,
+      "name": "records",
+      "h1": "跑步记录",
+      "doc": 1009,
+      "inner": 1024,
+      "tableClient": 695,
+      "tableScroll": 1120,
+      "pager": {
+        "left": 301,
+        "right": 956,
+        "width": 655
+      }
+    },
+    {
+      "width": 1024,
+      "name": "system",
+      "h1": "系统与权限",
+      "doc": 1009,
+      "inner": 1024,
+      "tableClient": 695,
+      "tableScroll": 695,
+      "pager": null
+    }
+  ],
+  "events": []
+}
