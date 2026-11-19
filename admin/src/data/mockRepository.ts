@@ -7,6 +7,8 @@ import {
   PLATFORM_DISPLAY_NAME,
   PLATFORM_EMAIL,
   PLATFORM_PASSWORD,
+  seedActivities,
+  seedActivitySignups,
   seedAnnouncements,
   seedChallenges,
   seedInvites,
@@ -14,13 +16,17 @@ import {
   seedRecords,
 } from './mock/mockData';
 import type {
+  ActivitySignup,
   AdminUser,
   Announcement,
   AnnouncementStatus,
   Challenge,
+  ClubActivity,
+  ClubActivitySummary,
   InviteCode,
   Member,
   MemberStatus,
+  NewActivityInput,
   NewAnnouncementInput,
   NewChallengeInput,
   NewInviteInput,
@@ -53,6 +59,8 @@ export class MockAdminRepository implements AdminRepository {
   private announcements: Announcement[] = clone(seedAnnouncements);
   private challenges: Challenge[] = clone(seedChallenges);
   private records: RunRecord[] = clone(seedRecords);
+  private activities: ClubActivity[] = clone(seedActivities);
+  private activitySignups: ActivitySignup[] = clone(seedActivitySignups);
 
   async login(email: string, password: string): Promise<AdminUser> {
     await wait(220);
@@ -263,6 +271,139 @@ export class MockAdminRepository implements AdminRepository {
     return clone([...this.records]
       .filter((record) => record.visibility !== 'private')
       .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt)));
+  }
+
+  private summarizeActivity(activity: ClubActivity): ClubActivitySummary {
+    const rows = this.activitySignups.filter((signup) => signup.activityId === activity.id);
+    const activeRows = rows.filter((signup) => signup.status !== 'declined');
+    return {
+      ...clone(activity),
+      signupCount: activeRows.length,
+      pendingCount: rows.filter((signup) => signup.status === 'pending').length,
+      confirmedCount: rows.filter((signup) => signup.status === 'approved' || signup.status === 'attended').length,
+    };
+  }
+
+  async listActivities(): Promise<ClubActivitySummary[]> {
+    await wait();
+    const statusOrder: Record<ClubActivity['status'], number> = { published: 0, draft: 1, ended: 2 };
+    return clone([...this.activities]
+      .sort((a, b) => statusOrder[a.status] - statusOrder[b.status]
+        || a.date.localeCompare(b.date)
+        || a.startTime.localeCompare(b.startTime))
+      .map((activity) => this.summarizeActivity(activity)));
+  }
+
+  async getActivity(id: string): Promise<ClubActivity | null> {
+    await wait(100);
+    const target = this.activities.find((activity) => activity.id === id);
+    return target ? clone(target) : null;
+  }
+
+  async listActivitySignups(activityId: string): Promise<ActivitySignup[]> {
+    await wait();
+    const statusOrder: Record<ActivitySignup['status'], number> = { pending: 0, approved: 1, attended: 2, declined: 3 };
+    return clone(this.activitySignups
+      .filter((signup) => signup.activityId === activityId)
+      .sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || b.createdAt.localeCompare(a.createdAt)));
+  }
+
+  async createActivity(input: NewActivityInput): Promise<ClubActivity> {
+    await wait(200);
+    const title = input.title.trim();
+    const meetingArea = input.meetingArea.trim();
+    const coach = input.coach.trim();
+    const description = input.description.trim();
+    if (title.length < 2) throw new Error('活动名称至少 2 个字。');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) throw new Error('请选择活动日期。');
+    if (input.date < today()) throw new Error('活动日期不能早于今天。');
+    if (!/^\d{2}:\d{2}$/.test(input.startTime)) throw new Error('请选择集合时间。');
+    if (!meetingArea) throw new Error('请填写集合地点。');
+    if (!coach) throw new Error('请填写带跑教练。');
+    if (!Number.isFinite(input.distanceKm) || input.distanceKm < 1 || input.distanceKm > 100) throw new Error('距离需要在 1 到 100 公里之间。');
+    if (!Number.isFinite(input.durationMin) || input.durationMin < 5 || input.durationMin > 600) throw new Error('预计时长需要在 5 到 600 分钟之间。');
+    if (!Number.isFinite(input.capacity) || input.capacity < 1 || input.capacity > 200) throw new Error('人数上限需要在 1 到 200 之间。');
+    if (description.length < 10) throw new Error('活动说明至少 10 个字，写清楚路线和强度。');
+    if (this.activities.some((activity) => activity.status !== 'ended' && activity.date === input.date && activity.startTime === input.startTime)) {
+      throw new Error('同一天同一时间已有活动，先调整时间。');
+    }
+    const activity: ClubActivity = {
+      id: 'act-' + Date.now(),
+      title,
+      tag: input.tag,
+      date: input.date,
+      startTime: input.startTime,
+      meetingArea,
+      meetingDetail: input.meetingDetail.trim(),
+      distanceKm: input.distanceKm,
+      durationMin: input.durationMin,
+      capacity: input.capacity,
+      coach,
+      intensity: input.intensity.trim() || '按自己的节奏跑',
+      description,
+      preparation: input.preparation.split(/\r?\n|；|;/).map((item) => item.trim()).filter(Boolean),
+      notes: input.notes.trim(),
+      status: 'published',
+      createdAt: nowIso(),
+    };
+    this.activities.unshift(activity);
+    return clone(activity);
+  }
+
+  async publishActivity(id: string): Promise<ClubActivity> {
+    await wait(160);
+    const target = this.activities.find((activity) => activity.id === id);
+    if (!target) throw new Error('活动不存在。');
+    if (target.status !== 'draft') throw new Error('只有草稿可以发布。');
+    if (target.date < today()) throw new Error('活动日期已过去，请先调整日期。');
+    target.status = 'published';
+    return clone(target);
+  }
+
+  async endActivity(id: string): Promise<ClubActivity> {
+    await wait(180);
+    const target = this.activities.find((activity) => activity.id === id);
+    if (!target) throw new Error('活动不存在。');
+    if (target.status !== 'published') throw new Error('只有报名中的活动可以结束。');
+    target.status = 'ended';
+    const reviewedAt = nowIso();
+    this.activitySignups
+      .filter((signup) => signup.activityId === id && signup.status === 'pending')
+      .forEach((signup) => {
+        signup.status = 'declined';
+        signup.reviewedAt = reviewedAt;
+        signup.reviewNote = '活动已结束，系统关闭未确认报名。';
+      });
+    return clone(target);
+  }
+
+  async recordGuardianConsent(id: string): Promise<ActivitySignup> {
+    await wait(140);
+    const signup = this.activitySignups.find((item) => item.id === id);
+    if (!signup) throw new Error('报名记录不存在。');
+    if (signup.guardianConsent) throw new Error('监护人同意已经登记过了。');
+    if (signup.status !== 'pending') throw new Error('只有待确认的报名可以补登记监护人同意。');
+    signup.guardianConsent = true;
+    return clone(signup);
+  }
+
+  async reviewActivitySignup(id: string, decision: 'approved' | 'declined', note?: string): Promise<ActivitySignup> {
+    await wait(180);
+    const signup = this.activitySignups.find((item) => item.id === id);
+    if (!signup) throw new Error('报名记录不存在。');
+    const activity = this.activities.find((item) => item.id === signup.activityId);
+    if (!activity) throw new Error('活动不存在。');
+    if (activity.status !== 'published') throw new Error('活动不在报名中，不能修改报名状态。');
+    if (signup.status !== 'pending') throw new Error('这条报名已经处理过了。');
+    if (decision === 'approved') {
+      if (!signup.guardianConsent) throw new Error('监护人同意还没登记，先联系监护人补充，再确认报名。');
+      const confirmed = this.activitySignups.filter((item) => item.activityId === activity.id && (item.status === 'approved' || item.status === 'attended')).length;
+      if (confirmed >= activity.capacity) throw new Error('名额已满，无法再确认报名。');
+    }
+    signup.status = decision;
+    signup.reviewedAt = nowIso();
+    signup.reviewNote = note?.trim() || (decision === 'approved' ? '团长已确认，集合点已开放。' : '团长已取消报名。');
+    return clone(signup);
   }
 }
 

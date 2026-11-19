@@ -1,6 +1,8 @@
 import type {
+  ActivitySignup,
   Announcement,
   Challenge,
+  ClubActivity,
   InviteCode,
   Member,
   RunRecord,
@@ -181,5 +183,219 @@ export const seedRecords: RunRecord[] = [
     id: 'run-008', memberId: 'm-011', memberName: '孙可欣', date: '2026-11-13',
     distanceKm: 5.0, durationMin: 33, pace: '6\'36"', note: '按体感跑，没有看表。',
     visibility: 'club', createdAt: '2026-11-13T17:25:00+08:00',
+  },
+];
+
+function dateOffset(days: number): string {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return year + '-' + month + '-' + day;
+}
+
+function isoOffset(days: number, hour: number, minute: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  date.setHours(hour, minute, 0, 0);
+  return date.toISOString();
+}
+
+export const seedActivities: ClubActivity[] = [
+  {
+    id: 'act-001',
+    title: '校园环湖 5K',
+    tag: '轻松跑',
+    date: dateOffset(2),
+    startTime: '07:00',
+    meetingArea: '学校东门',
+    meetingDetail: '东门内侧银杏树下',
+    distanceKm: 5,
+    durationMin: 45,
+    capacity: 40,
+    coach: '陈教练',
+    intensity: '7\'00"/km 左右，跑走结合也可以',
+    description: '绕校园外圈慢跑一圈，前两公里一起热身，后三公里按自己的节奏。不设关门时间，走完也算完成。',
+    preparation: ['穿跑鞋，带一件外套', '提前 10 分钟到东门', '跑前少量喝水，不要空腹'],
+    notes: '如遇雾霾、雷雨或路面结冰，活动会提前在跑团公告里取消。',
+    status: 'published',
+    createdAt: isoOffset(-3, 20, 30),
+  },
+  {
+    id: 'act-002',
+    title: '操场间歇入门',
+    tag: '训练',
+    date: dateOffset(3),
+    startTime: '16:30',
+    meetingArea: '学校田径场',
+    meetingDetail: '田径场北侧看台下集合，先做动态热身',
+    distanceKm: 4,
+    durationMin: 50,
+    capacity: 24,
+    coach: '周教练',
+    intensity: '快 1 分钟 + 慢 2 分钟，共 6 组',
+    description: '第一次接触间歇跑，不追配速。用“能说短句”的强度完成快跑段，慢跑段充分恢复，感觉不对随时停下。',
+    preparation: ['吃过午饭后 2 小时再来', '带水和毛巾', '有膝盖或脚踝疼痛提前告诉教练'],
+    notes: '训练前会统一做动态热身，结束后一起拉伸，不单独加练。',
+    status: 'published',
+    createdAt: isoOffset(-2, 21, 10),
+  },
+  {
+    id: 'act-003',
+    title: '奥森夜跑 6K',
+    tag: '同城',
+    date: dateOffset(6),
+    startTime: '19:30',
+    meetingArea: '奥森南园南门',
+    meetingDetail: '南门地铁口向西 200 米，路灯下集合',
+    distanceKm: 6,
+    durationMin: 55,
+    capacity: 30,
+    coach: '许教练',
+    intensity: '6\'30"/km 左右，分快慢两组',
+    description: '和朝阳的少年跑团一起夜跑，路线全程有路灯。需要家长知情，未成年人由监护人确认后再放出集合点。',
+    preparation: ['穿浅色或有反光条的衣服', '带一件干外套，跑后穿上', '提前把返程方式告诉家长'],
+    notes: '夜跑不追求速度，每公里都有收队；遇到天气预警直接取消。',
+    status: 'draft',
+    createdAt: isoOffset(-1, 19, 45),
+  },
+  {
+    id: 'act-004',
+    title: '校园环湖 5K',
+    tag: '轻松跑',
+    date: dateOffset(-5),
+    startTime: '07:00',
+    meetingArea: '学校东门',
+    meetingDetail: '东门内侧银杏树下',
+    distanceKm: 5,
+    durationMin: 42,
+    capacity: 40,
+    coach: '陈教练',
+    intensity: '6\'50"/km 左右',
+    description: '上周的校园环湖轻松跑，已结束。完成记录可以在成长档案里看到。',
+    preparation: ['跑前热身', '按自己的节奏完成', '结束后拉伸'],
+    notes: '活动已结束，报名与签到记录只读。',
+    status: 'ended',
+    createdAt: isoOffset(-12, 20, 0),
+  },
+];
+
+export const seedActivitySignups: ActivitySignup[] = [
+  {
+    id: 'sg-001', activityId: 'act-001', memberId: 'm-001', memberName: '林小满',
+    grade: '高一', gender: '女', guardianName: '林建国', guardianPhone: '138-0000-1001',
+    guardianConsent: true, note: '负责签到和收队。', status: 'approved',
+    createdAt: isoOffset(-2, 19, 20), reviewedAt: isoOffset(-2, 20, 5), reviewNote: '已确认，负责签到。',
+  },
+  {
+    id: 'sg-002', activityId: 'act-001', memberId: 'm-005', memberName: '陈一诺',
+    grade: '高一', gender: '女', guardianName: '陈慧', guardianPhone: '138-0000-1002',
+    guardianConsent: true, note: '想跟 7\'00" 这一组。', status: 'pending',
+    createdAt: isoOffset(-1, 20, 12),
+  },
+  {
+    id: 'sg-003', activityId: 'act-001', memberId: 'm-006', memberName: '周雨桐',
+    grade: '高二', gender: '女', guardianName: '周海峰', guardianPhone: '138-0000-1003',
+    guardianConsent: true, note: '会自己带水。', status: 'approved',
+    createdAt: isoOffset(-2, 18, 40), reviewedAt: isoOffset(-2, 20, 12),
+  },
+  {
+    id: 'sg-004', activityId: 'act-001', memberId: 'm-007', memberName: '许嘉禾',
+    grade: '初三', gender: '男', guardianName: '许文', guardianPhone: '138-0000-1004',
+    guardianConsent: true, note: '第一次参加，想跑慢组。', status: 'approved',
+    createdAt: isoOffset(-2, 18, 10), reviewedAt: isoOffset(-2, 20, 12),
+  },
+  {
+    id: 'sg-005', activityId: 'act-001', memberId: 'm-008', memberName: '王予辰',
+    grade: '高一', gender: '男', guardianName: '王立新', guardianPhone: '138-0000-1005',
+    guardianConsent: true, note: '', status: 'approved',
+    createdAt: isoOffset(-2, 17, 35), reviewedAt: isoOffset(-2, 20, 12),
+  },
+  {
+    id: 'sg-006', activityId: 'act-001', memberId: 'm-009', memberName: '李思远',
+    grade: '高二', gender: '男', guardianName: '李强', guardianPhone: '138-0000-1006',
+    guardianConsent: false, note: '家长同意书还没交，先报名。', status: 'pending',
+    createdAt: isoOffset(-1, 21, 5),
+  },
+  {
+    id: 'sg-007', activityId: 'act-001', memberId: 'm-010', memberName: '赵清和',
+    grade: '初二', gender: '女', guardianName: '赵敏', guardianPhone: '138-0000-1007',
+    guardianConsent: true, note: '当天上午有课，看看能不能赶到。', status: 'declined',
+    createdAt: isoOffset(-1, 18, 25), reviewedAt: isoOffset(-1, 19, 0),
+    reviewNote: '家长说明当天有课，已取消报名。',
+  },
+  {
+    id: 'sg-008', activityId: 'act-001', memberId: 'm-011', memberName: '孙可欣',
+    grade: '高一', gender: '女', guardianName: '孙晓梅', guardianPhone: '138-0000-1008',
+    guardianConsent: true, note: '', status: 'approved',
+    createdAt: isoOffset(-2, 17, 10), reviewedAt: isoOffset(-2, 20, 12),
+  },
+  {
+    id: 'sg-009', activityId: 'act-002', memberId: 'm-001', memberName: '林小满',
+    grade: '高一', gender: '女', guardianName: '林建国', guardianPhone: '138-0000-1001',
+    guardianConsent: true, note: '带秒表。', status: 'approved',
+    createdAt: isoOffset(-2, 9, 10), reviewedAt: isoOffset(-2, 12, 0),
+  },
+  {
+    id: 'sg-010', activityId: 'act-002', memberId: 'm-005', memberName: '陈一诺',
+    grade: '高一', gender: '女', guardianName: '陈慧', guardianPhone: '138-0000-1002',
+    guardianConsent: true, note: '', status: 'approved',
+    createdAt: isoOffset(-2, 8, 45), reviewedAt: isoOffset(-2, 12, 0),
+  },
+  {
+    id: 'sg-011', activityId: 'act-002', memberId: 'm-006', memberName: '周雨桐',
+    grade: '高二', gender: '女', guardianName: '周海峰', guardianPhone: '138-0000-1003',
+    guardianConsent: true, note: '想试第一组。', status: 'pending',
+    createdAt: isoOffset(-1, 7, 30),
+  },
+  {
+    id: 'sg-012', activityId: 'act-002', memberId: 'm-007', memberName: '许嘉禾',
+    grade: '初三', gender: '男', guardianName: '许文', guardianPhone: '138-0000-1004',
+    guardianConsent: true, note: '', status: 'approved',
+    createdAt: isoOffset(-2, 8, 0), reviewedAt: isoOffset(-2, 12, 0),
+  },
+  {
+    id: 'sg-013', activityId: 'act-002', memberId: 'm-010', memberName: '赵清和',
+    grade: '初二', gender: '女', guardianName: '赵敏', guardianPhone: '138-0000-1007',
+    guardianConsent: true, note: '', status: 'approved',
+    createdAt: isoOffset(-1, 19, 30), reviewedAt: isoOffset(-1, 20, 0),
+  },
+  {
+    id: 'sg-014', activityId: 'act-004', memberId: 'm-001', memberName: '林小满',
+    grade: '高一', gender: '女', guardianName: '林建国', guardianPhone: '138-0000-1001',
+    guardianConsent: true, note: '收队。', status: 'attended',
+    createdAt: isoOffset(-7, 18, 0), reviewedAt: isoOffset(-5, 8, 0),
+  },
+  {
+    id: 'sg-015', activityId: 'act-004', memberId: 'm-005', memberName: '陈一诺',
+    grade: '高一', gender: '女', guardianName: '陈慧', guardianPhone: '138-0000-1002',
+    guardianConsent: true, note: '', status: 'attended',
+    createdAt: isoOffset(-7, 18, 20), reviewedAt: isoOffset(-5, 8, 0),
+  },
+  {
+    id: 'sg-016', activityId: 'act-004', memberId: 'm-006', memberName: '周雨桐',
+    grade: '高二', gender: '女', guardianName: '周海峰', guardianPhone: '138-0000-1003',
+    guardianConsent: true, note: '', status: 'attended',
+    createdAt: isoOffset(-7, 18, 30), reviewedAt: isoOffset(-5, 8, 0),
+  },
+  {
+    id: 'sg-017', activityId: 'act-004', memberId: 'm-007', memberName: '许嘉禾',
+    grade: '初三', gender: '男', guardianName: '许文', guardianPhone: '138-0000-1004',
+    guardianConsent: true, note: '', status: 'attended',
+    createdAt: isoOffset(-7, 19, 0), reviewedAt: isoOffset(-5, 8, 0),
+  },
+  {
+    id: 'sg-018', activityId: 'act-004', memberId: 'm-008', memberName: '王予辰',
+    grade: '高一', gender: '男', guardianName: '王立新', guardianPhone: '138-0000-1005',
+    guardianConsent: true, note: '', status: 'attended',
+    createdAt: isoOffset(-7, 19, 10), reviewedAt: isoOffset(-5, 8, 0),
+  },
+  {
+    id: 'sg-019', activityId: 'act-004', memberId: 'm-009', memberName: '李思远',
+    grade: '高二', gender: '男', guardianName: '李强', guardianPhone: '138-0000-1006',
+    guardianConsent: true, note: '晚到 5 分钟。', status: 'attended',
+    createdAt: isoOffset(-7, 19, 20), reviewedAt: isoOffset(-5, 8, 0),
   },
 ];

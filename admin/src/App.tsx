@@ -10,6 +10,8 @@ import { MembersPage } from './features/members/MembersPage';
 import { InvitesPage } from './features/invites/InvitesPage';
 import { AnnouncementsPage } from './features/announcements/AnnouncementsPage';
 import { ChallengesPage } from './features/challenges/ChallengesPage';
+import { ActivitiesPage } from './features/activities/ActivitiesPage';
+import { ActivityDetailPage } from './features/activities/ActivityDetailPage';
 import { RecordsPage } from './features/records/RecordsPage';
 import { PlatformOverviewPage } from './features/platform/PlatformOverviewPage';
 import { PlatformClubsPage } from './features/platform/PlatformClubsPage';
@@ -35,6 +37,8 @@ export function App() {
                 <Route path="members" element={<MembersPage />} />
                 <Route path="invites" element={<InvitesPage />} />
                 <Route path="announcements" element={<AnnouncementsPage />} />
+                <Route path="activities" element={<ActivitiesPage />} />
+                <Route path="activities/:activityId" element={<ActivityDetailPage />} />
                 <Route path="challenges" element={<ChallengesPage />} />
                 <Route path="records" element={<RecordsPage />} />
               </Route>

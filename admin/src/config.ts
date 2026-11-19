@@ -18,6 +18,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/members', label: '成员', icon: 'users', description: '审批、查看和维护成员' },
   { to: '/invites', label: '邀请码', icon: 'ticket', description: '把新成员带进来' },
   { to: '/announcements', label: '公告', icon: 'megaphone', description: '发布社团通知' },
+  { to: '/activities', label: '活动', icon: 'calendar', description: '发布活动与审核报名' },
   { to: '/challenges', label: '挑战', icon: 'flag', description: '线上挑战与进度' },
   { to: '/records', label: '记录与导出', icon: 'list', description: '社团可见跑步记录' },
 ];

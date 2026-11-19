@@ -4,12 +4,12 @@
 
 ## 当前状态
 
-- 社团后台：登录、概览、成员、邀请码、公告、挑战、记录与导出。
+- 社团后台：登录、概览、成员、邀请码、公告、活动、挑战、记录与导出。
 - 平台总后台：总览、学校与社团、社团详情、全部用户、用户详情、内容与活动、跑步记录、审核与举报、系统与权限。
 - 数据：前端示例数据，刷新页面会恢复初始状态。
 - 社团账号：`admin@qingrun.local` / `Qingrun-Dev-2026` → `/`
 - 平台账号：`ops@qingrun.local` / `Qingrun-Dev-2026` → `/platform`
-- 已通过：`npm run typecheck`、`npm run build`、1440×1000 平台九页截图检查、社团/平台主要交互流程、1280/1024 响应式检查。
+- 已通过：`npm run typecheck`、`npm run build`、1440×1000 平台九页截图检查、社团活动发布与报名审核全流程、社团/平台主要交互流程、1280/1024 响应式检查。
 - 还没接：PocketBase 真实表、真实登录、邮件邀请、审计日志落库、手机端 API。
 
 ## 启动
@@ -38,6 +38,7 @@ server\pocketbase.exe serve --http 127.0.0.1:8091 --dir server\pb_data --dev
 | 成员 | 按状态筛选、搜索、通过/拒绝、重置临时密码、移出成员 |
 | 邀请码 | 生成邀请码、复制、停用；限制次数和有效期 |
 | 公告 | 新建草稿、发布、撤回、删除、置顶 |
+| 活动 | 发布新活动、待确认筛选、补登记监护人同意、通过/拒绝报名、结束活动、发布草稿 |
 | 挑战 | 新建挑战、查看社团平均进度、结束挑战 |
 | 记录与导出 | 按成员/备注/日期筛选社团可见记录，导出 CSV |
 
@@ -79,9 +80,10 @@ node verify-platform.mjs
 node verify-platform-actions.mjs
 node verify-platform-paging2.mjs
 node verify-platform-responsive.mjs
+node verify-activities-admin.mjs
 ```
 
-截图目录：`admin/shots/`（社团后台）和 `admin/shots/platform/`（平台总后台）。
+截图目录：`admin/shots/`（社团后台）、`admin/shots/activities/`（活动发布与报名审核）和 `admin/shots/platform/`（平台总后台）。
 
 ## 代码结构
 

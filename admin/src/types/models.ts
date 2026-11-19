@@ -289,3 +289,67 @@ export interface NewPlatformAccountInput {
   email: string;
   role: PlatformAccountRole;
 }
+
+export type ClubActivityStatus = 'draft' | 'published' | 'ended';
+export type ClubActivityTag = '轻松跑' | '训练' | '同城' | '公益';
+export type ActivitySignupStatus = 'pending' | 'approved' | 'declined' | 'attended';
+
+export interface ClubActivity {
+  id: string;
+  title: string;
+  tag: ClubActivityTag;
+  date: string;
+  startTime: string;
+  meetingArea: string;
+  meetingDetail: string;
+  distanceKm: number;
+  durationMin: number;
+  capacity: number;
+  coach: string;
+  intensity: string;
+  description: string;
+  preparation: string[];
+  notes: string;
+  status: ClubActivityStatus;
+  createdAt: string;
+}
+
+export interface ClubActivitySummary extends ClubActivity {
+  signupCount: number;
+  pendingCount: number;
+  confirmedCount: number;
+}
+
+export interface ActivitySignup {
+  id: string;
+  activityId: string;
+  memberId: string;
+  memberName: string;
+  grade: string;
+  gender: '男' | '女';
+  guardianName: string;
+  guardianPhone: string;
+  guardianConsent: boolean;
+  note: string;
+  status: ActivitySignupStatus;
+  createdAt: string;
+  reviewedAt?: string;
+  reviewNote?: string;
+}
+
+export interface NewActivityInput {
+  title: string;
+  tag: ClubActivityTag;
+  date: string;
+  startTime: string;
+  meetingArea: string;
+  meetingDetail: string;
+  distanceKm: number;
+  durationMin: number;
+  capacity: number;
+  coach: string;
+  intensity: string;
+  description: string;
+  preparation: string;
+  notes: string;
+}

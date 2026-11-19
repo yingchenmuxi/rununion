@@ -1,11 +1,15 @@
 import type {
+  ActivitySignup,
   AdminUser,
   Announcement,
   AnnouncementStatus,
   Challenge,
+  ClubActivity,
+  ClubActivitySummary,
   InviteCode,
   Member,
   MemberStatus,
+  NewActivityInput,
   NewAnnouncementInput,
   NewChallengeInput,
   NewInviteInput,
@@ -31,4 +35,12 @@ export interface AdminRepository {
   createChallenge(input: NewChallengeInput): Promise<Challenge>;
   endChallenge(id: string): Promise<Challenge>;
   listRecords(): Promise<RunRecord[]>;
+  listActivities(): Promise<ClubActivitySummary[]>;
+  getActivity(id: string): Promise<ClubActivity | null>;
+  listActivitySignups(activityId: string): Promise<ActivitySignup[]>;
+  createActivity(input: NewActivityInput): Promise<ClubActivity>;
+  publishActivity(id: string): Promise<ClubActivity>;
+  endActivity(id: string): Promise<ClubActivity>;
+  reviewActivitySignup(id: string, decision: 'approved' | 'declined', note?: string): Promise<ActivitySignup>;
+  recordGuardianConsent(id: string): Promise<ActivitySignup>;
 }
