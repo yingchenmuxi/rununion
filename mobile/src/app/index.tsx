@@ -15,6 +15,7 @@ import {
 } from '@/components/qingrun-ui';
 import { colors, mock, radius, space } from '@/constants/qingrun';
 import { useAuth } from '@/features/auth/AuthContext';
+import { FEATURED_ARTICLE } from '@/features/knowledge/knowledgeData';
 import { RUN_SOURCE_LABELS, formatDuration, formatPace, formatRunDate, useRuns } from '@/features/runs/RunContext';
 
 export default function HomeScreen() {
@@ -181,15 +182,19 @@ export default function HomeScreen() {
         </Card>
       </View>
 
-      <SectionTitle title="经验库" action="去逛逛" onAction={() => router.push('/school')} />
+      <SectionTitle title="经验库" action="去逛逛" onAction={() => router.push('/knowledge')} />
       <Card>
         <View style={styles.knowledgeTop}>
           <Pill text="教练精选" tone="gold" />
-          <Text style={styles.knowledgeMeta}>{mock.knowledge.meta}</Text>
+          <Text style={styles.knowledgeMeta}>
+            {FEATURED_ARTICLE.minutes} 分钟 · {FEATURED_ARTICLE.level}
+          </Text>
         </View>
-        <Text style={styles.knowledgeTitle}>{mock.knowledge.title}</Text>
-        <Text style={styles.knowledgeBody}>{mock.knowledge.body}</Text>
-        <Pressable onPress={() => router.push('/school')} style={styles.readMore}>
+        <Text style={styles.knowledgeTitle}>{FEATURED_ARTICLE.title}</Text>
+        <Text style={styles.knowledgeBody}>{FEATURED_ARTICLE.summary}</Text>
+        <Pressable
+          onPress={() => router.push('/knowledge/' + FEATURED_ARTICLE.id)}
+          style={styles.readMore}>
           <Text style={styles.readMoreText}>查看全文 ›</Text>
         </Pressable>
       </Card>

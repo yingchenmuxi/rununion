@@ -1,0 +1,111 @@
+{
+  "loginFill": {
+    "ok": true
+  },
+  "loginClick": {
+    "ok": true,
+    "text": "进入跑团"
+  },
+  "homeHasKnowledge": true,
+  "openList": {
+    "ok": true,
+    "text": "去逛逛"
+  },
+  "listPath": true,
+  "listReady": true,
+  "listBody": "青跑团 跑步知识库 先学会不受伤，再谈跑得快。 3 篇收藏 搜 全部文章 我的收藏 3 全部 入门 呼吸 配速 防伤 营养 恢复 比赛 身体 本周精选 4 分钟 第一次跑 5 公里，怎么不岔气？ 先慢后快，把呼吸拉长；岔气时降速，不要硬撑。 呼吸 · 入门 开始阅读 › 主题文章 · 9 篇 入门 收藏 跑前 6 分钟热身，比静态拉伸更重要 让身体先热起来，再进入跑步节奏。 3 分钟 · 入门 阅读 › 配速 已收藏 怎么判断今天跑得够慢？ 能用鼻子呼吸、能说短句，就是合适的有氧强度。 4 分钟 · 入门 阅读 › 防伤 已收藏 膝盖外侧疼，先别硬撑 突然加量容易诱发外侧疼痛，先减量，再练臀中肌。 5 分钟 · 进阶 阅读 › 入门 收藏 第一双跑鞋，不用买最贵的 合脚、缓震够用、脚趾前留一点空间，比价格重要。 3 分钟 · 入门 阅读 › 营养 收藏 跑前吃什么，跑后补什么 跑前 1 到 2 小时吃点易消化碳水，跑后补水和蛋白质。 4 分钟 · 入门 阅读 › 恢复 收藏 休息日也是训练 睡眠和轻松日，让身体把训练变成能力。 3 分钟 · 入门 阅读 › 比赛 收藏 第一次校运会 1500 米怎么跑 前 400 米别冲，最后 300 米再提速。 4 分钟 · 进阶 阅读 › 身体 收藏 女生跑步的生理期安排 不硬撑，按身体感觉调整强度和距离。 5 分钟 · 入门 阅读 › 怎么用这个库 先按主题读，再把“今天就能做”的一条带进下一次跑步。身体不适时，先停跑，再查资料。 演示数据 · 本次打开内有效，刷新会恢复 家 首页 团 跑团 跑 开跑 长 成长 我 我的",
+  "list": {
+    "title": true,
+    "total": true,
+    "categories": true,
+    "featured": true
+  },
+  "searchSet": {
+    "ok": true,
+    "value": "岔气"
+  },
+  "search": {
+    "oneResult": true,
+    "article": true,
+    "noOther": true
+  },
+  "clear": {
+    "ok": true,
+    "text": "清空"
+  },
+  "emptySet": {
+    "ok": true,
+    "value": "不存在的关键词"
+  },
+  "empty": {
+    "title": true,
+    "reset": true
+  },
+  "emptyReset": {
+    "ok": true,
+    "text": "清空搜索和筛选"
+  },
+  "category": {
+    "ok": true
+  },
+  "categoryResult": {
+    "oneResult": true,
+    "knee": true,
+    "notBreathing": true
+  },
+  "allCategory": {
+    "ok": true
+  },
+  "savedMode": {
+    "ok": true
+  },
+  "saved": {
+    "count": true,
+    "breathing": true,
+    "easy": true,
+    "knee": true,
+    "noFeatured": true
+  },
+  "openKnee": {
+    "ok": true
+  },
+  "detailPath": true,
+  "detailReady": true,
+  "detail": {
+    "title": true,
+    "checklist": true,
+    "warning": true,
+    "savedLabel": true,
+    "related": true
+  },
+  "unsave": {
+    "ok": true,
+    "text": "已收藏（点击取消）"
+  },
+  "unsaved": true,
+  "resave": {
+    "ok": true,
+    "text": "收藏这篇"
+  },
+  "resaved": true,
+  "relatedClick": {
+    "ok": true,
+    "text": "休息日也是训练"
+  },
+  "relatedPath": true,
+  "relatedDetail": true,
+  "back": {
+    "ok": true,
+    "text": "返回知识库"
+  },
+  "backPath": true,
+  "profileTab": {
+    "ok": true,
+    "text": "我的"
+  },
+  "profile": {
+    "path": "/profile",
+    "savedCount": true
+  },
+  "events": []
+}

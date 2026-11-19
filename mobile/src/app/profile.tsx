@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
@@ -15,10 +16,13 @@ import {
 } from '@/components/qingrun-ui';
 import { colors, mock, radius, space } from '@/constants/qingrun';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useKnowledge } from '@/features/knowledge/KnowledgeContext';
 import { useRuns } from '@/features/runs/RunContext';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { profile, logout } = useAuth();
+  const { savedCount } = useKnowledge();
   const { stats } = useRuns();
   const displayName = profile?.nickname ?? mock.user.name;
   const grade = profile?.grade ?? mock.user.grade;
@@ -79,28 +83,32 @@ export default function ProfileScreen() {
           glyph="团"
           title="我的跑团"
           subtitle={mock.club.name}
-          onPress={() => notify('我的跑团：演示版将跳转跑团主页')}
+          onPress={() => router.push('/school')}
         />
         <Divider />
         <ListRow
           glyph="长"
           title="成长档案"
           subtitle="个人最好、跑量与徽章"
-          onPress={() => notify('成长档案：演示版将跳转成长页')}
+          onPress={() => router.push('/growth')}
         />
         <Divider />
         <ListRow
           glyph="活"
           title="我的活动"
           subtitle="已报名 2 场 · 待参加 1 场"
-          onPress={() => notify('我的活动：演示版将展示报名记录')}
+          onPress={() => router.push('/school')}
         />
         <Divider />
         <ListRow
           glyph="书"
           title="经验库收藏"
-          subtitle="收藏了 3 篇训练与康复笔记"
-          onPress={() => notify('经验库收藏：演示版将展示收藏列表')}
+          subtitle={
+            savedCount > 0
+              ? '收藏了 ' + savedCount + ' 篇训练与康复笔记'
+              : '去知识库收藏训练与康复笔记'
+          }
+          onPress={() => router.push('/knowledge')}
         />
       </Card>
 
