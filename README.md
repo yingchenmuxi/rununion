@@ -131,6 +131,16 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
 - `verify-platform-paging2`：检查用户、内容、记录和日志列表的搜索与分页。
 - `verify-platform-responsive`：在 1280/1024 宽度检查主要平台页面的溢出与表内滚动。
 
+## 同步到 GitHub
+
+镜像仓库：<https://github.com/yingchenmuxi/rununion>
+
+每次改完，在项目根执行：
+
+    node scripts/publish-rununion.mjs "说明这次改了什么"
+
+它会复制项目到 `E:\_src\rununion`（跳过 node_modules、构建产物、本地 server、日志和环境文件），有变化就提交，然后推送 develop 和 main。只复制、不提交时用 `node scripts/sync-rununion.mjs`。
+
 ## 目录
 
     QPTapp/
@@ -148,6 +158,7 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
     │  ├─ src/data/              repository 接口 + 示例数据实现
     │  └─ shots/                 后台页面截图
     ├─ server/                   PocketBase 可执行文件与本地数据
+    ├─ scripts/                  GitHub 镜像与发布脚本
     └─ README.md
 
 ## 文档
