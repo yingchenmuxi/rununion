@@ -24,7 +24,10 @@ export function Screen({ children, contentStyle }: { children: ReactNode; conten
 export function Card({ children, style, onPress }: { children: ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void }) {
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => [styles.card, style, pressed && styles.pressed]}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPress}
+        style={({ pressed }) => [styles.card, style, pressed && styles.pressed]}>
         {children}
       </Pressable>
     );
@@ -37,7 +40,7 @@ export function SectionTitle({ title, action, onAction }: { title: string; actio
     <View style={styles.sectionTitleRow}>
       <Text style={styles.sectionTitle}>{title}</Text>
       {action ? (
-        <Pressable onPress={onAction} hitSlop={8}>
+        <Pressable accessibilityRole="button" onPress={onAction} hitSlop={8}>
           <Text style={styles.sectionAction}>{action}</Text>
         </Pressable>
       ) : null}
@@ -99,6 +102,7 @@ export function PrimaryButton({
 }) {
   return (
     <Pressable
+      accessibilityRole="button"
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [

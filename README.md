@@ -18,6 +18,7 @@
 - 五个主页面：首页、跑团、开跑、成长、我的。
 - 跑步记录三通道：GPS 前台记录、截屏后人工确认、GPX/TCX/CSV 文件导入；手动补记和计时补距离作为兜底。保存后首页本周/本月跑量、最近记录和成长页同步更新。
 - 跑步知识库：9 篇本地精选，支持关键词搜索、8 个主题筛选、收藏、文章详情和关联阅读；首页精选卡与“我的”页收藏篇数联动。内容为演示稿，不是医疗建议。
+- 活动报名：4 场演示活动，首页 / 跑团页 / 活动列表 / 详情 / 我的活动共用报名状态；支持待确认、已报名、已参加和取消，待确认不显示具体集合点。
 
 已完成的社团后台：
 
@@ -78,7 +79,7 @@
     npm run preview:web
 
 然后打开 <http://127.0.0.1:8090>。  
-`preview:web` 带 SPA fallback，直接访问 `/school`、`/run`、`/growth`、`/profile`、`/knowledge`、`/knowledge/knee` 不会 404。
+`preview:web` 带 SPA fallback，直接访问 `/school`、`/run`、`/growth`、`/profile`、`/knowledge`、`/knowledge/knee`、`/activities`、`/my-activities`、`/activity/a1` 不会 404。
 
 ## 手机预览
 
@@ -107,6 +108,7 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
     node verify-run-sync.mjs
     node verify-three-channels.mjs
     node verify-knowledge.mjs
+    node verify-activities.mjs
 
 后台：
 
@@ -127,6 +129,7 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
 - `verify-run-sync`：跑手动记录、计时记录，以及首页 / 成长 / 我的同步，并截取本轮证据图。
 - `verify-three-channels`：模拟 GPS、选择真实截图、导入 CSV，检查三通道保存和首页 / 成长同步；GPX/TCX 解析器另有单元测试。
 - `verify-knowledge`：检查知识库列表、搜索、空状态、主题筛选、收藏、详情、关联阅读和“我的”页收藏篇数，并截取证据图。
+- `verify-activities`：检查首页入口、详情、报名、我的活动、取消、四种筛选、过去/已确认详情和集合点隐私门控，并截取证据图。
 - `inspect-admin`：截后台各页到 admin/shots/。
 - `test-flows`：跑社团后台审批、邀请码、公告、挑战、导出等主要流程。
 - `verify-platform`：登录平台总后台并截九页图，检查 console 和横向溢出。
@@ -153,6 +156,7 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
     │  ├─ src/features/auth/     登录、入团、待审批
     │  ├─ src/features/runs/     共享记录、GPS 距离与文件解析
     │  ├─ src/features/knowledge/ 本地文章与收藏状态
+    │  ├─ src/features/activities/ 活动数据、共享报名状态
     │  ├─ src/components/        共享 UI 与底栏
     │  ├─ src/constants/         颜色、间距、演示数据
     │  ├─ scripts/               截图、直链检查、认证流程、本地预览服务器
@@ -179,11 +183,13 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
 - [双后台与平台总后台 v0.1](docs/09-双后台与平台总后台-v0.1.md)
 - [开跑记录与成长同步 v0.2（三通道）](docs/10-开跑记录与成长同步-v0.1.md)
 - [手机端跑步知识库 v0.1](docs/11-手机端跑步知识库-v0.1.md)
+- [手机端活动报名与我的活动 v0.1](docs/12-手机端活动报名与我的活动-v0.1.md)
 
 ## 重要说明
 
 - 这是演示原型，不要录入真实未成年人信息。
 - 手机端尚未把申请写入后台；手机端、社团后台、平台后台的演示数据互不相通，且都不会持久化。
+- 活动报名、取消和“团长确认”只在本机内存演示，未接社团后台审批；待确认状态不会真的通知团长或监护人。
 - 演示版只在前台采集 GPS 距离，不保存轨迹、不上传地图；截图和轨迹文件也只在本机处理。真实设备验证和正式隐私评估尚未完成。
 - 知识库内容是为演示写的项目稿，没有作者署名、外部来源或医学审核，不能当作正式科普或医疗建议。
 - 不做 AI 问答、不做支付、不直接收现金；AI 检索要等审核语料和引用规范确定后再接。

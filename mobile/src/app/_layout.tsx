@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import AppTabs from '@/components/app-tabs';
+import { ActivityProvider } from '@/features/activities/ActivityContext';
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import { AuthScreen, PendingScreen } from '@/features/auth/AuthScreen';
 import { KnowledgeProvider } from '@/features/knowledge/KnowledgeContext';
@@ -28,11 +29,13 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <StatusBar style="dark" />
       <AuthProvider>
-        <KnowledgeProvider>
-          <RunProvider>
-            <RootContent />
-          </RunProvider>
-        </KnowledgeProvider>
+        <ActivityProvider>
+          <KnowledgeProvider>
+            <RunProvider>
+              <RootContent />
+            </RunProvider>
+          </KnowledgeProvider>
+        </ActivityProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

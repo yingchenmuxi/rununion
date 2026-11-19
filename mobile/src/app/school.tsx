@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -12,6 +13,7 @@ import {
   SectionTitle,
 } from '@/components/qingrun-ui';
 import { colors, mock, radius, space } from '@/constants/qingrun';
+import { useActivities } from '@/features/activities/ActivityContext';
 import { useAuth } from '@/features/auth/AuthContext';
 
 const CLUBS = [
@@ -44,15 +46,10 @@ const CLUBS = [
   },
 ];
 
-const ACTIVITIES = [
-  { id: 'a1', day: '周六', time: '07:00', title: '校园 5K', meta: '学校东门集合 · 24 人已报名', tag: '轻松跑' },
-  { id: 'a2', day: '周日', time: '16:30', title: '操场间歇入门', meta: '学校田径场 · 18 人已报名', tag: '训练' },
-  { id: 'a3', day: '周三', time: '19:30', title: '奥森夜跑 6K', meta: '奥森南园 · 12 人已报名', tag: '同城' },
-];
-
 export default function SchoolScreen() {
+  const router = useRouter();
   const { profile } = useAuth();
-  const [joined, setJoined] = useState<Record<string, boolean>>({});
+  const { upcomingActivities, getSignupStatus, signupCount } = useActivities();
   const [applied, setApplied] = useState(false);
 
   return (
@@ -124,28 +121,33 @@ export default function SchoolScreen() {
         ))}
       </View>
 
-      <SectionTitle title="近期活动" action="全部活动" />
+      <SectionTitle title="近期活动" action="全部活动" onAction={() => router.push('/activities')} />
       <View style={styles.activityList}>
-        {ACTIVITIES.map((activity) => {
-          const isJoined = Boolean(joined[activity.id]);
+        {upcomingActivities.map((activity) => {
+          const status = getSignupStatus(activity.id);
+          const label =
+            status === 'pending' ? '待确认' : status === 'confirmed' ? '已报名' : '报名';
           return (
-            <Card key={activity.id} style={styles.activityCard}>
+            <Card
+              key={activity.id}
+              onPress={() => router.push('/activity/' + activity.id)}
+              style={styles.activityCard}>
               <View style={styles.dateBlock}>
-                <Text style={styles.dateDay}>{activity.day}</Text>
-                <Text style={styles.dateTime}>{activity.time}</Text>
+                <Text style={styles.dateDay}>{activity.dateISO.slice(5, 7)}/{activity.dateISO.slice(8, 10)}</Text>
+                <Text style={styles.dateTime}>{activity.startTime}</Text>
               </View>
               <View style={styles.activityInfo}>
                 <View style={styles.activityTitleRow}>
                   <Text style={styles.activityTitle}>{activity.title}</Text>
                   <Pill text={activity.tag} tone="neutral" />
                 </View>
-                <Text style={styles.activityMeta}>{activity.meta}</Text>
+                <Text style={styles.activityMeta}>
+                  {activity.meetingArea} · {signupCount(activity)} 人已报名
+                </Text>
               </View>
-              <Pressable
-                onPress={() => setJoined((current) => ({ ...current, [activity.id]: !current[activity.id] }))}
-                style={[styles.joinBtn, isJoined && styles.joinBtnDone]}>
-                <Text style={[styles.joinText, isJoined && styles.joinTextDone]}>{isJoined ? '已报名' : '报名'}</Text>
-              </Pressable>
+              <View style={[styles.joinBtn, status && styles.joinBtnDone]}>
+                <Text style={[styles.joinText, status && styles.joinTextDone]}>{label}</Text>
+              </View>
             </Card>
           );
         })}

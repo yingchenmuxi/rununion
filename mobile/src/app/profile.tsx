@@ -15,6 +15,7 @@ import {
   SectionTitle,
 } from '@/components/qingrun-ui';
 import { colors, mock, radius, space } from '@/constants/qingrun';
+import { useActivities } from '@/features/activities/ActivityContext';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useKnowledge } from '@/features/knowledge/KnowledgeContext';
 import { useRuns } from '@/features/runs/RunContext';
@@ -24,6 +25,13 @@ export default function ProfileScreen() {
   const { profile, logout } = useAuth();
   const { savedCount } = useKnowledge();
   const { stats } = useRuns();
+  const { myUpcoming, pendingCount, attendedCount } = useActivities();
+  const activitySubtitle =
+    pendingCount > 0
+      ? '已报名 ' + myUpcoming.length + ' 场 · 待确认 ' + pendingCount + ' 场'
+      : myUpcoming.length > 0
+        ? '已报名 ' + myUpcoming.length + ' 场 · 已参加 ' + attendedCount + ' 场'
+        : '已参加 ' + attendedCount + ' 场 · 去看看近期活动';
   const displayName = profile?.nickname ?? mock.user.name;
   const grade = profile?.grade ?? mock.user.grade;
   const initial = displayName.slice(0, 1);
@@ -96,8 +104,8 @@ export default function ProfileScreen() {
         <ListRow
           glyph="活"
           title="我的活动"
-          subtitle="已报名 2 场 · 待参加 1 场"
-          onPress={() => router.push('/school')}
+          subtitle={activitySubtitle}
+          onPress={() => router.push('/my-activities')}
         />
         <Divider />
         <ListRow

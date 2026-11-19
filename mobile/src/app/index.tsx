@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
@@ -14,6 +13,8 @@ import {
   Stat,
 } from '@/components/qingrun-ui';
 import { colors, mock, radius, space } from '@/constants/qingrun';
+import { formatActivityDay } from '@/features/activities/activityData';
+import { useActivities } from '@/features/activities/ActivityContext';
 import { useAuth } from '@/features/auth/AuthContext';
 import { FEATURED_ARTICLE } from '@/features/knowledge/knowledgeData';
 import { RUN_SOURCE_LABELS, formatDuration, formatPace, formatRunDate, useRuns } from '@/features/runs/RunContext';
@@ -22,9 +23,13 @@ export default function HomeScreen() {
   const router = useRouter();
   const { profile } = useAuth();
   const { stats, recentRuns } = useRuns();
+  const { upcomingActivities, getSignupStatus, signupCount } = useActivities();
+  const nextActivity = upcomingActivities[0];
+  const nextStatus = nextActivity ? getSignupStatus(nextActivity.id) : undefined;
+  const nextLabel =
+    nextStatus === 'pending' ? '待确认' : nextStatus === 'confirmed' ? '已报名' : '报名';
   const displayName = profile?.nickname ?? mock.user.name;
   const initial = displayName.slice(0, 1);
-  const [joined, setJoined] = useState(false);
   const weekKm = stats.weekKm;
   const goalGap = Math.max(0, stats.weekGoal - weekKm);
   const weekPercent = stats.weekPercent;
@@ -91,7 +96,7 @@ export default function HomeScreen() {
           label="看活动"
           variant="light"
           glyph="日"
-          onPress={() => router.push('/school')}
+          onPress={() => router.push('/activities')}
           style={styles.quickSecondary}
         />
       </View>
@@ -129,24 +134,23 @@ export default function HomeScreen() {
         </View>
       </Card>
 
-      <SectionTitle title="本周活动" action="全部活动" onAction={() => router.push('/school')} />
-      <Card style={styles.activityCard}>
-        <View style={styles.dateBlock}>
-          <Text style={styles.dateDay}>{mock.activities[0].day}</Text>
-          <Text style={styles.dateTime}>{mock.activities[0].time}</Text>
-        </View>
-        <View style={styles.activityInfo}>
-          <Text style={styles.activityTitle}>{mock.activities[0].title}</Text>
-          <Text style={styles.activityMeta}>{mock.activities[0].meta}</Text>
-        </View>
-        <Pressable
-          onPress={() => setJoined((value) => !value)}
-          style={[styles.joinBtn, joined && styles.joinBtnDone]}>
-          <Text style={[styles.joinText, joined && styles.joinTextDone]}>{joined ? '已报名' : '报名'}</Text>
-        </Pressable>
-      </Card>
-      {joined ? (
-        <Text style={styles.joinedNote}>已加入活动（演示）。正式版会同步到你的成长档案。</Text>
+      <SectionTitle title="本周活动" action="全部活动" onAction={() => router.push('/activities')} />
+      {nextActivity ? (
+        <Card onPress={() => router.push('/activity/' + nextActivity.id)} style={styles.activityCard}>
+          <View style={styles.dateBlock}>
+            <Text style={styles.dateDay}>{formatActivityDay(nextActivity.dateISO)}</Text>
+            <Text style={styles.dateTime}>{nextActivity.startTime}</Text>
+          </View>
+          <View style={styles.activityInfo}>
+            <Text style={styles.activityTitle}>{nextActivity.title}</Text>
+            <Text style={styles.activityMeta}>
+              {nextActivity.meetingArea} · {signupCount(nextActivity)} 人已报名
+            </Text>
+          </View>
+          <View style={[styles.joinBtn, nextStatus && styles.joinBtnDone]}>
+            <Text style={[styles.joinText, nextStatus && styles.joinTextDone]}>{nextLabel}</Text>
+          </View>
+        </Card>
       ) : null}
 
       <SectionTitle title="最近记录" action="去开跑" onAction={() => router.push('/run')} />
@@ -314,7 +318,6 @@ const styles = StyleSheet.create({
   joinBtnDone: { backgroundColor: colors.brandSoft },
   joinText: { fontSize: 12, fontWeight: '700', color: colors.white },
   joinTextDone: { color: colors.brand },
-  joinedNote: { marginTop: 8, marginLeft: 4, fontSize: 11, color: colors.accent },
   runRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12 },
   runRowLine: { borderTopWidth: 1, borderTopColor: colors.line },
   runDate: { width: 66 },
