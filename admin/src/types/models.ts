@@ -292,7 +292,7 @@ export interface NewPlatformAccountInput {
 
 export type ClubActivityStatus = 'draft' | 'published' | 'ended';
 export type ClubActivityTag = '轻松跑' | '训练' | '同城' | '公益';
-export type ActivitySignupStatus = 'pending' | 'approved' | 'declined' | 'attended';
+export type ActivitySignupStatus = 'pending' | 'approved' | 'declined' | 'attended' | 'absent';
 
 export interface ClubActivity {
   id: string;
@@ -318,6 +318,9 @@ export interface ClubActivitySummary extends ClubActivity {
   signupCount: number;
   pendingCount: number;
   confirmedCount: number;
+  pendingCheckinCount: number;
+  attendedCount: number;
+  absentCount: number;
 }
 
 export interface ActivitySignup {
@@ -335,6 +338,8 @@ export interface ActivitySignup {
   createdAt: string;
   reviewedAt?: string;
   reviewNote?: string;
+  checkinAt?: string;
+  checkinNote?: string;
 }
 
 export interface NewActivityInput {

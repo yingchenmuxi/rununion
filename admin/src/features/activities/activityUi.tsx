@@ -14,6 +14,7 @@ const signupStatus: Record<ActivitySignupStatus, { label: string; tone: Tone }> 
   approved: { label: '已确认', tone: 'green' },
   declined: { label: '已取消', tone: 'gray' },
   attended: { label: '已参加', tone: 'blue' },
+  absent: { label: '未到', tone: 'coral' },
 };
 
 const tagTone: Record<ClubActivityTag, Tone> = {
@@ -36,6 +37,7 @@ export const signupStatusLabels: Record<ActivitySignupStatus, string> = {
   approved: '已确认',
   declined: '已取消',
   attended: '已参加',
+  absent: '未到',
 };
 
 export function ActivityStatusBadge({ status }: { status: ClubActivityStatus }) {

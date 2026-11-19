@@ -4,7 +4,7 @@ import { repository } from '../../data';
 import { useAsync } from '../../lib/useAsync';
 import { relativeTime } from '../../lib/format';
 import type { ActivitySignup, ActivitySignupStatus } from '../../types/models';
-import { Avatar, Badge, Button, Card, EmptyState, Spinner } from '../../components/ui/primitives';
+import { Avatar, Badge, Button, Card, EmptyState, ProgressBar, Spinner } from '../../components/ui/primitives';
 import { Icon } from '../../components/ui/Icon';
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -16,10 +16,16 @@ type TabKey = 'signups' | 'info';
 type Filter = 'all' | ActivitySignupStatus;
 type Decision = 'approved' | 'declined';
 type ConfirmAction = 'publish' | 'end';
+type CheckinResult = 'attended' | 'absent';
 
 interface ReviewTarget {
   signup: ActivitySignup;
   decision: Decision;
+}
+
+interface CheckinTarget {
+  signup: ActivitySignup;
+  result: CheckinResult;
 }
 
 export function ActivityDetailPage() {
@@ -34,6 +40,8 @@ export function ActivityDetailPage() {
   const [busy, setBusy] = useState(false);
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const [consentTarget, setConsentTarget] = useState<ActivitySignup | null>(null);
+  const [checkinTarget, setCheckinTarget] = useState<CheckinTarget | null>(null);
+  const [resetCheckinTarget, setResetCheckinTarget] = useState<ActivitySignup | null>(null);
 
   const { data, loading, error, reload } = useAsync(async () => {
     if (!activityId) return null;
@@ -51,8 +59,10 @@ export function ActivityDetailPage() {
       approved: rows.filter((row) => row.status === 'approved').length,
       declined: rows.filter((row) => row.status === 'declined').length,
       attended: rows.filter((row) => row.status === 'attended').length,
+      absent: rows.filter((row) => row.status === 'absent').length,
       active: rows.filter((row) => row.status !== 'declined').length,
-      confirmed: rows.filter((row) => row.status === 'approved' || row.status === 'attended').length,
+      confirmed: rows.filter((row) => row.status === 'approved' || row.status === 'attended' || row.status === 'absent').length,
+      checked: rows.filter((row) => row.status === 'attended' || row.status === 'absent').length,
     };
   }, [data]);
 
@@ -91,8 +101,9 @@ export function ActivityDetailPage() {
   const filters: Array<{ key: Filter; label: string; count: number }> = [
     { key: 'all', label: '全部', count: counts.all },
     { key: 'pending', label: '待确认', count: counts.pending },
-    { key: 'approved', label: '已确认', count: counts.approved },
+    { key: 'approved', label: activity.status === 'ended' ? '待签到' : '已确认', count: counts.approved },
     { key: 'attended', label: '已参加', count: counts.attended },
+    { key: 'absent', label: '未到', count: counts.absent },
     { key: 'declined', label: '已取消', count: counts.declined },
   ];
 
@@ -148,7 +159,7 @@ export function ActivityDetailPage() {
         toast('活动已发布，成员端现在可以报名。');
       } else {
         await repository.endActivity(activity.id);
-        toast('活动已结束，未确认的报名已自动关闭。', 'info');
+        toast('活动已结束，未确认的报名已自动关闭，可以开始签到。', 'info');
       }
       setConfirmAction(null);
       reload();
@@ -157,6 +168,78 @@ export function ActivityDetailPage() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const submitCheckin = async () => {
+    if (!checkinTarget) return;
+    setBusy(true);
+    try {
+      await repository.checkinActivitySignup(checkinTarget.signup.id, checkinTarget.result);
+      toast(
+        checkinTarget.result === 'attended'
+          ? checkinTarget.signup.memberName + ' 已标记为参加，出勤记录已更新。'
+          : checkinTarget.signup.memberName + ' 已标记为未到，可以随时撤销。',
+        checkinTarget.result === 'attended' ? 'success' : 'info',
+      );
+      setCheckinTarget(null);
+      reload();
+    } catch (reason) {
+      toast(reason instanceof Error ? reason.message : '签到失败，请稍后再试。', 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitResetCheckin = async () => {
+    if (!resetCheckinTarget) return;
+    setBusy(true);
+    try {
+      await repository.resetActivityCheckin(resetCheckinTarget.id);
+      toast('已撤销 ' + resetCheckinTarget.memberName + ' 的签到，报名回到已确认。', 'info');
+      setResetCheckinTarget(null);
+      reload();
+    } catch (reason) {
+      toast(reason instanceof Error ? reason.message : '撤销失败，请稍后再试。', 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const renderRowActions = (signup: ActivitySignup) => {
+    if (activity.status === 'ended' && (signup.status === 'approved' || signup.status === 'attended' || signup.status === 'absent')) {
+      if (signup.status === 'approved') {
+        return (
+          <>
+            <Button variant="primary" size="sm" icon="check" disabled={busy} onClick={() => setCheckinTarget({ signup, result: 'attended' })}>签到</Button>
+            <Button variant="ghost" size="sm" disabled={busy} onClick={() => setCheckinTarget({ signup, result: 'absent' })}>未到</Button>
+          </>
+        );
+      }
+      return <Button variant="secondary" size="sm" disabled={busy} onClick={() => setResetCheckinTarget(signup)}>撤销签到</Button>;
+    }
+
+    if (signup.status === 'pending' && activity.status === 'published') {
+      return (
+        <>
+          {!signup.guardianConsent ? (
+            <Button variant="secondary" size="sm" onClick={() => setConsentTarget(signup)}>补登记同意</Button>
+          ) : null}
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={!signup.guardianConsent || full}
+            title={!signup.guardianConsent ? '先补登记监护人同意' : full ? '名额已满' : '确认报名'}
+            onClick={() => openReview(signup, 'approved')}
+          >
+            通过
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => openReview(signup, 'declined')}>取消</Button>
+        </>
+      );
+    }
+
+    if (signup.status === 'pending') return <span className="muted-cell">活动不在报名中</span>;
+    return <span className="muted-cell">已处理</span>;
   };
 
   const tabs = [
@@ -186,17 +269,41 @@ export function ActivityDetailPage() {
         ) : activity.status === 'published' ? (
           <Button variant="dangerGhost" onClick={() => setConfirmAction('end')}>结束活动</Button>
         ) : (
-          <span className="soft-chip">活动已结束，报名只读</span>
+          <span className="soft-chip">活动已结束，可核对签到</span>
         )}
       />
 
       <section className="detail-summary">
         <div><span>报名人数</span><strong>{counts.active} / {activity.capacity}</strong><small>不含已取消</small></div>
         <div><span>待确认</span><strong>{counts.pending}</strong><small>需要团长处理</small></div>
-        <div><span>已确认</span><strong>{counts.confirmed}</strong><small>含已参加</small></div>
+        <div><span>已确认</span><strong>{counts.confirmed}</strong><small>{activity.status === 'ended' ? '已参加 ' + counts.attended + ' · 未到 ' + counts.absent : '含已参加'}</small></div>
         <div><span>距离</span><strong>{activity.distanceKm} km</strong><small>约 {activity.durationMin} 分钟</small></div>
         <div><span>集合</span><strong>{activity.startTime}</strong><small>{formatActivityDate(activity.date)}</small></div>
       </section>
+
+      {activity.status === 'ended' ? (
+        <Card className="checkin-card">
+          <div className="checkin-head">
+            <div className="checkin-title">
+              <span className="checkin-icon"><Icon name="check" size={18} /></span>
+              <div>
+                <h2>赛后签到</h2>
+                <p>逐条核对到场情况。签到只影响出勤记录，不会改变报名人数；填错可以撤销。</p>
+              </div>
+            </div>
+            <span className="soft-chip">已核对 {counts.checked} / {counts.active}</span>
+          </div>
+          <ProgressBar value={counts.checked} max={counts.active} />
+          <div className="checkin-counts">
+            <div><strong>{counts.attended}</strong><span>已参加</span></div>
+            <div><strong>{counts.absent}</strong><span>未到</span></div>
+            <div><strong>{counts.approved}</strong><span>待签到</span></div>
+          </div>
+          {counts.approved === 0 && counts.active > 0 ? (
+            <p className="checkin-done">出勤已经核对完，名单里仍可以撤销修正。</p>
+          ) : null}
+        </Card>
+      ) : null}
 
       <DetailTabs tabs={tabs} active={tab} onChange={(key) => setTab(key as TabKey)} />
 
@@ -282,32 +389,14 @@ export function ActivityDetailPage() {
                       <td>
                         <div className="stacked-cell">
                           <SignupStatusBadge status={signup.status} />
-                          {signup.reviewNote ? <span className="signup-note">{signup.reviewNote}</span> : null}
+                          {signup.checkinNote
+                            ? <span className="signup-note">{signup.checkinNote}</span>
+                            : signup.reviewNote ? <span className="signup-note">{signup.reviewNote}</span> : null}
                         </div>
                       </td>
                       <td>
                         <div className="row-actions">
-                          {signup.status === 'pending' && activity.status === 'published' ? (
-                            <>
-                              {!signup.guardianConsent ? (
-                                <Button variant="secondary" size="sm" onClick={() => setConsentTarget(signup)}>补登记同意</Button>
-                              ) : null}
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                disabled={!signup.guardianConsent || full}
-                                title={!signup.guardianConsent ? '先补登记监护人同意' : full ? '名额已满' : '确认报名'}
-                                onClick={() => openReview(signup, 'approved')}
-                              >
-                                通过
-                              </Button>
-                              <Button variant="ghost" size="sm" onClick={() => openReview(signup, 'declined')}>取消</Button>
-                            </>
-                          ) : signup.status === 'pending' ? (
-                            <span className="muted-cell">活动不在报名中</span>
-                          ) : (
-                            <span className="muted-cell">已处理</span>
-                          )}
+                          {renderRowActions(signup)}
                         </div>
                       </td>
                     </tr>
@@ -318,7 +407,11 @@ export function ActivityDetailPage() {
           )}
 
           <p className="table-footnote">
-            共 {signups.length} 条报名。通过前必须登记监护人同意；确认后成员才能看到具体集合点。
+            共 {signups.length} 条报名。{activity.status === 'ended'
+              ? counts.approved > 0
+                ? '活动已结束，还有 ' + counts.approved + ' 人待签到。'
+                : '活动已结束，出勤已核对完，仍可撤销修正。'
+              : '通过前必须登记监护人同意；确认后成员才能看到具体集合点。'}
           </p>
         </Card>
       ) : (
@@ -381,6 +474,7 @@ export function ActivityDetailPage() {
                 <li><Icon name="check" size={15} className="check-ok" /><div>监护人同意未登记时，不能确认报名。</div></li>
                 <li><Icon name="check" size={15} className="check-ok" /><div>确认后才显示具体集合点，取消后重新隐藏。</div></li>
                 <li><Icon name="check" size={15} className="check-ok" /><div>名额满后停止确认；活动结束会自动关闭未处理报名。</div></li>
+                <li><Icon name="check" size={15} className="check-ok" /><div>活动结束后逐条核对签到，已参加和未到都可以撤销修正。</div></li>
               </ul>
               <div className="detail-block">
                 <h3>成员端会看到</h3>
@@ -392,12 +486,15 @@ export function ActivityDetailPage() {
               <div className="section-head">
                 <div>
                   <h2 className="section-title">当前状态</h2>
-                  <p className="section-desc">活动状态会影响报名和名单操作。</p>
+                  <p className="section-desc">活动状态会影响报名和签到操作。</p>
                 </div>
               </div>
               <div className="info-grid activity-status-grid">
-                <div className="info-item"><span>活动状态</span><strong>{activity.status === 'published' ? '报名中' : activity.status === 'draft' ? '草稿，成员端不可见' : '已结束，名单只读'}</strong></div>
+                <div className="info-item"><span>活动状态</span><strong>{activity.status === 'published' ? '报名中' : activity.status === 'draft' ? '草稿，成员端不可见' : '已结束，可核对签到'}</strong></div>
                 <div className="info-item"><span>报名情况</span><strong>{counts.active} 人报名 · {counts.pending} 人待确认</strong></div>
+                {activity.status === 'ended' ? (
+                  <div className="info-item"><span>签到情况</span><strong>{counts.attended} 人已参加 · {counts.absent} 人未到</strong></div>
+                ) : null}
               </div>
               {activity.status === 'draft' ? (
                 <div className="detail-block">
@@ -410,7 +507,7 @@ export function ActivityDetailPage() {
                   <Button variant="dangerGhost" size="sm" onClick={() => setConfirmAction('end')}>结束活动</Button>
                 </div>
               ) : (
-                <div className="detail-block"><p>活动已结束，报名名单保留为历史记录。</p></div>
+                <div className="detail-block"><p>活动已结束，报名名单保留为历史记录；可以在报名名单里逐条核对签到。</p></div>
               )}
             </Card>
           </div>
@@ -488,6 +585,28 @@ export function ActivityDetailPage() {
       />
 
       <ConfirmDialog
+        open={Boolean(checkinTarget)}
+        title={checkinTarget?.result === 'attended' ? '标记为已参加？' : '标记为未到？'}
+        description={checkinTarget?.result === 'attended'
+          ? (checkinTarget?.signup.memberName ?? '这位成员') + ' 已到场。签到会记入出勤，不影响报名人数；填错可以撤销。'
+          : (checkinTarget?.signup.memberName ?? '这位成员') + ' 没有到场。只记录出勤，不会取消报名，也不会计入跑量。'}
+        confirmText={checkinTarget?.result === 'attended' ? '确认签到' : '确认未到'}
+        loading={busy}
+        onConfirm={submitCheckin}
+        onClose={() => { if (!busy) setCheckinTarget(null); }}
+      />
+
+      <ConfirmDialog
+        open={Boolean(resetCheckinTarget)}
+        title="撤销这条签到？"
+        description={'撤销后，' + (resetCheckinTarget?.memberName ?? '这位成员') + ' 会回到“已确认”，可以重新签到或标记未到。'}
+        confirmText="撤销签到"
+        loading={busy}
+        onConfirm={submitResetCheckin}
+        onClose={() => { if (!busy) setResetCheckinTarget(null); }}
+      />
+
+      <ConfirmDialog
         open={confirmAction === 'publish'}
         title="发布这场活动？"
         description="发布后，社团成员会在手机端看到活动并可以提交报名。报名仍需要团长确认。"
@@ -500,7 +619,7 @@ export function ActivityDetailPage() {
       <ConfirmDialog
         open={confirmAction === 'end'}
         title="结束这场活动？"
-        description="结束后不能再处理报名，所有待确认的报名会自动取消，名单转为只读。"
+        description="结束后不能再处理报名，所有待确认的报名会自动取消，已确认成员进入签到名单。"
         confirmText="结束活动"
         tone="danger"
         loading={busy}

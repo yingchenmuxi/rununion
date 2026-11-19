@@ -280,7 +280,10 @@ export class MockAdminRepository implements AdminRepository {
       ...clone(activity),
       signupCount: activeRows.length,
       pendingCount: rows.filter((signup) => signup.status === 'pending').length,
-      confirmedCount: rows.filter((signup) => signup.status === 'approved' || signup.status === 'attended').length,
+      confirmedCount: rows.filter((signup) => signup.status === 'approved' || signup.status === 'attended' || signup.status === 'absent').length,
+      pendingCheckinCount: rows.filter((signup) => signup.status === 'approved').length,
+      attendedCount: rows.filter((signup) => signup.status === 'attended').length,
+      absentCount: rows.filter((signup) => signup.status === 'absent').length,
     };
   }
 
@@ -302,7 +305,7 @@ export class MockAdminRepository implements AdminRepository {
 
   async listActivitySignups(activityId: string): Promise<ActivitySignup[]> {
     await wait();
-    const statusOrder: Record<ActivitySignup['status'], number> = { pending: 0, approved: 1, attended: 2, declined: 3 };
+    const statusOrder: Record<ActivitySignup['status'], number> = { pending: 0, approved: 1, attended: 2, absent: 3, declined: 4 };
     return clone(this.activitySignups
       .filter((signup) => signup.activityId === activityId)
       .sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || b.createdAt.localeCompare(a.createdAt)));
@@ -387,6 +390,37 @@ export class MockAdminRepository implements AdminRepository {
     return clone(signup);
   }
 
+  async checkinActivitySignup(id: string, result: 'attended' | 'absent'): Promise<ActivitySignup> {
+    await wait(160);
+    const signup = this.activitySignups.find((item) => item.id === id);
+    if (!signup) throw new Error('报名记录不存在。');
+    const activity = this.activities.find((item) => item.id === signup.activityId);
+    if (!activity) throw new Error('活动不存在。');
+    if (activity.status !== 'ended') throw new Error('活动结束后才能签到。');
+    if (signup.status === 'pending' || signup.status === 'declined') {
+      throw new Error('只有已确认报名的成员可以签到。');
+    }
+    if (signup.status === result) throw new Error(result === 'attended' ? '这位成员已经签到。' : '这位成员已经标记为未到。');
+    signup.status = result;
+    signup.checkinAt = nowIso();
+    signup.checkinNote = result === 'attended' ? '赛后签到：已到场。' : '赛后签到：未到场。';
+    return clone(signup);
+  }
+
+  async resetActivityCheckin(id: string): Promise<ActivitySignup> {
+    await wait(140);
+    const signup = this.activitySignups.find((item) => item.id === id);
+    if (!signup) throw new Error('报名记录不存在。');
+    const activity = this.activities.find((item) => item.id === signup.activityId);
+    if (!activity) throw new Error('活动不存在。');
+    if (activity.status !== 'ended') throw new Error('只有已结束的活动可以撤销签到。');
+    if (signup.status !== 'attended' && signup.status !== 'absent') throw new Error('这条报名还没有签到记录。');
+    signup.status = 'approved';
+    signup.checkinAt = undefined;
+    signup.checkinNote = undefined;
+    return clone(signup);
+  }
+
   async reviewActivitySignup(id: string, decision: 'approved' | 'declined', note?: string): Promise<ActivitySignup> {
     await wait(180);
     const signup = this.activitySignups.find((item) => item.id === id);
@@ -397,7 +431,7 @@ export class MockAdminRepository implements AdminRepository {
     if (signup.status !== 'pending') throw new Error('这条报名已经处理过了。');
     if (decision === 'approved') {
       if (!signup.guardianConsent) throw new Error('监护人同意还没登记，先联系监护人补充，再确认报名。');
-      const confirmed = this.activitySignups.filter((item) => item.activityId === activity.id && (item.status === 'approved' || item.status === 'attended')).length;
+      const confirmed = this.activitySignups.filter((item) => item.activityId === activity.id && (item.status === 'approved' || item.status === 'attended' || item.status === 'absent')).length;
       if (confirmed >= activity.capacity) throw new Error('名额已满，无法再确认报名。');
     }
     signup.status = decision;

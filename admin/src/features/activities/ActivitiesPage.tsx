@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { repository } from '../../data';
 import { useAsync } from '../../lib/useAsync';
-import type { ClubActivityStatus } from '../../types/models';
+import type { ClubActivityStatus, ClubActivitySummary } from '../../types/models';
 import { Button, Card, EmptyState, PageHeader, Spinner } from '../../components/ui/primitives';
 import { Icon } from '../../components/ui/Icon';
 import { ActivityStatusBadge, ActivityTagBadge, formatActivityDate } from './activityUi';
@@ -25,6 +25,7 @@ export function ActivitiesPage() {
       ended: list.filter((item) => item.status === 'ended').length,
       pending: list.reduce((sum, item) => sum + item.pendingCount, 0),
       pendingActivities: list.filter((item) => item.pendingCount > 0).length,
+      pendingCheckin: list.filter((item) => item.status === 'ended').reduce((sum, item) => sum + item.pendingCheckinCount, 0),
       signups: list.reduce((sum, item) => sum + item.signupCount, 0),
     };
   }, [data]);
@@ -39,6 +40,14 @@ export function ActivitiesPage() {
       return matchesFilter && matchesQuery;
     });
   }, [data, filter, query]);
+
+  const signupHint = (activity: ClubActivitySummary) => {
+    if (activity.pendingCount > 0) return activity.pendingCount + ' 条待确认';
+    if (activity.status === 'ended' && activity.pendingCheckinCount > 0) return activity.pendingCheckinCount + ' 人待签到';
+    if (activity.status === 'ended' && activity.absentCount > 0) return '出勤已核对 · ' + activity.absentCount + ' 人未到';
+    if (activity.status === 'ended') return '出勤已核对';
+    return '没有待确认报名';
+  };
 
   if (loading && !data) return <Spinner label="正在加载活动" />;
   if (error) {
@@ -63,11 +72,11 @@ export function ActivitiesPage() {
     <div>
       <PageHeader
         title="活动"
-        description="发布线下活动、审核报名，确认监护人知情后再放行集合点。活动只面向本社团成员。"
+        description="发布线下活动、审核报名、赛后核对签到。确认监护人知情后再放行集合点，活动只面向本社团成员。"
         actions={<Button variant="primary" icon="plus" onClick={() => setCreateOpen(true)}>发布活动</Button>}
       />
 
-      <section className="stat-grid stat-grid-3">
+      <section className="stat-grid">
         <Card className="stat-card">
           <div className="stat-icon stat-icon-green"><Icon name="calendar" size={19} /></div>
           <div className="stat-copy"><span>报名中</span><strong>{counts.published}</strong><small>场活动正在开放报名</small></div>
@@ -75,6 +84,10 @@ export function ActivitiesPage() {
         <Card className="stat-card">
           <div className="stat-icon stat-icon-gold"><Icon name="clock" size={19} /></div>
           <div className="stat-copy"><span>待确认</span><strong>{counts.pending}</strong><small>条报名等团长处理</small></div>
+        </Card>
+        <Card className="stat-card">
+          <div className="stat-icon stat-icon-coral"><Icon name="check" size={19} /></div>
+          <div className="stat-copy"><span>待签到</span><strong>{counts.pendingCheckin}</strong><small>{counts.pendingCheckin > 0 ? '活动结束后核对出勤' : '出勤记录已核对'}</small></div>
         </Card>
         <Card className="stat-card">
           <div className="stat-icon stat-icon-blue"><Icon name="users" size={19} /></div>
@@ -150,7 +163,7 @@ export function ActivitiesPage() {
                     <td>
                       <div className="stacked-cell">
                         <strong>{activity.signupCount} / {activity.capacity} 人</strong>
-                        <span>{activity.pendingCount > 0 ? activity.pendingCount + ' 条待确认' : '没有待确认报名'}</span>
+                        <span>{signupHint(activity)}</span>
                       </div>
                     </td>
                     <td>{activity.coach}</td>
@@ -171,7 +184,7 @@ export function ActivitiesPage() {
         )}
 
         <p className="table-footnote">
-          共 {filtered.length} 场活动。报名确认前不显示具体集合点；活动结束后，未处理的报名会自动关闭。
+          共 {filtered.length} 场活动。报名确认前不显示具体集合点；活动结束后，未处理的报名会自动关闭，已确认成员进入签到。
         </p>
       </Card>
 

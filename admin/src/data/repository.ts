@@ -43,4 +43,6 @@ export interface AdminRepository {
   endActivity(id: string): Promise<ClubActivity>;
   reviewActivitySignup(id: string, decision: 'approved' | 'declined', note?: string): Promise<ActivitySignup>;
   recordGuardianConsent(id: string): Promise<ActivitySignup>;
+  checkinActivitySignup(id: string, result: 'attended' | 'absent'): Promise<ActivitySignup>;
+  resetActivityCheckin(id: string): Promise<ActivitySignup>;
 }
