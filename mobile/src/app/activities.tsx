@@ -13,7 +13,12 @@ import {
 } from '@/components/qingrun-ui';
 import { colors, radius, space } from '@/constants/qingrun';
 import { useActivities } from '@/features/activities/ActivityContext';
-import { formatActivityDay, formatActivityMonthDay } from '@/features/activities/activityData';
+import {
+  formatActivityDay,
+  formatActivityMonthDay,
+  type Activity,
+  type SignupStatus,
+} from '@/features/activities/activityData';
 
 type FilterKey = 'all' | 'open' | 'mine' | 'past';
 
@@ -24,22 +29,37 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'past', label: '已结束' },
 ];
 
+function statusLabel(activity: Activity, status: SignupStatus | undefined) {
+  if (activity.status === 'ended') {
+    if (status === 'attended') return '已参加';
+    if (status === 'absent') return '未到';
+    if (status === 'approved') return '待核对';
+    return '已结束';
+  }
+  if (status === 'pending') return '待确认';
+  if (status === 'approved') return '已报名';
+  return '可报名';
+}
+
 export default function ActivitiesScreen() {
   const router = useRouter();
-  const { activities, getSignupStatus, signupCount } = useActivities();
+  const { activities, getSignupStatus, signupCount, loading, error, refresh } = useActivities();
   const [filter, setFilter] = useState<FilterKey>('all');
 
   const rows = activities
     .filter((activity) => {
+      if (activity.status === 'draft') return false;
       const status = getSignupStatus(activity.id);
-      if (filter === 'open') return activity.status === 'upcoming' && !status;
-      if (filter === 'mine') return activity.status === 'upcoming' && (status === 'pending' || status === 'confirmed');
-      if (filter === 'past') return activity.status === 'past';
+      if (filter === 'open') return activity.status === 'published' && (!status || status === 'declined');
+      if (filter === 'mine') {
+        return activity.status === 'published' && (status === 'pending' || status === 'approved');
+      }
+      if (filter === 'past') return activity.status === 'ended';
       return true;
     })
     .sort((a, b) => {
-      if (a.status !== b.status) return a.status === 'upcoming' ? -1 : 1;
-      return a.dateISO.localeCompare(b.dateISO);
+      if (a.status !== b.status) return a.status === 'published' ? -1 : 1;
+      return a.dateISO.localeCompare(b.dateISO) || a.startTime.localeCompare(b.startTime);
     });
 
   return (
@@ -64,73 +84,93 @@ export default function ActivitiesScreen() {
       </View>
 
       <View style={styles.countRow}>
-        <Text style={styles.countText}>共 {rows.length} 场 · 演示活动</Text>
+        <Text style={styles.countText}>
+          {loading ? '正在加载活动…' : '共 ' + rows.length + ' 场 · 共享演示数据'}
+        </Text>
         <Text style={styles.countHint}>点开看集合与报名状态</Text>
       </View>
 
+      {error ? (
+        <Card style={styles.emptyCard}>
+          <Text style={styles.emptyTitle}>活动没加载出来</Text>
+          <Text style={styles.emptyBody}>{error}</Text>
+          <PrimaryButton
+            label="重新加载"
+            variant="light"
+            onPress={() => void refresh()}
+            style={styles.emptyButton}
+          />
+        </Card>
+      ) : null}
+
+      {!error && loading ? (
+        <Card style={styles.loadingCard}>
+          <Text style={styles.loadingText}>正在同步社团活动与出勤记录…</Text>
+        </Card>
+      ) : null}
+
       <View style={styles.list}>
-        {rows.map((activity) => {
-          const status = getSignupStatus(activity.id);
-          const statusLabel =
-            activity.status === 'past'
-              ? status === 'attended'
-                ? '已参加'
-                : '已结束'
-              : status === 'pending'
-                ? '待确认'
-                : status === 'confirmed'
-                  ? '已报名'
-                  : '可报名';
-          return (
-            <Card
-              key={activity.id}
-              onPress={() => router.push('/activity/' + activity.id)}
-              style={styles.activityCard}>
-              <View style={styles.cardTop}>
-                <View style={styles.dateBlock}>
-                  <Text style={styles.dateMonth}>{formatActivityMonthDay(activity.dateISO)}</Text>
-                  <Text style={styles.dateDay}>{formatActivityDay(activity.dateISO)}</Text>
-                </View>
-                <View style={styles.cardInfo}>
-                  <View style={styles.titleRow}>
-                    <Text style={styles.title} numberOfLines={1}>
-                      {activity.title}
-                    </Text>
-                    <Pill text={activity.tag} tone={activity.tag === '训练' ? 'gold' : 'green'} />
+        {!loading && !error
+          ? rows.map((activity) => {
+              const status = getSignupStatus(activity.id);
+              const label = statusLabel(activity, status);
+              return (
+                <Card
+                  key={activity.id}
+                  onPress={() => router.push('/activity/' + activity.id)}
+                  style={styles.activityCard}>
+                  <View style={styles.cardTop}>
+                    <View style={styles.dateBlock}>
+                      <Text style={styles.dateMonth}>{formatActivityMonthDay(activity.dateISO)}</Text>
+                      <Text style={styles.dateDay}>{formatActivityDay(activity.dateISO)}</Text>
+                    </View>
+                    <View style={styles.cardInfo}>
+                      <View style={styles.titleRow}>
+                        <Text style={styles.title} numberOfLines={1}>
+                          {activity.title}
+                        </Text>
+                        <Pill text={activity.tag} tone={activity.tag === '训练' ? 'gold' : 'green'} />
+                      </View>
+                      <Text style={styles.club}>{activity.clubShort} · {activity.startTime} 集合</Text>
+                      <Text style={styles.meta}>
+                        {activity.distanceKm} km · {activity.meetingArea} · {signupCount(activity)} 人已报名
+                      </Text>
+                    </View>
+                    <Text style={styles.chevron}>›</Text>
                   </View>
-                  <Text style={styles.club}>{activity.clubShort} · {activity.startTime} 集合</Text>
-                  <Text style={styles.meta}>
-                    {activity.distanceKm} km · {activity.meetingArea} · {signupCount(activity)} 人已报名
-                  </Text>
-                </View>
-                <Text style={styles.chevron}>›</Text>
-              </View>
-              <View style={styles.cardFooter}>
-                <Text style={styles.pace}>{activity.paceHint}</Text>
-                <View
-                  style={[
-                    styles.status,
-                    statusLabel === '可报名' && styles.statusOpen,
-                    statusLabel === '待确认' && styles.statusPending,
-                    statusLabel === '已报名' && styles.statusMine,
-                  ]}>
-                  <Text
-                    style={[
-                      styles.statusText,
-                      statusLabel === '可报名' && styles.statusTextOpen,
-                      statusLabel === '待确认' && styles.statusTextPending,
-                      statusLabel === '已报名' && styles.statusTextMine,
-                    ]}>
-                    {statusLabel}
-                  </Text>
-                </View>
-              </View>
-            </Card>
-          );
-        })}
+                  <View style={styles.cardFooter}>
+                    <Text style={styles.pace}>{activity.paceHint}</Text>
+                    <View
+                      style={[
+                        styles.status,
+                        label === '可报名' && styles.statusOpen,
+                        label === '待确认' && styles.statusPending,
+                        label === '待核对' && styles.statusPending,
+                        label === '已报名' && styles.statusMine,
+                        label === '已参加' && styles.statusMine,
+                        label === '未到' && styles.statusAbsent,
+                      ]}>
+                      <Text
+                        style={[
+                          styles.statusText,
+                          label === '可报名' && styles.statusTextOpen,
+                          label === '待确认' && styles.statusTextPending,
+                          label === '待核对' && styles.statusTextPending,
+                          label === '已报名' && styles.statusTextMine,
+                          label === '已参加' && styles.statusTextMine,
+                          label === '未到' && styles.statusTextAbsent,
+                        ]}>
+                        {label}
+                      </Text>
+                    </View>
+                  </View>
+                </Card>
+              );
+            })
+          : null}
       </View>
 
-      {rows.length === 0 ? (
+      {!loading && !error && rows.length === 0 ? (
         <Card style={styles.emptyCard}>
           <Text style={styles.emptyTitle}>这里还没有活动</Text>
           <Text style={styles.emptyBody}>换一个筛选，或回到全部活动看看近期安排。</Text>
@@ -145,8 +185,10 @@ export default function ActivitiesScreen() {
           未成年人提交报名后，团长会联系监护人确认。确认前不会显示具体集合点，也不会把联系方式交给其他参与者。
         </Text>
         <View style={styles.noteDivider} />
-        <Text style={styles.noteTitle}>临时不去，提前说一声</Text>
-        <Text style={styles.noteBody}>在活动详情里取消报名即可，名额会立刻回到活动里。</Text>
+        <Text style={styles.noteTitle}>赛后出勤由团长核对</Text>
+        <Text style={styles.noteBody}>
+          活动结束后，团长会逐条记录已参加或未到。填错可以撤销，不影响报名名额，也不会公开排名。
+        </Text>
       </Card>
 
       <DemoNote />
@@ -171,6 +213,8 @@ const styles = StyleSheet.create({
   countText: { fontSize: 11, fontWeight: '700', color: colors.inkSoft },
   countHint: { fontSize: 9, color: colors.muted },
   list: { gap: 10 },
+  loadingCard: { paddingVertical: 22, alignItems: 'center' },
+  loadingText: { fontSize: 11, color: colors.muted },
   activityCard: { padding: 14 },
   cardTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   dateBlock: {
@@ -200,14 +244,16 @@ const styles = StyleSheet.create({
   },
   pace: { flex: 1, fontSize: 10, lineHeight: 15, color: colors.muted },
   status: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.pill, backgroundColor: '#F1EDE4' },
-  statusOpen: { backgroundColor: colors.accentSoft },
+  statusOpen: { backgroundColor: colors.brandSoft },
   statusPending: { backgroundColor: colors.goldSoft },
   statusMine: { backgroundColor: colors.brandSoft },
+  statusAbsent: { backgroundColor: colors.accentSoft },
   statusText: { fontSize: 10, fontWeight: '800', color: colors.muted },
-  statusTextOpen: { color: colors.accent },
+  statusTextOpen: { color: colors.brand },
   statusTextPending: { color: colors.gold },
   statusTextMine: { color: colors.brand },
-  emptyCard: { alignItems: 'center', paddingVertical: 26 },
+  statusTextAbsent: { color: colors.accent },
+  emptyCard: { alignItems: 'center', paddingVertical: 26, marginBottom: 10 },
   emptyTitle: { fontSize: 17, fontWeight: '800', color: colors.ink },
   emptyBody: { marginTop: 7, fontSize: 11, lineHeight: 17, color: colors.muted, textAlign: 'center' },
   emptyButton: { marginTop: 16, alignSelf: 'stretch' },

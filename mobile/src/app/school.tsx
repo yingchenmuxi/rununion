@@ -125,8 +125,8 @@ export default function SchoolScreen() {
       <View style={styles.activityList}>
         {upcomingActivities.map((activity) => {
           const status = getSignupStatus(activity.id);
-          const label =
-            status === 'pending' ? '待确认' : status === 'confirmed' ? '已报名' : '报名';
+          const active = status === 'pending' || status === 'approved';
+          const label = status === 'pending' ? '待确认' : status === 'approved' ? '已报名' : '报名';
           return (
             <Card
               key={activity.id}
@@ -145,8 +145,8 @@ export default function SchoolScreen() {
                   {activity.meetingArea} · {signupCount(activity)} 人已报名
                 </Text>
               </View>
-              <View style={[styles.joinBtn, status && styles.joinBtnDone]}>
-                <Text style={[styles.joinText, status && styles.joinTextDone]}>{label}</Text>
+              <View style={[styles.joinBtn, active && styles.joinBtnDone]}>
+                <Text style={[styles.joinText, active && styles.joinTextDone]}>{label}</Text>
               </View>
             </Card>
           );

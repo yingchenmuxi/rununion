@@ -44,7 +44,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "web:export": "expo export --platform web",
-    "preview:web": "node scripts/serve-dist.mjs"
+    "preview:web": "node scripts/preview-shared.mjs"
   },
   "private": true
 }

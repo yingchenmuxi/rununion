@@ -1,13 +1,22 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import {
-  ACTIVITIES,
   compareActivityDate,
+  DEMO_MEMBER_ID,
+  isActiveSignup,
+  mapActivity,
   type Activity,
   type SignupStatus,
 } from './activityData';
+import {
+  ActivityApiError,
+  cancelActivitySignup,
+  createActivitySignup,
+  fetchMemberActivities,
+  resetActivityDemo,
+} from './activityApi';
 
-export type SignupResult = 'joined' | 'already' | 'full' | 'closed';
+export type SignupResult = 'joined' | 'already' | 'full' | 'closed' | 'error';
 
 type ActivityContextValue = {
   activities: Activity[];
@@ -17,81 +26,118 @@ type ActivityContextValue = {
   pendingCount: number;
   confirmedCount: number;
   attendedCount: number;
+  absentCount: number;
+  checkinPendingCount: number;
+  loading: boolean;
+  error: string;
+  refresh: () => Promise<void>;
   getSignupStatus: (id: string) => SignupStatus | undefined;
   isSignedUp: (id: string) => boolean;
   signupCount: (activity: Activity) => number;
-  signup: (id: string) => SignupResult;
-  cancelSignup: (id: string) => boolean;
+  signup: (id: string) => Promise<SignupResult>;
+  cancelSignup: (id: string) => Promise<boolean>;
+  resetDemo: () => Promise<void>;
 };
 
 const ActivityContext = createContext<ActivityContextValue | undefined>(undefined);
 
-const INITIAL_SIGNUPS: Record<string, SignupStatus> = {
-  a2: 'confirmed',
-  p1: 'attended',
-};
-
 export function ActivityProvider({ children }: { children: ReactNode }) {
-  const [signups, setSignups] = useState<Record<string, SignupStatus>>(INITIAL_SIGNUPS);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const rows = await fetchMemberActivities(DEMO_MEMBER_ID);
+      setActivities(rows.map(mapActivity));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : '活动数据加载失败。');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   const value = useMemo<ActivityContextValue>(() => {
-    const getSignupStatus = (id: string) => signups[id];
+    const getActivity = (id: string) => activities.find((activity) => activity.id === id);
+    const getSignupStatus = (id: string) => getActivity(id)?.mySignup?.status;
+    const isSignedUp = (id: string) => isActiveSignup(getSignupStatus(id));
+    const signupCount = (activity: Activity) => activity.signupCount;
 
-    const isSignedUp = (id: string) => {
-      const status = signups[id];
-      return status === 'pending' || status === 'confirmed';
+    const upcomingActivities = activities
+      .filter((activity) => activity.status === 'published')
+      .sort(compareActivityDate);
+
+    const myUpcoming = upcomingActivities
+      .filter((activity) => activity.mySignup?.status === 'pending' || activity.mySignup?.status === 'approved')
+      .sort(compareActivityDate);
+
+    const myPast = activities
+      .filter(
+        (activity) =>
+          activity.status === 'ended' &&
+          (activity.mySignup?.status === 'approved' ||
+            activity.mySignup?.status === 'attended' ||
+            activity.mySignup?.status === 'absent'),
+      )
+      .sort((a, b) => b.dateISO.localeCompare(a.dateISO) || b.startTime.localeCompare(a.startTime));
+
+    const signup = async (id: string): Promise<SignupResult> => {
+      try {
+        await createActivitySignup(id, DEMO_MEMBER_ID);
+        await refresh();
+        return 'joined';
+      } catch (cause) {
+        if (cause instanceof ActivityApiError) {
+          if (cause.code === 'already' || cause.code === 'full' || cause.code === 'closed') return cause.code;
+        }
+        return 'error';
+      }
     };
 
-    const signupCount = (activity: Activity) => {
-      const status = signups[activity.id];
-      const self = status === 'pending' || status === 'confirmed' ? 1 : 0;
-      return activity.signedBase + self;
+    const cancelSignup = async (id: string) => {
+      const signupRecord = getActivity(id)?.mySignup;
+      if (!signupRecord) return false;
+      try {
+        await cancelActivitySignup(signupRecord.id);
+        await refresh();
+        return true;
+      } catch {
+        return false;
+      }
     };
 
-    const signup = (id: string): SignupResult => {
-      const activity = ACTIVITIES.find((item) => item.id === id);
-      if (!activity || activity.status === 'past') return 'closed';
-      const current = signups[id];
-      if (current === 'pending' || current === 'confirmed' || current === 'attended') return 'already';
-      if (activity.signedBase >= activity.capacity) return 'full';
-      setSignups((previous) => ({ ...previous, [id]: 'pending' }));
-      return 'joined';
+    const resetDemo = async () => {
+      await resetActivityDemo();
+      await refresh();
     };
-
-    const cancelSignup = (id: string) => {
-      const current = signups[id];
-      if (current !== 'pending' && current !== 'confirmed') return false;
-      setSignups((previous) => {
-        const next = { ...previous };
-        delete next[id];
-        return next;
-      });
-      return true;
-    };
-
-    const upcomingActivities = ACTIVITIES.filter((activity) => activity.status === 'upcoming').sort(
-      compareActivityDate,
-    );
-    const myUpcoming = upcomingActivities.filter((activity) => isSignedUp(activity.id));
-    const myPast = ACTIVITIES.filter(
-      (activity) => activity.status === 'past' && signups[activity.id] === 'attended',
-    ).sort((a, b) => b.dateISO.localeCompare(a.dateISO));
 
     return {
-      activities: ACTIVITIES,
+      activities,
       upcomingActivities,
       myUpcoming,
       myPast,
-      pendingCount: myUpcoming.filter((activity) => signups[activity.id] === 'pending').length,
-      confirmedCount: myUpcoming.filter((activity) => signups[activity.id] === 'confirmed').length,
-      attendedCount: myPast.length,
+      pendingCount: myUpcoming.filter((activity) => activity.mySignup?.status === 'pending').length,
+      confirmedCount: myUpcoming.filter((activity) => activity.mySignup?.status === 'approved').length,
+      attendedCount: myPast.filter((activity) => activity.mySignup?.status === 'attended').length,
+      absentCount: myPast.filter((activity) => activity.mySignup?.status === 'absent').length,
+      checkinPendingCount: myPast.filter((activity) => activity.mySignup?.status === 'approved').length,
+      loading,
+      error,
+      refresh,
       getSignupStatus,
       isSignedUp,
       signupCount,
       signup,
       cancelSignup,
+      resetDemo,
     };
-  }, [signups]);
+  }, [activities, error, loading, refresh]);
 
   return <ActivityContext.Provider value={value}>{children}</ActivityContext.Provider>;
 }

@@ -6,22 +6,29 @@
 
 - 社团后台：登录、概览、成员、邀请码、公告、活动、挑战、记录与导出。
 - 平台总后台：总览、学校与社团、社团详情、全部用户、用户详情、内容与活动、跑步记录、审核与举报、系统与权限。
-- 数据：前端示例数据，刷新页面会恢复初始状态。
+- 数据：活动与报名走本地 Mock API，和手机端共享；其他页面仍是前端示例数据。刷新活动页会保留当前状态，重启 Mock API 或点“重置演示数据”回种子。
 - 社团账号：`admin@qingrun.local` / `Qingrun-Dev-2026` → `/`
 - 平台账号：`ops@qingrun.local` / `Qingrun-Dev-2026` → `/platform`
 - 已通过：`npm run typecheck`、`npm run build`、1440×1000 平台九页截图检查、社团活动发布与报名审核全流程、社团赛后签到与出勤全流程、社团/平台主要交互流程、1280/1024 响应式检查。
-- 还没接：PocketBase 真实表、真实登录、邮件邀请、审计日志落库、手机端 API。
+- 还没接：PocketBase 真实表、真实登录、邮件邀请、审计日志落库；活动已接本地 Mock API，其他模块尚未共享。
 
 ## 启动
 
-当前后台使用前端示例数据，不依赖 PocketBase，可以直接启动：
+先在项目根启动共享活动数据（社团后台和手机端都要用）：
+
+```bat
+cd /d E:\QPTapp
+node mock-api\server.mjs
+```
+
+它监听 <http://127.0.0.1:8090>。再启动后台：
 
 ```bat
 cd /d E:\QPTapp\admin
 npm run dev
 ```
 
-浏览器打开 <http://127.0.0.1:5173>。
+浏览器打开 <http://127.0.0.1:5173>。活动页需要 8090 的 Mock API；不启动时活动页会显示请求失败。
 
 以后接真实数据时，再启动 PocketBase：
 
@@ -38,7 +45,7 @@ server\pocketbase.exe serve --http 127.0.0.1:8091 --dir server\pb_data --dev
 | 成员 | 按状态筛选、搜索、通过/拒绝、重置临时密码、移出成员 |
 | 邀请码 | 生成邀请码、复制、停用；限制次数和有效期 |
 | 公告 | 新建草稿、发布、撤回、删除、置顶 |
-| 活动 | 发布新活动、待确认筛选、补登记监护人同意、通过/拒绝报名、结束活动、发布草稿；结束后逐条签到/标未到、撤销签到、查看出勤统计 |
+| 活动 | 发布新活动、待确认筛选、补登记监护人同意、通过/拒绝报名、结束活动、发布草稿；结束后逐条签到/标未到、撤销签到、查看出勤统计；数据与手机端共享 |
 | 挑战 | 新建挑战、查看社团平均进度、结束挑战 |
 | 记录与导出 | 按成员/备注/日期筛选社团可见记录，导出 CSV |
 
@@ -84,6 +91,8 @@ node verify-activities-admin.mjs
 node verify-checkin-admin.mjs
 ```
 
+`verify-activities-admin` 和 `verify-checkin-admin` 需要先启动 8090 的 Mock API。
+
 截图目录：`admin/shots/`（社团后台）、`admin/shots/activities/`（活动发布与报名审核）、`admin/shots/checkin/`（赛后签到与出勤）和 `admin/shots/platform/`（平台总后台）。
 
 ## 代码结构
@@ -92,14 +101,16 @@ node verify-checkin-admin.mjs
 admin/src/
   config.ts                 全局配置、社团与平台侧栏导航
   types/models.ts           数据模型
-  data/                     数据层（repository 接口 + mock 实现）
+  data/                     数据层（repository 接口 + mock 实现 + activityApi 共享接口）
   features/                 社团页面、platform/ 平台页面、auth/ 登录
   components/ui/            按钮、卡片、弹窗、Toast 等共享组件
   components/layout/        社团后台与平台后台框架
   styles/index.css          统一样式与响应式规则
 ```
 
-以后接 PocketBase 时，优先只替换 `admin/src/data/index.ts` 里的 repository，不把 API 代码写进页面。
+活动的共享接口在 `admin/src/data/activityApi.ts`，其余模块仍走 `admin/src/data/index.ts` 的 repository。以后接 PocketBase 时，优先只替换这两层，不把 API 代码写进页面。
+
+活动跨端闭环的实现与验收见[活动出勤跨端闭环 v0.1](../docs/15-活动出勤跨端闭环-v0.1.md)。
 
 ## 安全提醒
 

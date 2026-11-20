@@ -27,7 +27,7 @@ export default function HomeScreen() {
   const nextActivity = upcomingActivities[0];
   const nextStatus = nextActivity ? getSignupStatus(nextActivity.id) : undefined;
   const nextLabel =
-    nextStatus === 'pending' ? '待确认' : nextStatus === 'confirmed' ? '已报名' : '报名';
+    nextStatus === 'pending' ? '待确认' : nextStatus === 'approved' ? '已报名' : '报名';
   const displayName = profile?.nickname ?? mock.user.name;
   const initial = displayName.slice(0, 1);
   const weekKm = stats.weekKm;

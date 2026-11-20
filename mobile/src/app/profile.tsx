@@ -25,7 +25,7 @@ export default function ProfileScreen() {
   const { profile, logout } = useAuth();
   const { savedCount } = useKnowledge();
   const { stats } = useRuns();
-  const { myUpcoming, pendingCount, attendedCount } = useActivities();
+  const { myUpcoming, pendingCount, attendedCount, resetDemo } = useActivities();
   const activitySubtitle =
     pendingCount > 0
       ? '已报名 ' + myUpcoming.length + ' 场 · 待确认 ' + pendingCount + ' 场'
@@ -38,6 +38,8 @@ export default function ProfileScreen() {
   const [toast, setToast] = useState('');
   const [cityVisible, setCityVisible] = useState(false);
   const [recordVisible, setRecordVisible] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetMessage, setResetMessage] = useState('');
 
   useEffect(() => {
     if (!toast) return;
@@ -46,6 +48,19 @@ export default function ProfileScreen() {
   }, [toast]);
 
   const notify = (message: string) => setToast(message);
+
+  const handleResetDemo = async () => {
+    setResetting(true);
+    setResetMessage('');
+    try {
+      await resetDemo();
+      setResetMessage('活动演示数据已重置，后台和手机端都回到初始状态。');
+    } catch {
+      setResetMessage('重置失败，请确认演示数据服务已启动。');
+    } finally {
+      setResetting(false);
+    }
+  };
 
   return (
     <Screen>
@@ -186,6 +201,29 @@ export default function ProfileScreen() {
         <Text style={styles.privacyNote}>未满 18 岁参加线下活动，需要监护人知情并确认活动风险。</Text>
       </Card>
 
+      <SectionTitle title="演示数据" />
+      <Card style={styles.demoCard}>
+        <View style={styles.demoTop}>
+          <Text style={styles.demoTitle}>共享活动数据</Text>
+          <Pill text="本地 Mock" tone="neutral" />
+        </View>
+        <Text style={styles.demoBody}>
+          社团后台的报名审核、赛后签到和手机端看到的是同一份数据。刷新不会恢复初始状态；重置后两边都会回到演示种子。
+        </Text>
+        <PrimaryButton
+          label={resetting ? '重置中…' : '重置活动演示数据'}
+          variant="outline"
+          disabled={resetting}
+          onPress={() => void handleResetDemo()}
+          style={styles.demoButton}
+        />
+        {resetMessage ? (
+          <Text style={[styles.demoResult, resetMessage.startsWith('重置失败') && styles.demoResultError]}>
+            {resetMessage}
+          </Text>
+        ) : null}
+      </Card>
+
       <SectionTitle title="设置" />
       <Card style={styles.listCard}>
         <ListRow glyph="铃" title="通知设置" subtitle="活动提醒、周报与审核结果" onPress={() => notify('通知设置：演示版暂未开放')} />
@@ -252,5 +290,12 @@ const styles = StyleSheet.create({
   privacyNote: { marginTop: 6, fontSize: 9, lineHeight: 15, color: colors.muted },
   guardianRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   guardianText: { flex: 1, gap: 3 },
+  demoCard: { padding: space.lg },
+  demoTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+  demoTitle: { fontSize: 15, fontWeight: '800', color: colors.ink },
+  demoBody: { marginTop: 8, fontSize: 11, lineHeight: 18, color: colors.muted },
+  demoButton: { marginTop: 14 },
+  demoResult: { marginTop: 10, fontSize: 10, lineHeight: 16, fontWeight: '700', color: colors.brand, textAlign: 'center' },
+  demoResultError: { color: colors.accent },
   logout: { marginTop: 18 },
 });

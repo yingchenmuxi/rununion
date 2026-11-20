@@ -13,74 +13,152 @@ import {
 } from '@/components/qingrun-ui';
 import { colors, radius, space } from '@/constants/qingrun';
 import { useActivities } from '@/features/activities/ActivityContext';
-import {
-  formatActivityDate,
-  getActivity,
-  SIGNUP_LABELS,
-} from '@/features/activities/activityData';
+import { formatActivityDate, SIGNUP_LABELS } from '@/features/activities/activityData';
 
 export default function ActivityDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string }>();
-  const activity = getActivity(params.id);
-  const { getSignupStatus, signup, cancelSignup, signupCount } = useActivities();
+  const targetId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const { activities, loading, error, refresh, signup, cancelSignup } = useActivities();
+  const activity = activities.find((item) => item.id === targetId);
   const [feedback, setFeedback] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const back = (
+    <Pressable onPress={() => router.back()} hitSlop={10}>
+      <Text style={styles.back}>‹ 返回</Text>
+    </Pressable>
+  );
 
   if (!activity) {
     return (
       <Screen>
-        <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Text style={styles.back}>‹ 返回</Text>
-        </Pressable>
-        <Card style={styles.missingCard}>
-          <Text style={styles.missingTitle}>没有找到这场活动</Text>
-          <Text style={styles.missingBody}>它可能已经结束，或者链接不完整。</Text>
-          <PrimaryButton label="去看全部活动" onPress={() => router.replace('/activities')} style={styles.missingButton} />
-        </Card>
+        {back}
+        {loading ? (
+          <Card style={styles.missingCard}>
+            <Text style={styles.missingTitle}>正在加载活动…</Text>
+            <Text style={styles.missingBody}>正在同步社团的报名与出勤记录。</Text>
+          </Card>
+        ) : error ? (
+          <Card style={styles.missingCard}>
+            <Text style={styles.missingTitle}>活动没加载出来</Text>
+            <Text style={styles.missingBody}>{error}</Text>
+            <PrimaryButton label="重新加载" onPress={() => void refresh()} style={styles.missingButton} />
+          </Card>
+        ) : (
+          <Card style={styles.missingCard}>
+            <Text style={styles.missingTitle}>没有找到这场活动</Text>
+            <Text style={styles.missingBody}>它可能还没有发布，或者链接不完整。</Text>
+            <PrimaryButton label="去看全部活动" onPress={() => router.replace('/activities')} style={styles.missingButton} />
+          </Card>
+        )}
       </Screen>
     );
   }
 
-  const status = getSignupStatus(activity.id);
-  const isPast = activity.status === 'past';
-  const isSignedUp = status === 'pending' || status === 'confirmed';
+  const status = activity.mySignup?.status;
+  const isEnded = activity.status === 'ended';
+  const isSignedUp = status === 'pending' || status === 'approved';
   const attended = status === 'attended';
-  const taken = signupCount(activity);
+  const absent = status === 'absent';
+  const awaitingCheckin = isEnded && status === 'approved';
+  const taken = activity.signupCount;
   const full = taken >= activity.capacity;
-  const meetingVisible = status === 'confirmed' || attended;
+  const meetingVisible =
+    status === 'approved' || status === 'attended' || status === 'absent';
 
-  const buttonLabel = isPast
+  const buttonLabel = isEnded
     ? attended
       ? '已参加这场活动'
-      : '活动已结束'
+      : absent
+        ? '团长记录为未到'
+        : awaitingCheckin
+          ? '等待团长核对出勤'
+          : '活动已结束'
     : isSignedUp
       ? status === 'pending'
         ? '取消报名（待确认）'
         : '取消报名'
-      : full
-        ? '名额已满'
-        : '报名参加';
+      : status === 'declined'
+        ? '重新报名'
+        : full
+          ? '名额已满'
+          : '报名参加';
 
-  const handleSignup = () => {
-    if (isPast) return;
+  const signupTitle =
+    isEnded && status === 'approved'
+      ? '待团长核对出勤'
+      : status
+        ? SIGNUP_LABELS[status]
+        : '还没报名';
+
+  const pillText =
+    status === 'pending'
+      ? '待确认'
+      : status === 'approved'
+        ? isEnded
+          ? '待核对'
+          : '已报名'
+        : status === 'attended'
+          ? '已参加'
+          : status === 'absent'
+            ? '未到'
+            : status === 'declined'
+              ? '已取消'
+              : full
+                ? '已满'
+                : '开放';
+
+  const pillTone =
+    status === 'pending' || awaitingCheckin
+      ? 'gold'
+      : status === 'attended' || status === 'approved'
+        ? 'green'
+        : status === 'absent'
+          ? 'coral'
+          : 'neutral';
+
+  const handleSignup = async () => {
+    if (isEnded || busy) return;
+    setBusy(true);
     if (isSignedUp) {
-      if (cancelSignup(activity.id)) setFeedback('已取消报名，名额已经释放。');
+      const ok = await cancelSignup(activity.id);
+      setFeedback(ok ? '已取消报名，名额已经释放。' : '取消失败，请稍后再试。');
+      setBusy(false);
       return;
     }
-    const result = signup(activity.id);
+    const result = await signup(activity.id);
     if (result === 'joined') setFeedback('报名已提交，等团长联系监护人确认。');
     if (result === 'already') setFeedback('你已经报过这场活动了。');
     if (result === 'full') setFeedback('名额刚好满了，可以看看其他场次。');
     if (result === 'closed') setFeedback('这场活动已经结束。');
+    if (result === 'error') setFeedback('报名没提交成功，请确认演示数据服务已启动。');
+    setBusy(false);
   };
+
+  const signupNote = isSignedUp
+    ? status === 'pending'
+      ? '团长会在活动前联系你和监护人，确认后集合点会一直可见。'
+      : '已确认。出发前如身体不适，取消报名即可，不必解释。'
+    : isEnded
+      ? attended
+        ? '团长已记录你参加这场活动。出勤只用于社团记录，不公开排名。'
+        : absent
+          ? '团长记录为未到。未到不会取消报名记录，也不会释放名额；如果记录有误，请联系团长核对。'
+          : awaitingCheckin
+            ? '活动已结束，团长正在核对出勤。核对后会显示已参加或未到。'
+            : '这场活动已经结束，没有你的参加记录。'
+      : status === 'declined'
+        ? '这次报名已经取消，名额已经释放。如果还想去，可以重新报名。'
+        : full
+          ? '名额已满，可以等有人取消，或先报名下一场。'
+          : '提交后需团长与监护人确认，不会因为点了一下就直接放行。';
 
   return (
     <Screen>
       <View style={styles.topBar}>
-        <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Text style={styles.back}>‹ 返回</Text>
-        </Pressable>
-        <Text style={styles.demoTag}>演示活动</Text>
+        {back}
+        <Text style={styles.demoTag}>共享演示活动</Text>
       </View>
 
       <View style={styles.hero}>
@@ -118,7 +196,9 @@ export default function ActivityDetailScreen() {
                 ? activity.meetingDetail
                 : status === 'pending'
                   ? '团长确认后显示具体集合点'
-                  : '报名确认后显示具体集合点'}
+                  : status === 'declined'
+                    ? '重新报名并确认后显示具体集合点'
+                    : '报名确认后显示具体集合点'}
             </Text>
           </View>
         </View>
@@ -160,39 +240,33 @@ export default function ActivityDetailScreen() {
         <Text style={styles.noticeText}>{activity.notice}</Text>
       </View>
 
-      <SectionTitle title="报名状态" />
+      <SectionTitle title="报名与出勤" />
       <Card style={styles.signupCard}>
         <View style={styles.signupTop}>
-          <View>
-            <Text style={styles.signupTitle}>{status ? SIGNUP_LABELS[status] : '还没报名'}</Text>
+          <View style={styles.signupTitleWrap}>
+            <Text style={styles.signupTitle}>{signupTitle}</Text>
             <Text style={styles.signupSub}>
-              {taken} / {activity.capacity} 人 · {isPast ? '活动已结束' : '剩余 ' + Math.max(0, activity.capacity - taken) + ' 个名额'}
+              {taken} / {activity.capacity} 人 · {isEnded ? '活动已结束' : '剩余 ' + Math.max(0, activity.capacity - taken) + ' 个名额'}
             </Text>
           </View>
-          <Pill
-            text={status === 'pending' ? '待确认' : status === 'confirmed' ? '已报名' : status === 'attended' ? '已参加' : full ? '已满' : '开放'}
-            tone={status === 'pending' ? 'gold' : status ? 'green' : 'neutral'}
-          />
+          <Pill text={pillText} tone={pillTone} />
         </View>
-        <ProgressBar value={(taken / activity.capacity) * 100} />
-        <Text style={styles.signupNote}>
-          {isSignedUp
-            ? status === 'pending'
-              ? '团长会在活动前联系你和监护人，确认后集合点会一直可见。'
-              : '已确认。出发前如身体不适，取消报名即可，不必解释。'
-            : isPast
-              ? attended
-                ? '这场活动已经结束。完成情况已记录，去成长档案看看。'
-                : '这场活动已经结束，没有参加记录。'
-              : full
-                ? '名额已满，可以等有人取消，或先报名下一场。'
-                : '提交后需团长与监护人确认，不会因为点了一下就直接放行。'}
-        </Text>
+        <ProgressBar value={Math.min(100, (taken / activity.capacity) * 100)} />
+        <Text style={styles.signupNote}>{signupNote}</Text>
+        {isEnded && (attended || absent) ? (
+          <View style={styles.checkinRecord}>
+            <Text style={styles.checkinRecordLabel}>团长已核对出勤</Text>
+            <Text style={styles.checkinRecordText}>
+              {attended ? '已参加' : '未到'}
+              {activity.mySignup?.checkinAt ? ' · 记录已同步到社团后台' : ''}
+            </Text>
+          </View>
+        ) : null}
         <PrimaryButton
           label={buttonLabel}
           variant={isSignedUp ? 'outline' : 'brand'}
-          disabled={isPast || full}
-          onPress={handleSignup}
+          disabled={isEnded || busy || (full && !isSignedUp)}
+          onPress={() => void handleSignup()}
           style={styles.signupButton}
         />
         {feedback ? <Text style={styles.feedback}>{feedback}</Text> : null}
@@ -268,10 +342,21 @@ const styles = StyleSheet.create({
   noticeLabel: { fontSize: 10, fontWeight: '800', color: colors.accent, letterSpacing: 0.5 },
   noticeText: { marginTop: 6, fontSize: 11, lineHeight: 18, color: colors.inkSoft },
   signupCard: { padding: space.lg },
-  signupTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  signupTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 },
+  signupTitleWrap: { flex: 1 },
   signupTitle: { fontSize: 18, fontWeight: '800', color: colors.ink },
   signupSub: { fontSize: 10, color: colors.muted, marginTop: 4 },
   signupNote: { marginTop: 12, fontSize: 11, lineHeight: 18, color: colors.inkSoft },
+  checkinRecord: {
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: radius.md,
+    backgroundColor: colors.brandSoft,
+    gap: 3,
+  },
+  checkinRecordLabel: { fontSize: 9, fontWeight: '800', color: colors.brand, letterSpacing: 0.4 },
+  checkinRecordText: { fontSize: 11, lineHeight: 16, color: colors.inkSoft },
   signupButton: { marginTop: 14 },
   feedback: {
     marginTop: 10,
@@ -289,6 +374,6 @@ const styles = StyleSheet.create({
   safetyLinkText: { fontSize: 11, fontWeight: '800', color: colors.brand },
   missingCard: { marginTop: 30, alignItems: 'center', paddingVertical: 30 },
   missingTitle: { fontSize: 19, fontWeight: '800', color: colors.ink },
-  missingBody: { marginTop: 8, fontSize: 11, color: colors.muted },
+  missingBody: { marginTop: 8, fontSize: 11, lineHeight: 17, color: colors.muted, textAlign: 'center' },
   missingButton: { marginTop: 18, alignSelf: 'stretch' },
 });

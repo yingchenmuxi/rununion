@@ -1,0 +1,328 @@
+{
+  "checks": [
+    {
+      "name": "API 初始 4 场活动 / 19 条报名",
+      "pass": true,
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"serves\":\"mobile/dist\"}"
+    },
+    {
+      "name": "act-001 初始 7/40 已报名",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "act-004 初始出勤 3 已参加 / 3 待签到",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "登录页可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "首次登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "首页显示共享活动 7 人已报名",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "首页显示已报名状态",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开全部活动",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "活动列表路径正确",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "活动列表加载 3 场共享数据",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "列表同时显示 3 场活动",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "可报名筛选打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "可报名筛选为空态",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "已报名筛选打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "已报名筛选 2 场",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开 act-001 详情",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "详情路径 act-001",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "详情显示 7/40、已报名与集合点",
+      "pass": true,
+      "detail": "7/40"
+    },
+    {
+      "name": "已确认成员可见详细集合点",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "详情按钮为取消报名",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开我的页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "我的页有共享数据说明与重置按钮",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开我的活动",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "我的活动路径",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "我的活动显示 2 场待参加",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "我的活动显示已参加 1 场",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台找到 m-001 的已结束报名",
+      "pass": true,
+      "detail": "sg-014"
+    },
+    {
+      "name": "后台可把 m-001 标记为未到",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台 act-004 未到数变为 1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "登录页可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "刷新后重新登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "手机端刷新后看到未到",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "手机端已参加数降为 0",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开已结束 act-004 卡片",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "act-004 详情路径",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "详情显示团长记录为未到",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "详情显示已核对出勤记录",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台可撤销签到回到待核对",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "登录页可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "刷新后重新登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "手机端刷新后显示待核对",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "再次打开 act-004 卡片",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "详情显示等待团长核对出勤",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "待核对时不显示已核对记录",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "登录页可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "刷新后重新登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重新打开 act-001",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "取消报名按钮可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "手机端取消报名反馈",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "取消后名额变为 6/40",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台 act-001 报名数释放到 6",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台 m-001 报名状态为已取消",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "回到活动列表",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "列表 act-001 人数变 6",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "可报名筛选出现 1 场",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "点击重置活动演示数据",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重置成功提示出现",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重置后 API 回到 4 场 / 19 条报名",
+      "pass": true,
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"serves\":\"mobile/dist\"}"
+    },
+    {
+      "name": "重置后 act-001 回到 7/40",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "登录页可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "刷新后重新登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重置后手机端回到 2 场待参加",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重置后手机端回到 1 场已参加",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重置后首页活动回到 7 人已报名",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "events": [],
+  "failures": [],
+  "passed": 64,
+  "total": 64
+}

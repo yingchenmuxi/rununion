@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { repository } from '../../data';
+import { activityApi } from '../../data/activityApi';
 import { useAsync } from '../../lib/useAsync';
 import { relativeTime } from '../../lib/format';
 import type { ActivitySignup, ActivitySignupStatus } from '../../types/models';
@@ -45,9 +45,9 @@ export function ActivityDetailPage() {
 
   const { data, loading, error, reload } = useAsync(async () => {
     if (!activityId) return null;
-    const activity = await repository.getActivity(activityId);
+    const activity = await activityApi.getActivity(activityId);
     if (!activity) return null;
-    const signups = await repository.listActivitySignups(activity.id);
+    const signups = await activityApi.listActivitySignups(activity.id);
     return { activity, signups };
   }, [activityId]);
 
@@ -122,7 +122,7 @@ export function ActivityDetailPage() {
     setBusy(true);
     setReviewError(null);
     try {
-      await repository.reviewActivitySignup(review.signup.id, review.decision, reviewNote.trim() || undefined);
+      await activityApi.reviewActivitySignup(review.signup.id, review.decision, reviewNote.trim() || undefined);
       toast(review.decision === 'approved'
         ? review.signup.memberName + ' 的报名已确认，集合点已开放。'
         : '报名已取消，名额已退回。');
@@ -139,7 +139,7 @@ export function ActivityDetailPage() {
     if (!consentTarget) return;
     setBusy(true);
     try {
-      await repository.recordGuardianConsent(consentTarget.id);
+      await activityApi.recordGuardianConsent(consentTarget.id);
       toast('已登记 ' + consentTarget.memberName + ' 的监护人同意。', 'info');
       setConsentTarget(null);
       reload();
@@ -155,10 +155,10 @@ export function ActivityDetailPage() {
     setBusy(true);
     try {
       if (confirmAction === 'publish') {
-        await repository.publishActivity(activity.id);
+        await activityApi.publishActivity(activity.id);
         toast('活动已发布，成员端现在可以报名。');
       } else {
-        await repository.endActivity(activity.id);
+        await activityApi.endActivity(activity.id);
         toast('活动已结束，未确认的报名已自动关闭，可以开始签到。', 'info');
       }
       setConfirmAction(null);
@@ -174,7 +174,7 @@ export function ActivityDetailPage() {
     if (!checkinTarget) return;
     setBusy(true);
     try {
-      await repository.checkinActivitySignup(checkinTarget.signup.id, checkinTarget.result);
+      await activityApi.checkinActivitySignup(checkinTarget.signup.id, checkinTarget.result);
       toast(
         checkinTarget.result === 'attended'
           ? checkinTarget.signup.memberName + ' 已标记为参加，出勤记录已更新。'
@@ -194,7 +194,7 @@ export function ActivityDetailPage() {
     if (!resetCheckinTarget) return;
     setBusy(true);
     try {
-      await repository.resetActivityCheckin(resetCheckinTarget.id);
+      await activityApi.resetActivityCheckin(resetCheckinTarget.id);
       toast('已撤销 ' + resetCheckinTarget.memberName + ' 的签到，报名回到已确认。', 'info');
       setResetCheckinTarget(null);
       reload();

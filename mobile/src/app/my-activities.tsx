@@ -16,7 +16,17 @@ import { formatActivityDate, SIGNUP_LABELS } from '@/features/activities/activit
 
 export default function MyActivitiesScreen() {
   const router = useRouter();
-  const { myUpcoming, myPast, pendingCount, confirmedCount, getSignupStatus, signupCount } = useActivities();
+  const {
+    myUpcoming,
+    myPast,
+    pendingCount,
+    confirmedCount,
+    attendedCount,
+    absentCount,
+    checkinPendingCount,
+    getSignupStatus,
+    signupCount,
+  } = useActivities();
 
   return (
     <Screen>
@@ -36,9 +46,17 @@ export default function MyActivitiesScreen() {
         </View>
         <View style={styles.summaryDivider} />
         <View style={styles.summaryItem}>
-          <Text style={styles.summaryValue}>{myPast.length}</Text>
+          <Text style={styles.summaryValue}>{attendedCount}</Text>
           <Text style={styles.summaryLabel}>已参加</Text>
-          <Text style={styles.summaryHint}>线下活动记录</Text>
+          <Text style={styles.summaryHint}>
+            {absentCount > 0 ? '另有 ' + absentCount + ' 场未到' : '线下活动记录'}
+          </Text>
+        </View>
+        <View style={styles.summaryDivider} />
+        <View style={styles.summaryItem}>
+          <Text style={styles.summaryValue}>{checkinPendingCount}</Text>
+          <Text style={styles.summaryLabel}>待核对</Text>
+          <Text style={styles.summaryHint}>等团长核对出勤</Text>
         </View>
       </View>
 
@@ -79,48 +97,59 @@ export default function MyActivitiesScreen() {
       {myUpcoming.length === 0 ? (
         <Card style={styles.emptyCard}>
           <Text style={styles.emptyTitle}>还没有待参加的活动</Text>
-          <Text style={styles.emptyBody}>本周有两场校园活动，周末也可以去奥森夜跑。</Text>
+          <Text style={styles.emptyBody}>看看社团近期安排，报名后会在这里显示确认进度。</Text>
           <PrimaryButton label="去看看近期活动" onPress={() => router.push('/activities')} style={styles.emptyButton} />
         </Card>
       ) : null}
 
-      <SectionTitle title="已参加" />
+      <SectionTitle title="已结束" />
       <View style={styles.list}>
-        {myPast.map((activity) => (
-          <Card
-            key={activity.id}
-            onPress={() => router.push('/activity/' + activity.id)}
-            style={styles.activityCard}>
-            <View style={styles.cardTop}>
-              <Text style={styles.pastDate}>{formatActivityDate(activity.dateISO)}</Text>
-              <Pill text="已参加" tone="neutral" />
-            </View>
-            <Text style={styles.title}>{activity.title}</Text>
-            <Text style={styles.meta}>
-              {activity.clubShort} · {activity.distanceKm} km · {activity.coach}带跑
-            </Text>
-            <View style={styles.cardFooter}>
-              <Text style={styles.footerHint}>去成长档案看看这周的记录</Text>
-              <Text style={styles.chevron}>›</Text>
-            </View>
-          </Card>
-        ))}
+        {myPast.map((activity) => {
+          const status = getSignupStatus(activity.id);
+          const label = status === 'attended' ? '已参加' : status === 'absent' ? '未到' : '待核对';
+          const tone = status === 'attended' ? 'green' : status === 'absent' ? 'coral' : 'gold';
+          const hint =
+            status === 'attended'
+              ? '团长已核对出勤，去成长档案看看这周的记录'
+              : status === 'absent'
+                ? '团长记录为未到，不释放名额；有疑问请联系团长'
+                : '活动已结束，等团长核对出勤';
+          return (
+            <Card
+              key={activity.id}
+              onPress={() => router.push('/activity/' + activity.id)}
+              style={styles.activityCard}>
+              <View style={styles.cardTop}>
+                <Text style={styles.pastDate}>{formatActivityDate(activity.dateISO)}</Text>
+                <Pill text={label} tone={tone} />
+              </View>
+              <Text style={styles.title}>{activity.title}</Text>
+              <Text style={styles.meta}>
+                {activity.clubShort} · {activity.distanceKm} km · {activity.coach}带跑
+              </Text>
+              <View style={styles.cardFooter}>
+                <Text style={styles.footerHint}>{hint}</Text>
+                <Text style={styles.chevron}>›</Text>
+              </View>
+            </Card>
+          );
+        })}
       </View>
 
       {myPast.length === 0 ? (
         <Text style={styles.noPast}>还没有参加记录。第一次来，跑走结合也算完成。</Text>
       ) : null}
 
-      <SectionTitle title="报名与取消" />
+      <SectionTitle title="报名与出勤" />
       <Card style={styles.noteCard}>
         <Text style={styles.noteTitle}>取消不需要理由</Text>
         <Text style={styles.noteBody}>
           临时有事、身体不舒服或天气不好，都可以在活动详情里取消。名额会回到活动里，不会影响之后的报名。
         </Text>
         <View style={styles.noteDivider} />
-        <Text style={styles.noteTitle}>待确认不是已通过</Text>
+        <Text style={styles.noteTitle}>未到不等于被移出跑团</Text>
         <Text style={styles.noteBody}>
-          未成年人报名后，团长会联系监护人确认。确认前集合点只显示大致位置，不展示个人联系方式。
+          赛后出勤只记录是否到场，不会取消报名、不释放名额，也不做公开排名。记录有误可以请团长撤销修正。
         </Text>
       </Card>
 
@@ -136,13 +165,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.brand,
     borderRadius: radius.lg,
     paddingVertical: space.xl,
-    paddingHorizontal: space.lg,
+    paddingHorizontal: space.md,
     marginBottom: space.md,
   },
   summaryItem: { flex: 1, alignItems: 'center' },
-  summaryValue: { fontSize: 32, fontWeight: '800', color: colors.white, lineHeight: 38 },
+  summaryValue: { fontSize: 30, fontWeight: '800', color: colors.white, lineHeight: 36 },
   summaryLabel: { fontSize: 11, fontWeight: '700', color: colors.white, marginTop: 2 },
-  summaryHint: { fontSize: 9, color: 'rgba(255,255,255,0.62)', marginTop: 5, textAlign: 'center' },
+  summaryHint: { fontSize: 8.5, color: 'rgba(255,255,255,0.62)', marginTop: 5, textAlign: 'center' },
   summaryDivider: { width: 1, height: 48, backgroundColor: 'rgba(255,255,255,0.18)' },
   list: { gap: 10 },
   activityCard: { padding: space.lg },

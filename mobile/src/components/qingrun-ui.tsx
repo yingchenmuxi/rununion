@@ -181,7 +181,7 @@ export function AppHeader({ title, subtitle, right }: { title: string; subtitle?
 }
 
 export function DemoNote() {
-  return <Text style={styles.demoNote}>演示数据 · 本次打开内有效，刷新会恢复</Text>;
+  return <Text style={styles.demoNote}>演示数据 · 本地 Mock，不接真实数据</Text>;
 }
 
 const pillStyles: Record<PillTone, ViewStyle> = {

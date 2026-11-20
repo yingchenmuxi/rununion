@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { repository } from '../../data';
+import { activityApi } from '../../data/activityApi';
 import { useAsync } from '../../lib/useAsync';
 import type { ClubActivityStatus, ClubActivitySummary } from '../../types/models';
 import { Button, Card, EmptyState, PageHeader, Spinner } from '../../components/ui/primitives';
@@ -11,7 +11,7 @@ import { NewActivityModal } from './NewActivityModal';
 type Filter = 'all' | 'pending' | ClubActivityStatus;
 
 export function ActivitiesPage() {
-  const { data, loading, error, reload } = useAsync(() => repository.listActivities(), []);
+  const { data, loading, error, reload } = useAsync(() => activityApi.listActivities(), []);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [createOpen, setCreateOpen] = useState(false);

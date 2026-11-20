@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { repository } from '../../data';
+import { activityApi } from '../../data/activityApi';
 import type { ClubActivityTag, NewActivityInput } from '../../types/models';
 import { Button, Field } from '../../components/ui/primitives';
 import { Icon } from '../../components/ui/Icon';
@@ -93,7 +93,7 @@ export function NewActivityModal({
         meetingArea: form.meetingArea.trim(),
         coach: form.coach.trim(),
       };
-      await repository.createActivity(input);
+      await activityApi.createActivity(input);
       toast('活动已发布，成员端会看到新的场次。');
       onCreated();
       onClose();
