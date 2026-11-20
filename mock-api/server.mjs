@@ -112,10 +112,70 @@ function buildSeed() {
     { id: 'sg-018', activityId: 'act-004', memberId: 'm-008', memberName: '王予辰', grade: '高一', gender: '男', guardianName: '王立新', guardianPhone: '138-0000-1005', guardianConsent: true, note: '', status: 'approved', createdAt: isoOffset(-7, 19, 10), reviewedAt: isoOffset(-5, 8, 0), reviewNote: '已确认报名，等待赛后签到。' },
     { id: 'sg-019', activityId: 'act-004', memberId: 'm-009', memberName: '李思远', grade: '高二', gender: '男', guardianName: '李强', guardianPhone: '138-0000-1006', guardianConsent: true, note: '晚到 5 分钟。', status: 'approved', createdAt: isoOffset(-7, 19, 20), reviewedAt: isoOffset(-5, 8, 0), reviewNote: '已确认报名，等待赛后签到。' },
   ];
-  return { activities, signups };
+
+  const notifications = [
+    {
+      id: 'ntf-001', memberId: 'm-001', type: 'activity_confirmed', activityId: 'act-001',
+      title: '报名已确认：校园环湖 5K', body: '团长已确认你的报名。11 月 22 日 07:00 在学校东门集合，具体位置：东门内侧银杏树下。',
+      createdAt: isoOffset(-2, 20, 6), readAt: undefined,
+    },
+    {
+      id: 'ntf-002', memberId: 'm-001', type: 'activity_reminder', activityId: 'act-002',
+      title: '活动提醒：操场间歇入门', body: '11 月 23 日 16:30 在学校田径场集合。第一次练间歇不用追配速，带水和毛巾，吃过午饭 2 小时后再来。',
+      createdAt: isoOffset(-1, 18, 0), readAt: undefined,
+    },
+    {
+      id: 'ntf-003', memberId: 'm-001', type: 'attendance', activityId: 'act-004',
+      title: '出勤已记录：已参加', body: '校园环湖 5K 的出勤已由团长核对，记录为“已参加”。活动里程单独统计，不会和跑步记录重复计算。',
+      createdAt: isoOffset(-5, 9, 8), readAt: isoOffset(-5, 9, 30),
+    },
+  ];
+
+  return { activities, signups, notifications };
 }
 
 let state = buildSeed();
+
+function addNotification({ memberId, type, title, body, activityId }) {
+  const notification = {
+    id: 'ntf-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    memberId, type, title, body,
+    activityId: activityId || undefined,
+    createdAt: new Date().toISOString(),
+    readAt: undefined,
+  };
+  state.notifications.unshift(notification);
+  return notification;
+}
+
+function notifyActivityMembers(activity, title, body, statuses) {
+  const targets = state.signups.filter((s) => s.activityId === activity.id && statuses.includes(s.status));
+  targets.forEach((signup) => addNotification({
+    memberId: signup.memberId, type: 'activity_changed', activityId: activity.id, title, body,
+  }));
+}
+
+function changeSummary(before, after) {
+  const changes = [];
+  if (before.title !== after.title) changes.push('活动名称改为“' + after.title + '”');
+  if (before.date !== after.date || before.startTime !== after.startTime) {
+    changes.push('时间改为 ' + after.date + ' ' + after.startTime);
+  }
+  if (before.meetingArea !== after.meetingArea) changes.push('集合地点改为 ' + after.meetingArea);
+  else if (before.meetingDetail !== after.meetingDetail) changes.push('具体集合位置已更新');
+  if (before.coach !== after.coach) changes.push('带跑教练改为 ' + after.coach);
+  if (before.distanceKm !== after.distanceKm) changes.push('距离改为 ' + after.distanceKm + ' km');
+  if (before.intensity !== after.intensity) changes.push('强度说明已更新');
+  if (before.description !== after.description) changes.push('活动安排已更新');
+  if ((before.preparation || []).join('|') !== (after.preparation || []).join('|')) changes.push('出发前准备已更新');
+  if (before.notes !== after.notes) changes.push('安全备注已更新');
+  return changes.slice(0, 3).join('；');
+}
+
+function normalizePreparation(value) {
+  const rows = Array.isArray(value) ? value : String(value || '').split(/\r?\n|；|;/);
+  return rows.map((s) => String(s).trim()).filter(Boolean);
+}
 
 function summarize(activity) {
   const rows = state.signups.filter((s) => s.activityId === activity.id);
@@ -145,7 +205,7 @@ function json(res, status, payload) {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,PATCH,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   });
   res.end(body);
@@ -202,12 +262,32 @@ async function handleApi(req, res, url) {
 
   try {
     if (method === 'GET' && path === '/health') {
-      return json(res, 200, { ok: true, activities: state.activities.length, signups: state.signups.length, serves: 'mobile/dist' });
+      return json(res, 200, { ok: true, activities: state.activities.length, signups: state.signups.length, notifications: state.notifications.length, serves: 'mobile/dist' });
     }
 
     if (method === 'POST' && path === '/reset') {
       state = buildSeed();
-      return json(res, 200, { ok: true, activities: activitySummaryList() });
+      return json(res, 200, { ok: true, activities: activitySummaryList(), notifications: state.notifications.length });
+    }
+
+    if (method === 'GET' && path === '/member/notifications') {
+      const memberId = url.searchParams.get('memberId') || 'm-001';
+      const items = state.notifications
+        .filter((item) => item.memberId === memberId)
+        .slice()
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      return json(res, 200, { items, unread: items.filter((item) => !item.readAt).length });
+    }
+
+    if (method === 'POST' && path === '/member/notifications/read-all') {
+      const body = await readBody(req);
+      const memberId = String(body.memberId || 'm-001');
+      const readAt = new Date().toISOString();
+      let changed = 0;
+      state.notifications.forEach((item) => {
+        if (item.memberId === memberId && !item.readAt) { item.readAt = readAt; changed += 1; }
+      });
+      return json(res, 200, { ok: true, changed });
     }
 
     if (method === 'GET' && path === '/member/activities') {
@@ -249,7 +329,7 @@ async function handleApi(req, res, url) {
         meetingArea, meetingDetail: String(body.meetingDetail || '').trim(),
         distanceKm: Number(body.distanceKm), durationMin: Number(body.durationMin), capacity: Number(body.capacity),
         coach, intensity: String(body.intensity || '').trim() || '按自己的节奏跑', description,
-        preparation: String(body.preparation || '').split(/\r?\n|；|;/).map((s) => s.trim()).filter(Boolean),
+        preparation: normalizePreparation(body.preparation),
         notes: String(body.notes || '').trim(), status: 'published', createdAt: new Date().toISOString(),
       };
       state.activities.unshift(activity);
@@ -263,6 +343,56 @@ async function handleApi(req, res, url) {
       if (err) return fail(res, 404, err, 'not_found');
 
       if (method === 'GET' && parts.length === 2) return json(res, 200, summarize(activity));
+      if (method === 'PATCH' && parts.length === 2) {
+        if (activity.status === 'ended') return fail(res, 400, '活动已结束，不能再修改。');
+        const body = await readBody(req);
+        const title = String(body.title || '').trim();
+        const meetingArea = String(body.meetingArea || '').trim();
+        const coach = String(body.coach || '').trim();
+        const description = String(body.description || '').trim();
+        if (title.length < 2) return fail(res, 400, '活动名称至少 2 个字。');
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(body.date || ''))) return fail(res, 400, '请选择活动日期。');
+        if (body.date < todayDate()) return fail(res, 400, '活动日期不能早于今天。');
+        if (!/^\d{2}:\d{2}$/.test(String(body.startTime || ''))) return fail(res, 400, '请选择集合时间。');
+        if (!meetingArea) return fail(res, 400, '请填写集合地点。');
+        if (!coach) return fail(res, 400, '请填写带跑教练。');
+        if (!Number.isFinite(Number(body.distanceKm)) || Number(body.distanceKm) < 1 || Number(body.distanceKm) > 100) return fail(res, 400, '距离需要在 1 到 100 公里之间。');
+        if (!Number.isFinite(Number(body.durationMin)) || Number(body.durationMin) < 5 || Number(body.durationMin) > 600) return fail(res, 400, '预计时长需要在 5 到 600 分钟之间。');
+        if (!Number.isFinite(Number(body.capacity)) || Number(body.capacity) < 1 || Number(body.capacity) > 200) return fail(res, 400, '人数上限需要在 1 到 200 之间。');
+        if (description.length < 10) return fail(res, 400, '活动说明至少 10 个字，写清楚路线和强度。');
+        const activeCount = state.signups.filter((s) => s.activityId === activity.id && s.status !== 'declined').length;
+        if (Number(body.capacity) < activeCount) return fail(res, 400, '人数上限不能小于当前报名人数（' + activeCount + ' 人）。');
+        if (state.activities.some((a) => a.id !== activity.id && a.status !== 'ended' && a.date === body.date && a.startTime === body.startTime)) {
+          return fail(res, 409, '同一天同一时间已有活动，先调整时间。', 'conflict');
+        }
+        const before = clone(activity);
+        activity.title = title;
+        activity.tag = body.tag;
+        activity.date = body.date;
+        activity.startTime = body.startTime;
+        activity.meetingArea = meetingArea;
+        activity.meetingDetail = String(body.meetingDetail || '').trim();
+        activity.distanceKm = Number(body.distanceKm);
+        activity.durationMin = Number(body.durationMin);
+        activity.capacity = Number(body.capacity);
+        activity.coach = coach;
+        activity.intensity = String(body.intensity || '').trim() || '按自己的节奏跑';
+        activity.description = description;
+        activity.preparation = normalizePreparation(body.preparation);
+        activity.notes = String(body.notes || '').trim();
+        if (activity.status === 'published') {
+          const summary = changeSummary(before, activity);
+          if (summary) {
+            notifyActivityMembers(
+              activity,
+              '活动信息有变更：' + activity.title,
+              '团长更新了活动信息：' + summary + '。出发前请再确认一次集合时间和地点。',
+              ['pending', 'approved'],
+            );
+          }
+        }
+        return json(res, 200, summarize(activity));
+      }
       if (method === 'GET' && parts[2] === 'signups') {
         const order = { pending: 0, approved: 1, attended: 2, absent: 3, declined: 4 };
         const rows = state.signups.filter((s) => s.activityId === activity.id).sort((a, b) => order[a.status] - order[b.status] || b.createdAt.localeCompare(a.createdAt));
@@ -277,6 +407,16 @@ async function handleApi(req, res, url) {
       if (method === 'POST' && parts[2] === 'end') {
         if (activity.status !== 'published') return fail(res, 400, '只有报名中的活动可以结束。');
         activity.status = 'ended';
+        const endedTargets = state.signups
+          .filter((s) => s.activityId === activity.id && ['pending', 'approved'].includes(s.status))
+          .map((s) => ({ memberId: s.memberId, wasPending: s.status === 'pending' }));
+        endedTargets.forEach((target) => addNotification({
+          memberId: target.memberId, type: 'activity_ended', activityId: activity.id,
+          title: '活动已结束：' + activity.title,
+          body: target.wasPending
+            ? '这场活动已结束，未确认的报名已自动关闭。可以关注跑团下一场活动。'
+            : '这场活动已结束，出勤记录会由团长在赛后核对。',
+        }));
         const reviewedAt = new Date().toISOString();
         state.signups.filter((s) => s.activityId === activity.id && s.status === 'pending').forEach((s) => {
           s.status = 'declined'; s.reviewedAt = reviewedAt; s.reviewNote = '活动已结束，系统关闭未确认报名。';
@@ -307,6 +447,14 @@ async function handleApi(req, res, url) {
         }
         return json(res, 201, { signup: clone(signup), activity: summarize(activity) });
       }
+    }
+
+    const notificationId = parts[0] === 'notifications' ? parts[1] : null;
+    if (notificationId && method === 'POST' && parts[2] === 'read') {
+      const notification = state.notifications.find((item) => item.id === notificationId);
+      if (!notification) return fail(res, 404, '消息不存在。', 'not_found');
+      notification.readAt = new Date().toISOString();
+      return json(res, 200, notification);
     }
 
     const signupId = parts[0] === 'signups' ? parts[1] : null;
@@ -344,12 +492,32 @@ async function handleApi(req, res, url) {
         signup.status = decision;
         signup.reviewedAt = new Date().toISOString();
         signup.reviewNote = String(body.note || '').trim() || (decision === 'approved' ? '团长已确认，集合点已开放。' : '团长已取消报名。');
+        if (decision === 'approved') {
+          addNotification({
+            memberId: signup.memberId, type: 'activity_confirmed', activityId: activity.id,
+            title: '报名已确认：' + activity.title,
+            body: '团长已确认你的报名。' + activity.date + ' ' + activity.startTime + ' 在' + activity.meetingArea + '集合，具体位置：' + (activity.meetingDetail || activity.meetingArea) + '。',
+          });
+        } else {
+          addNotification({
+            memberId: signup.memberId, type: 'activity_declined', activityId: activity.id,
+            title: '报名未通过：' + activity.title,
+            body: '团长取消了你在这场活动的报名。原因：' + signup.reviewNote,
+          });
+        }
         return json(res, 200, signup);
       }
       if (method === 'POST' && parts[2] === 'checkin') {
         const body = await readBody(req);
         if (body.result !== 'attended' && body.result !== 'absent') return fail(res, 400, '签到结果不正确。');
         try { checkinSignup(signup, body.result); } catch (e) { return fail(res, 400, e.message); }
+        addNotification({
+          memberId: signup.memberId, type: 'attendance', activityId: activity.id,
+          title: body.result === 'attended' ? '出勤已记录：已参加' : '出勤已记录：未到',
+          body: body.result === 'attended'
+            ? '团长记录了你在“' + activity.title + '”的出勤：已参加。活动里程单独统计，不会和跑步记录重复计算。'
+            : '团长记录了你在“' + activity.title + '”的出勤：未到。如有疑问，可以联系团长核对。',
+        });
         return json(res, 200, signup);
       }
       if (method === 'POST' && parts[2] === 'reset-checkin') {
@@ -358,6 +526,11 @@ async function handleApi(req, res, url) {
         signup.status = 'approved';
         signup.checkinAt = undefined;
         signup.checkinNote = undefined;
+        addNotification({
+          memberId: signup.memberId, type: 'attendance', activityId: activity.id,
+          title: '出勤记录已撤销：' + activity.title,
+          body: '团长撤销了这场活动的出勤记录，报名回到“已确认”。如果需要，可以联系团长重新核对。',
+        });
         return json(res, 200, signup);
       }
     }

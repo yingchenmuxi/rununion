@@ -8,6 +8,7 @@ import { ActivityProvider } from '@/features/activities/ActivityContext';
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import { AuthScreen, PendingScreen } from '@/features/auth/AuthScreen';
 import { KnowledgeProvider } from '@/features/knowledge/KnowledgeContext';
+import { NotificationProvider } from '@/features/notifications/NotificationContext';
 import { RunProvider } from '@/features/runs/RunContext';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -30,11 +31,13 @@ export default function RootLayout() {
       <StatusBar style="dark" />
       <AuthProvider>
         <ActivityProvider>
+          <NotificationProvider>
           <KnowledgeProvider>
             <RunProvider>
               <RootContent />
             </RunProvider>
           </KnowledgeProvider>
+          </NotificationProvider>
         </ActivityProvider>
       </AuthProvider>
     </SafeAreaProvider>

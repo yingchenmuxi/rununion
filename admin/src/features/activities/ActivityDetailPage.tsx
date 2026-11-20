@@ -11,6 +11,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { useToast } from '../../components/ui/Toast';
 import { DetailHeader, DetailTabs } from '../../components/ui/detail';
 import { ActivityStatusBadge, ActivityTagBadge, SignupStatusBadge, formatActivityDate } from './activityUi';
+import { NewActivityModal } from './NewActivityModal';
 
 type TabKey = 'signups' | 'info';
 type Filter = 'all' | ActivitySignupStatus;
@@ -42,6 +43,7 @@ export function ActivityDetailPage() {
   const [consentTarget, setConsentTarget] = useState<ActivitySignup | null>(null);
   const [checkinTarget, setCheckinTarget] = useState<CheckinTarget | null>(null);
   const [resetCheckinTarget, setResetCheckinTarget] = useState<ActivitySignup | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   const { data, loading, error, reload } = useAsync(async () => {
     if (!activityId) return null;
@@ -264,12 +266,17 @@ export function ActivityDetailPage() {
             {formatActivityDate(activity.date)} {activity.startTime} · {activity.meetingArea} · {activity.distanceKm} km · {activity.coach}
           </>
         )}
-        actions={activity.status === 'draft' ? (
-          <Button variant="primary" icon="send" onClick={() => setConfirmAction('publish')}>发布活动</Button>
-        ) : activity.status === 'published' ? (
-          <Button variant="dangerGhost" onClick={() => setConfirmAction('end')}>结束活动</Button>
-        ) : (
+        actions={activity.status === 'ended' ? (
           <span className="soft-chip">活动已结束，可核对签到</span>
+        ) : (
+          <div className="page-actions">
+            <Button variant="secondary" icon="edit" onClick={() => setEditOpen(true)}>编辑活动</Button>
+            {activity.status === 'draft' ? (
+              <Button variant="primary" icon="send" onClick={() => setConfirmAction('publish')}>发布活动</Button>
+            ) : (
+              <Button variant="dangerGhost" onClick={() => setConfirmAction('end')}>结束活动</Button>
+            )}
+          </div>
         )}
       />
 
@@ -614,6 +621,13 @@ export function ActivityDetailPage() {
         loading={busy}
         onConfirm={runActivityAction}
         onClose={() => { if (!busy) setConfirmAction(null); }}
+      />
+
+      <NewActivityModal
+        open={editOpen}
+        activity={activity}
+        onClose={() => setEditOpen(false)}
+        onCreated={reload}
       />
 
       <ConfirmDialog

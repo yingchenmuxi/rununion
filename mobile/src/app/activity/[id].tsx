@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
@@ -23,6 +23,12 @@ export default function ActivityDetailScreen() {
   const activity = activities.find((item) => item.id === targetId);
   const [feedback, setFeedback] = useState('');
   const [busy, setBusy] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh]),
+  );
 
   const back = (
     <Pressable onPress={() => router.back()} hitSlop={10}>

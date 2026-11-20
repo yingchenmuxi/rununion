@@ -1,4 +1,5 @@
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
@@ -17,13 +18,15 @@ import { formatActivityDay } from '@/features/activities/activityData';
 import { useActivities } from '@/features/activities/ActivityContext';
 import { useAuth } from '@/features/auth/AuthContext';
 import { FEATURED_ARTICLE } from '@/features/knowledge/knowledgeData';
+import { useNotifications } from '@/features/notifications/NotificationContext';
 import { RUN_SOURCE_LABELS, formatDuration, formatPace, formatRunDate, useRuns } from '@/features/runs/RunContext';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { profile } = useAuth();
   const { stats, recentRuns } = useRuns();
-  const { upcomingActivities, getSignupStatus, signupCount } = useActivities();
+  const { upcomingActivities, getSignupStatus, signupCount, refresh: refreshActivities } = useActivities();
+  const { unread, refresh: refreshNotifications } = useNotifications();
   const nextActivity = upcomingActivities[0];
   const nextStatus = nextActivity ? getSignupStatus(nextActivity.id) : undefined;
   const nextLabel =
@@ -34,6 +37,13 @@ export default function HomeScreen() {
   const goalGap = Math.max(0, stats.weekGoal - weekKm);
   const weekPercent = stats.weekPercent;
 
+  useFocusEffect(
+    useCallback(() => {
+      void refreshActivities();
+      void refreshNotifications();
+    }, [refreshActivities, refreshNotifications]),
+  );
+
   return (
     <Screen>
       <View style={styles.topBar}>
@@ -43,9 +53,19 @@ export default function HomeScreen() {
           </View>
           <Text style={styles.brandName}>青跑团</Text>
         </View>
-        <Pressable onPress={() => router.push('/profile')} hitSlop={8}>
-          <Avatar label={initial} size={38} />
-        </Pressable>
+        <View style={styles.topActions}>
+          <Pressable accessibilityLabel="消息中心" onPress={() => router.push('/notifications')} hitSlop={8} style={styles.bellButton}>
+            <Text style={styles.bellGlyph}>铃</Text>
+            {unread > 0 ? (
+              <View style={styles.bellBadge}>
+                <Text style={styles.bellBadgeText}>{unread > 9 ? '9+' : unread}</Text>
+              </View>
+            ) : null}
+          </Pressable>
+          <Pressable onPress={() => router.push('/profile')} hitSlop={8}>
+            <Avatar label={initial} size={38} />
+          </Pressable>
+        </View>
       </View>
 
       <Text style={styles.hello}>你好，{displayName}</Text>
@@ -221,6 +241,33 @@ const styles = StyleSheet.create({
   },
   brandMarkText: { fontSize: 17, fontWeight: '800', color: colors.white },
   brandName: { fontSize: 20, fontWeight: '800', color: colors.ink, letterSpacing: 0.5 },
+  topActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  bellButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  bellGlyph: { fontSize: 15, fontWeight: '700', color: colors.brand },
+  bellBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    backgroundColor: colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.bg,
+  },
+  bellBadgeText: { fontSize: 9, fontWeight: '800', color: colors.white },
   hello: { fontSize: 28, fontWeight: '800', color: colors.ink, letterSpacing: 0.2 },
   tagline: { fontSize: 14, color: colors.muted, marginTop: 4 },
   hero: {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { activityApi } from '../../data/activityApi';
-import type { ClubActivityTag, NewActivityInput } from '../../types/models';
+import type { ClubActivity, ClubActivityTag, NewActivityInput } from '../../types/models';
 import { Button, Field } from '../../components/ui/primitives';
 import { Icon } from '../../components/ui/Icon';
 import { Modal } from '../../components/ui/Modal';
@@ -38,7 +38,25 @@ function nextSaturday(): string {
   return toInputDate(date);
 }
 
-function createInitialForm(): ActivityFormState {
+function createInitialForm(activity?: ClubActivity | null): ActivityFormState {
+  if (activity) {
+    return {
+      title: activity.title,
+      tag: activity.tag,
+      date: activity.date,
+      startTime: activity.startTime,
+      meetingArea: activity.meetingArea,
+      meetingDetail: activity.meetingDetail,
+      distanceKm: activity.distanceKm,
+      durationMin: activity.durationMin,
+      capacity: activity.capacity,
+      coach: activity.coach,
+      intensity: activity.intensity,
+      description: activity.description,
+      preparation: activity.preparation.join('\n'),
+      notes: activity.notes,
+    };
+  }
   return {
     title: '',
     tag: '轻松跑',
@@ -59,24 +77,27 @@ function createInitialForm(): ActivityFormState {
 
 export function NewActivityModal({
   open,
+  activity,
   onClose,
   onCreated,
 }: {
   open: boolean;
+  activity?: ClubActivity | null;
   onClose: () => void;
   onCreated: () => void;
 }) {
   const toast = useToast();
-  const [form, setForm] = useState<ActivityFormState>(createInitialForm);
+  const editing = Boolean(activity);
+  const [form, setForm] = useState<ActivityFormState>(() => createInitialForm(activity));
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
-      setForm(createInitialForm());
+      setForm(createInitialForm(activity));
       setFormError(null);
     }
-  }, [open]);
+  }, [open, activity]);
 
   useEffect(() => {
     if (!formError) return;
@@ -93,12 +114,17 @@ export function NewActivityModal({
         meetingArea: form.meetingArea.trim(),
         coach: form.coach.trim(),
       };
-      await activityApi.createActivity(input);
-      toast('活动已发布，成员端会看到新的场次。');
+      if (activity) {
+        await activityApi.updateActivity(activity.id, input);
+        toast('活动已更新，已报名的成员会收到变更消息。');
+      } else {
+        await activityApi.createActivity(input);
+        toast('活动已发布，成员端会看到新的场次。');
+      }
       onCreated();
       onClose();
     } catch (reason) {
-      setFormError(reason instanceof Error ? reason.message : '发布失败，请稍后再试。');
+      setFormError(reason instanceof Error ? reason.message : (editing ? '保存失败，请稍后再试。' : '发布失败，请稍后再试。'));
     } finally {
       setSaving(false);
     }
@@ -107,14 +133,18 @@ export function NewActivityModal({
   return (
     <Modal
       open={open}
-      title="发布新活动"
-      description="面向社团成员的线下活动。未成年人报名后先进入待确认，团长联系监护人后再放行。"
+      title={editing ? '编辑活动' : '发布新活动'}
+      description={editing
+        ? '修改会同步到成员端；已报名的成员会收到一条变更消息。集合点和具体位置改动后，请确认还能按时集合。'
+        : '面向社团成员的线下活动。未成年人报名后先进入待确认，团长联系监护人后再放行。'}
       size="lg"
       onClose={() => { if (!saving) onClose(); }}
       footer={(
         <>
           <Button variant="ghost" onClick={onClose} disabled={saving}>取消</Button>
-          <Button variant="primary" icon="send" onClick={submit} loading={saving}>发布活动</Button>
+          <Button variant="primary" icon={editing ? 'edit' : 'send'} onClick={submit} loading={saving}>
+            {editing ? '保存修改' : '发布活动'}
+          </Button>
         </>
       )}
     >

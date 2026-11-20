@@ -18,6 +18,7 @@ import { colors, mock, radius, space } from '@/constants/qingrun';
 import { useActivities } from '@/features/activities/ActivityContext';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useKnowledge } from '@/features/knowledge/KnowledgeContext';
+import { useNotifications } from '@/features/notifications/NotificationContext';
 import { useRuns } from '@/features/runs/RunContext';
 
 export default function ProfileScreen() {
@@ -26,6 +27,7 @@ export default function ProfileScreen() {
   const { savedCount } = useKnowledge();
   const { stats } = useRuns();
   const { myUpcoming, pendingCount, attendedCount, resetDemo } = useActivities();
+  const { unread, refresh: refreshNotifications } = useNotifications();
   const activitySubtitle =
     pendingCount > 0
       ? '已报名 ' + myUpcoming.length + ' 场 · 待确认 ' + pendingCount + ' 场'
@@ -54,7 +56,8 @@ export default function ProfileScreen() {
     setResetMessage('');
     try {
       await resetDemo();
-      setResetMessage('活动演示数据已重置，后台和手机端都回到初始状态。');
+      await refreshNotifications();
+      setResetMessage('活动演示数据和消息已重置，后台和手机端都回到初始状态。');
     } catch {
       setResetMessage('重置失败，请确认演示数据服务已启动。');
     } finally {
@@ -117,6 +120,13 @@ export default function ProfileScreen() {
         />
         <Divider />
         <ListRow
+          glyph="铃"
+          title="消息中心"
+          subtitle={unread > 0 ? unread + ' 条未读 · 报名与出勤结果' : '报名、变更与出勤处理结果'}
+          onPress={() => router.push('/notifications')}
+        />
+        <Divider />
+        <ListRow
           glyph="活"
           title="我的活动"
           subtitle={activitySubtitle}
@@ -143,12 +153,12 @@ export default function ProfileScreen() {
         </View>
         <Text style={styles.charityTitle}>不让热爱被现实阻碍</Text>
         <Text style={styles.charityBody}>
-          为有长跑梦想、但家庭条件有限的青少年提供跑鞋、参赛名额与教练陪伴。第一版不直接募集现金，避免未成年人接触资金风险。
+          为有长跑梦想、但家庭条件有限的青少年提供跑鞋、参赛名额与教练陪伴。第一版不直接募集现金，每笔物资去向都记在透明账本里。
         </Text>
         <PrimaryButton
-          label="了解帮扶通道"
+          label="查看透明账本"
           variant="light"
-          onPress={() => notify('帮扶通道：正式版将说明申请条件与审核流程')}
+          onPress={() => router.push('/charity')}
           style={styles.charityButton}
         />
       </Card>
@@ -226,7 +236,7 @@ export default function ProfileScreen() {
 
       <SectionTitle title="设置" />
       <Card style={styles.listCard}>
-        <ListRow glyph="铃" title="通知设置" subtitle="活动提醒、周报与审核结果" onPress={() => notify('通知设置：演示版暂未开放')} />
+        <ListRow glyph="铃" title="消息提醒" subtitle="站内消息已接入，真实推送暂未开放" onPress={() => notify('消息提醒：演示版只做站内消息，不接真实推送')} />
         <Divider />
         <ListRow glyph="信" title="意见反馈" subtitle="帮助我们把青跑团做得更稳" onPress={() => notify('意见反馈：演示版暂未开放')} />
         <Divider />

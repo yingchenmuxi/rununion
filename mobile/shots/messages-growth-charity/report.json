@@ -1,0 +1,272 @@
+{
+  "checks": [
+    {
+      "name": "API 初始 4 场活动 / 19 条报名 / 3 条消息",
+      "pass": true,
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"serves\":\"mobile/dist\"}"
+    },
+    {
+      "name": "初始消息 3 条、未读 2 条",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "初始消息包含确认、提醒、出勤",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "登录页可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "首页显示共享活动 7 人已报名",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "首页铃铛显示 2 条未读",
+      "pass": true,
+      "detail": "铃\n2"
+    },
+    {
+      "name": "点击铃铛进入消息中心",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "消息中心路径正确",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "消息中心加载 3 条消息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "消息中心显示 2 条未读",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "消息中心显示三类消息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "切换到未读筛选",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "未读筛选隐藏已读消息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "切回全部消息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开活动提醒消息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "消息跳转到 act-002 详情",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "详情显示操场间歇入门",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "详情仍是已报名状态",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "从消息返回首页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "读完一条后铃铛剩 1 条",
+      "pass": true,
+      "detail": "铃\n1"
+    },
+    {
+      "name": "再次进入消息中心",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "未读数变为 1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "点击全部已读",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "全部已读状态出现",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 未读归零",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "从消息中心回首页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "进入我的页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "我的页加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "点击重置演示数据",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重置成功提示可见",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重置后消息恢复 3 条 / 未读 2 条",
+      "pass": true,
+      "detail": "{\"n\":3,\"unread\":2}"
+    },
+    {
+      "name": "进入成长档案",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "成长页加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "成长页显示四类活动数字",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "成长页说明不重复计算跑量",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "回到我的页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "我的页重新加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开公益透明账本",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "账本路径正确",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "账本加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "账本摘要完整",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "账本显示物资去向与规则",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "回到首页看变更消息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台改期后消息增至 4 条 / 未读 3 条",
+      "pass": true,
+      "detail": "{\"n\":4,\"unread\":3}"
+    },
+    {
+      "name": "新增消息类型为活动变更",
+      "pass": true,
+      "detail": "activity_changed"
+    },
+    {
+      "name": "点击铃铛看到变更消息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "消息中心加载 4 条",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "变更消息显示新时间 07:30",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开变更消息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "变更消息跳到 act-001",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "详情已显示 07:30",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "测试结束恢复种子消息 3 条 / 未读 2 条",
+      "pass": true,
+      "detail": "{\"n\":3,\"unread\":2}"
+    }
+  ],
+  "failures": [],
+  "events": [],
+  "finishedAt": "2026-11-20T11:33:52.286Z"
+}

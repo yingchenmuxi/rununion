@@ -57,6 +57,13 @@ export const activityApi = {
     return post<ClubActivity>('/activities', input);
   },
 
+  async updateActivity(id: string, input: NewActivityInput): Promise<ClubActivity> {
+    return request<ClubActivity>('/activities/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    });
+  },
+
   async publishActivity(id: string): Promise<ClubActivity> {
     return post<ClubActivity>('/activities/' + encodeURIComponent(id) + '/publish');
   },

@@ -12,6 +12,8 @@ import {
   SectionTitle,
 } from '@/components/qingrun-ui';
 import { colors, mock, radius, space } from '@/constants/qingrun';
+import { useActivities } from '@/features/activities/ActivityContext';
+import { formatActivityDate } from '@/features/activities/activityData';
 import { RUN_SOURCE_LABELS, formatDuration, formatPace, formatRunDate, useRuns } from '@/features/runs/RunContext';
 
 const LEVELS = ['区级', '市级', '省级', '全国'];
@@ -19,6 +21,8 @@ const LEVELS = ['区级', '市级', '省级', '全国'];
 export default function GrowthScreen() {
   const router = useRouter();
   const { stats, recentRuns } = useRuns();
+  const { myUpcoming, myPast, attendedCount, absentCount, checkinPendingCount } = useActivities();
+  const lastActivity = myPast[0];
   const maxWeek = Math.max(1, ...stats.weeks.map((week) => week.km));
 
   return (
@@ -56,6 +60,44 @@ export default function GrowthScreen() {
             <Text style={styles.summaryStatLabel}>队内参与</Text>
           </View>
         </View>
+      </Card>
+
+      <SectionTitle title="活动参与" action="我的活动" onAction={() => router.push('/my-activities')} />
+      <Card style={styles.activityCard}>
+        <View style={styles.activityStats}>
+          <View style={styles.activityStat}>
+            <Text style={styles.activityStatValue}>{attendedCount}</Text>
+            <Text style={styles.activityStatLabel}>已参加</Text>
+          </View>
+          <View style={styles.activityDivider} />
+          <View style={styles.activityStat}>
+            <Text style={styles.activityStatValue}>{absentCount}</Text>
+            <Text style={styles.activityStatLabel}>未到</Text>
+          </View>
+          <View style={styles.activityDivider} />
+          <View style={styles.activityStat}>
+            <Text style={styles.activityStatValue}>{checkinPendingCount}</Text>
+            <Text style={styles.activityStatLabel}>待核对</Text>
+          </View>
+          <View style={styles.activityDivider} />
+          <View style={styles.activityStat}>
+            <Text style={styles.activityStatValue}>{myUpcoming.length}</Text>
+            <Text style={styles.activityStatLabel}>待参加</Text>
+          </View>
+        </View>
+        {lastActivity ? (
+          <View style={styles.lastActivity}>
+            <View style={styles.lastActivityMark}><Text style={styles.lastActivityGlyph}>跑</Text></View>
+            <View style={styles.lastActivityInfo}>
+              <Text style={styles.lastActivityTitle}>{lastActivity.title}</Text>
+              <Text style={styles.lastActivityMeta}>{formatActivityDate(lastActivity.dateISO)} · {lastActivity.distanceKm} km · {lastActivity.mySignup?.status === 'attended' ? '已参加' : lastActivity.mySignup?.status === 'absent' ? '未到' : '待核对'}</Text>
+            </View>
+            <Pill text="线下活动" tone="green" />
+          </View>
+        ) : (
+          <Text style={styles.activityEmpty}>还没有线下活动记录，报名一场和跑团一起跑。</Text>
+        )}
+        <Text style={styles.activityNote}>活动参与只沉淀出勤与参与场次，不把活动距离重复计入跑量。</Text>
       </Card>
 
       <SectionTitle title="个人最好" action="添加记录" />
@@ -195,6 +237,20 @@ const styles = StyleSheet.create({
   summaryStatValue: { fontSize: 16, fontWeight: '800', color: colors.white },
   summaryStatLabel: { marginTop: 2, fontSize: 10, color: 'rgba(255,255,255,0.66)' },
   summaryDivider: { width: 1, height: 26, backgroundColor: 'rgba(255,255,255,0.14)' },
+  activityCard: { padding: space.lg },
+  activityStats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  activityStat: { flex: 1, alignItems: 'flex-start' },
+  activityStatValue: { fontSize: 20, fontWeight: '800', color: colors.brand },
+  activityStatLabel: { marginTop: 2, fontSize: 10, color: colors.muted },
+  activityDivider: { width: 1, height: 28, backgroundColor: colors.line },
+  lastActivity: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.line },
+  lastActivityMark: { width: 34, height: 34, borderRadius: 12, backgroundColor: colors.brandSoft, alignItems: 'center', justifyContent: 'center' },
+  lastActivityGlyph: { fontSize: 13, fontWeight: '800', color: colors.brand },
+  lastActivityInfo: { flex: 1, gap: 2 },
+  lastActivityTitle: { fontSize: 13, fontWeight: '700', color: colors.ink },
+  lastActivityMeta: { fontSize: 10, color: colors.muted },
+  activityEmpty: { marginTop: 12, fontSize: 12, color: colors.muted },
+  activityNote: { marginTop: 10, fontSize: 10, lineHeight: 16, color: colors.muted },
   pbGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8 },
   pbCard: { width: '48%', padding: 14 },
   pbDistance: { fontSize: 11, fontWeight: '700', color: colors.muted },
