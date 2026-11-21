@@ -1,0 +1,207 @@
+{
+  "checks": [
+    {
+      "name": "初始公告 3 发布 + 1 草稿",
+      "pass": true,
+      "detail": "[\"published\",\"published\",\"published\",\"draft\"]"
+    },
+    {
+      "name": "初始消息 3 条 / 未读 2 条",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "社团后台登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开公告页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "公告页加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "统计卡显示 3 已发布 / 1 草稿 / 1 置顶",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "列表显示 4 条公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "点击新建公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "新建弹窗打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写标题",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写正文",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "选择训练分类",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "保存草稿",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "草稿保存后弹窗关闭",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "草稿保存 toast 出现",
+      "pass": true,
+      "detail": "公告已保存为草稿，发布后成员才会看到。"
+    },
+    {
+      "name": "列表出现新草稿卡片",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 新公告为草稿且置顶",
+      "pass": true,
+      "detail": "{\"status\":\"draft\",\"pinned\":true,\"category\":\"training\"}"
+    },
+    {
+      "name": "发布新公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "发布后 toast 出现",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 公告已发布并记录发布时间",
+      "pass": true,
+      "detail": "{\"status\":\"published\",\"publishedAt\":\"2026-11-21T07:59:58.417Z\"}"
+    },
+    {
+      "name": "后台置顶排在最前",
+      "pass": true,
+      "detail": "测试公告：周末训练改到南门"
+    },
+    {
+      "name": "发布后成员收到站内消息",
+      "pass": true,
+      "detail": "[\"announcement\",\"activity_reminder\",\"activity_confirmed\",\"attendance\"]"
+    },
+    {
+      "name": "消息标题带公告标题",
+      "pass": true,
+      "detail": "跑团公告：测试公告：周末训练改到南门"
+    },
+    {
+      "name": "成员未读增至 3 条",
+      "pass": true,
+      "detail": "3"
+    },
+    {
+      "name": "手机成员端公告变为 4 条",
+      "pass": true,
+      "detail": "4"
+    },
+    {
+      "name": "取消置顶",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 取消置顶生效",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重新置顶",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 重新置顶生效",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "撤回新公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "撤回 toast 出现",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 公告回到草稿",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "撤回后公告消息被清理",
+      "pass": true,
+      "detail": "{\"n\":3,\"unread\":2}"
+    },
+    {
+      "name": "撤回后手机端只剩 3 条公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "删除测试公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "删除确认弹窗打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "确认删除",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "删除后卡片消失",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 公告恢复 4 条",
+      "pass": true,
+      "detail": "4"
+    },
+    {
+      "name": "测试结束恢复 4 条公告",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "failures": [],
+  "events": [],
+  "finishedAt": "2026-11-21T08:00:10.113Z"
+}

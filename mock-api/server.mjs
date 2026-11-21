@@ -46,6 +46,11 @@ function isoOffset(days, hour = 9, minute = 0) {
   return d.toISOString();
 }
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
+function cnDate(iso) {
+  const parts = String(iso || '').split('-');
+  if (parts.length !== 3) return String(iso || '');
+  return Number(parts[1]) + ' 月 ' + Number(parts[2]) + ' 日';
+}
 
 function buildSeed() {
   const activities = [
@@ -116,12 +121,12 @@ function buildSeed() {
   const notifications = [
     {
       id: 'ntf-001', memberId: 'm-001', type: 'activity_confirmed', activityId: 'act-001',
-      title: '报名已确认：校园环湖 5K', body: '团长已确认你的报名。11 月 22 日 07:00 在学校东门集合，具体位置：东门内侧银杏树下。',
+      title: '报名已确认：校园环湖 5K', body: '团长已确认你的报名。' + cnDate(activities[0].date) + ' ' + activities[0].startTime + ' 在' + activities[0].meetingArea + '集合，具体位置：' + activities[0].meetingDetail + '。',
       createdAt: isoOffset(-2, 20, 6), readAt: undefined,
     },
     {
       id: 'ntf-002', memberId: 'm-001', type: 'activity_reminder', activityId: 'act-002',
-      title: '活动提醒：操场间歇入门', body: '11 月 23 日 16:30 在学校田径场集合。第一次练间歇不用追配速，带水和毛巾，吃过午饭 2 小时后再来。',
+      title: '活动提醒：操场间歇入门', body: cnDate(activities[1].date) + ' ' + activities[1].startTime + ' 在' + activities[1].meetingArea + '集合。第一次练间歇不用追配速，带水和毛巾，吃过午饭 2 小时后再来。',
       createdAt: isoOffset(-1, 18, 0), readAt: undefined,
     },
     {
@@ -131,16 +136,40 @@ function buildSeed() {
     },
   ];
 
-  return { activities, signups, notifications };
+  const announcements = [
+    {
+      id: 'ann-001', title: '雾霾天训练调整：改到体育馆做核心', category: 'safety', pinned: true,
+      content: '今天下午的操场训练改到体育馆二楼。\n\n到场后先做 10 分钟动态热身，再按年级分组做核心力量，最后一起拉伸。有哮喘或呼吸道不适的同学不用勉强参加，在群里和团长说一声即可。\n\n后续遇到空气质量预警，线下训练都会提前在公告里调整，不临时改集合点。',
+      author: '林建国', status: 'published', createdAt: isoOffset(-1, 8, 10), publishedAt: isoOffset(-1, 8, 30), readBy: [],
+    },
+    {
+      id: 'ann-002', title: '周六校园环湖 5K 集合提醒', category: 'notice', pinned: false,
+      content: cnDate(activities[0].date) + ' ' + activities[0].startTime + ' 在学校东门内侧银杏树下集合，07:10 一起出发。\n\n穿跑鞋和一件防风外套，带水。路线绕校园外圈一圈，前两公里一起热身，后三公里按自己的节奏，走完也算完成。\n\n如遇雷雨或路面结冰，会在 06:30 前发公告取消。',
+      author: '陈教练', status: 'published', createdAt: isoOffset(-2, 19, 0), publishedAt: isoOffset(-2, 19, 20), readBy: [],
+    },
+    {
+      id: 'ann-003', title: '新队员第一次参加活动要带什么', category: 'training', pinned: false,
+      content: '第一次来不用准备专业装备：一双合脚的跑鞋、一件干外套、一瓶水就够了。\n\n提前 10 分钟到集合点，先找带跑教练报到。训练不设关门时间，感觉不舒服随时停下，和收队教练说一声。\n\n未成年人参加线下活动，需要监护人知情并确认活动风险；集合点只在报名确认后对成员显示。',
+      author: '周教练', status: 'published', createdAt: isoOffset(-5, 17, 40), publishedAt: isoOffset(-5, 18, 0), readBy: ['m-001'],
+    },
+    {
+      id: 'ann-004', title: '期末接力赛报名安排（草稿）', category: 'notice', pinned: false,
+      content: '期末接力赛初步定在 12 月 06 日，具体分组和棒次等体育组确认后发布。先收集想参加的同学名单，不提前承诺名额。',
+      author: '林建国', status: 'draft', createdAt: isoOffset(0, 9, 10), readBy: [],
+    },
+  ];
+
+  return { activities, signups, notifications, announcements };
 }
 
 let state = buildSeed();
 
-function addNotification({ memberId, type, title, body, activityId }) {
+function addNotification({ memberId, type, title, body, activityId, announcementId }) {
   const notification = {
     id: 'ntf-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
     memberId, type, title, body,
     activityId: activityId || undefined,
+    announcementId: announcementId || undefined,
     createdAt: new Date().toISOString(),
     readAt: undefined,
   };
@@ -153,6 +182,43 @@ function notifyActivityMembers(activity, title, body, statuses) {
   targets.forEach((signup) => addNotification({
     memberId: signup.memberId, type: 'activity_changed', activityId: activity.id, title, body,
   }));
+}
+
+function notifyAnnouncement(announcement) {
+  const memberIds = [...new Set(state.signups.map((signup) => signup.memberId))];
+  const flat = String(announcement.content || '').replace(/\s+/g, ' ').trim();
+  memberIds.forEach((memberId) => addNotification({
+    memberId,
+    type: 'announcement',
+    announcementId: announcement.id,
+    title: '跑团公告：' + announcement.title,
+    body: flat.length > 64 ? flat.slice(0, 64) + '…' : flat,
+  }));
+}
+
+function removeAnnouncementNotifications(announcementId) {
+  state.notifications = state.notifications.filter((item) => item.announcementId !== announcementId);
+}
+
+function normalizeAnnouncementCategory(value) {
+  return ['notice', 'training', 'safety'].includes(value) ? value : 'notice';
+}
+
+function announcementTitle(value) {
+  return String(value || '').trim();
+}
+
+function validateAnnouncement(title, content) {
+  if (title.length < 2) return '公告标题至少 2 个字。';
+  if (title.length > 60) return '公告标题不要超过 60 个字。';
+  if (content.length < 10) return '公告正文至少 10 个字，写清楚时间、地点或注意事项。';
+  if (content.length > 1000) return '公告正文不要超过 1000 个字。';
+  return null;
+}
+
+function summarizeAnnouncement(announcement) {
+  const { readBy, ...rest } = announcement;
+  return { ...clone(rest), readCount: (readBy || []).length };
 }
 
 function changeSummary(before, after) {
@@ -205,7 +271,7 @@ function json(res, status, payload) {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET,POST,PATCH,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,PATCH,DELETE,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   });
   res.end(body);
@@ -262,12 +328,12 @@ async function handleApi(req, res, url) {
 
   try {
     if (method === 'GET' && path === '/health') {
-      return json(res, 200, { ok: true, activities: state.activities.length, signups: state.signups.length, notifications: state.notifications.length, serves: 'mobile/dist' });
+      return json(res, 200, { ok: true, activities: state.activities.length, signups: state.signups.length, notifications: state.notifications.length, announcements: state.announcements.length, serves: 'mobile/dist' });
     }
 
     if (method === 'POST' && path === '/reset') {
       state = buildSeed();
-      return json(res, 200, { ok: true, activities: activitySummaryList(), notifications: state.notifications.length });
+      return json(res, 200, { ok: true, activities: activitySummaryList(), notifications: state.notifications.length, announcements: state.announcements.length });
     }
 
     if (method === 'GET' && path === '/member/notifications') {
@@ -288,6 +354,99 @@ async function handleApi(req, res, url) {
         if (item.memberId === memberId && !item.readAt) { item.readAt = readAt; changed += 1; }
       });
       return json(res, 200, { ok: true, changed });
+    }
+
+    if (method === 'GET' && path === '/announcements') {
+      const order = { published: 0, draft: 1 };
+      const items = state.announcements
+        .slice()
+        .sort((a, b) => order[a.status] - order[b.status]
+          || Number(b.pinned) - Number(a.pinned)
+          || (b.publishedAt || b.createdAt).localeCompare(a.publishedAt || a.createdAt))
+        .map(summarizeAnnouncement);
+      return json(res, 200, items);
+    }
+
+    if (method === 'POST' && path === '/announcements') {
+      const body = await readBody(req);
+      const title = announcementTitle(body.title);
+      const content = String(body.content || '').trim();
+      const err = validateAnnouncement(title, content);
+      if (err) return fail(res, 400, err);
+      const announcement = {
+        id: 'ann-' + Date.now(),
+        title,
+        content,
+        category: normalizeAnnouncementCategory(body.category),
+        pinned: Boolean(body.pinned),
+        author: '林建国',
+        status: 'draft',
+        createdAt: new Date().toISOString(),
+        readBy: [],
+      };
+      state.announcements.unshift(announcement);
+      return json(res, 201, summarizeAnnouncement(announcement));
+    }
+
+    if (method === 'GET' && path === '/member/announcements') {
+      const memberId = url.searchParams.get('memberId') || 'm-001';
+      const items = state.announcements
+        .filter((item) => item.status === 'published')
+        .slice()
+        .sort((a, b) => Number(b.pinned) - Number(a.pinned) || String(b.publishedAt || '').localeCompare(String(a.publishedAt || '')))
+        .map((item) => {
+          const { readBy, ...rest } = item;
+          return { ...clone(rest), read: (readBy || []).includes(memberId) };
+        });
+      return json(res, 200, items);
+    }
+
+    const announcementId = parts[0] === 'announcements' ? parts[1] : null;
+    if (announcementId) {
+      const announcement = state.announcements.find((item) => item.id === announcementId);
+      if (!announcement) return fail(res, 404, '公告不存在。', 'not_found');
+
+      if (method === 'PATCH' && parts.length === 2) {
+        const body = await readBody(req);
+        if (body.title !== undefined || body.content !== undefined) {
+          const title = body.title !== undefined ? announcementTitle(body.title) : announcement.title;
+          const content = body.content !== undefined ? String(body.content || '').trim() : announcement.content;
+          const err = validateAnnouncement(title, content);
+          if (err) return fail(res, 400, err);
+          announcement.title = title;
+          announcement.content = content;
+        }
+        if (body.category !== undefined) announcement.category = normalizeAnnouncementCategory(body.category);
+        if (body.pinned !== undefined) announcement.pinned = Boolean(body.pinned);
+        if (body.status !== undefined) {
+          if (body.status !== 'published' && body.status !== 'draft') return fail(res, 400, '公告状态不正确。');
+          if (body.status === 'published') {
+            if (announcement.status === 'published') return fail(res, 400, '公告已经发布过了。');
+            announcement.status = 'published';
+            announcement.publishedAt = new Date().toISOString();
+            notifyAnnouncement(announcement);
+          } else {
+            announcement.status = 'draft';
+            announcement.publishedAt = undefined;
+            removeAnnouncementNotifications(announcement.id);
+          }
+        }
+        return json(res, 200, summarizeAnnouncement(announcement));
+      }
+
+      if (method === 'DELETE' && parts.length === 2) {
+        state.announcements = state.announcements.filter((item) => item.id !== announcement.id);
+        removeAnnouncementNotifications(announcement.id);
+        return json(res, 200, { ok: true });
+      }
+
+      if (method === 'POST' && parts[2] === 'read') {
+        const body = await readBody(req);
+        const memberId = String(body.memberId || 'm-001');
+        announcement.readBy = announcement.readBy || [];
+        if (!announcement.readBy.includes(memberId)) announcement.readBy.push(memberId);
+        return json(res, 200, { id: announcement.id, read: true });
+      }
     }
 
     if (method === 'GET' && path === '/member/activities') {

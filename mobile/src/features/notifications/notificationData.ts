@@ -4,7 +4,8 @@ export type NotificationType =
   | 'activity_reminder'
   | 'activity_changed'
   | 'activity_ended'
-  | 'attendance';
+  | 'attendance'
+  | 'announcement';
 
 export type MemberNotification = {
   id: string;
@@ -12,7 +13,8 @@ export type MemberNotification = {
   type: NotificationType;
   title: string;
   body: string;
-  activityId: string;
+  activityId?: string;
+  announcementId?: string;
   createdAt: string;
   readAt?: string | null;
 };
@@ -27,6 +29,7 @@ export const NOTIFICATION_META: Record<
   activity_changed: { glyph: '变', label: '活动变更', tone: 'gold' },
   activity_ended: { glyph: '止', label: '活动结束', tone: 'neutral' },
   attendance: { glyph: '勤', label: '出勤记录', tone: 'green' },
+  announcement: { glyph: '公', label: '跑团公告', tone: 'green' },
 };
 
 export function notificationTone(notification: MemberNotification) {

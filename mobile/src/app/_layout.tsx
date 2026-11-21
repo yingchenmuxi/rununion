@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import AppTabs from '@/components/app-tabs';
 import { ActivityProvider } from '@/features/activities/ActivityContext';
+import { AnnouncementProvider } from '@/features/announcements/AnnouncementContext';
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import { AuthScreen, PendingScreen } from '@/features/auth/AuthScreen';
 import { KnowledgeProvider } from '@/features/knowledge/KnowledgeContext';
@@ -32,11 +33,13 @@ export default function RootLayout() {
       <AuthProvider>
         <ActivityProvider>
           <NotificationProvider>
+          <AnnouncementProvider>
           <KnowledgeProvider>
             <RunProvider>
               <RootContent />
             </RunProvider>
           </KnowledgeProvider>
+          </AnnouncementProvider>
           </NotificationProvider>
         </ActivityProvider>
       </AuthProvider>

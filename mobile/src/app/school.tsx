@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
@@ -14,6 +14,8 @@ import {
 } from '@/components/qingrun-ui';
 import { colors, mock, radius, space } from '@/constants/qingrun';
 import { useActivities } from '@/features/activities/ActivityContext';
+import { useAnnouncements } from '@/features/announcements/AnnouncementContext';
+import { ANNOUNCEMENT_META, formatAnnouncementDate } from '@/features/announcements/announcementData';
 import { useAuth } from '@/features/auth/AuthContext';
 
 const CLUBS = [
@@ -49,8 +51,15 @@ const CLUBS = [
 export default function SchoolScreen() {
   const router = useRouter();
   const { profile } = useAuth();
-  const { upcomingActivities, getSignupStatus, signupCount } = useActivities();
+  const { activities, upcomingActivities, getSignupStatus, signupCount } = useActivities();
+  const { announcements, refresh: refreshAnnouncements } = useAnnouncements();
   const [applied, setApplied] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshAnnouncements();
+    }, [refreshAnnouncements]),
+  );
 
   return (
     <Screen>
@@ -73,7 +82,7 @@ export default function SchoolScreen() {
               <Pill text="已认证" tone="green" />
             </View>
             <Text style={styles.clubMeta}>
-              {mock.club.members} 名成员 · 本周 {mock.club.weekKm} km · {mock.club.activities} 场活动
+              {mock.club.members} 名成员 · 本周 {mock.club.weekKm} km · {activities.length} 场活动
             </Text>
           </View>
         </View>
@@ -88,9 +97,30 @@ export default function SchoolScreen() {
               <Text style={styles.avatarMoreText}>+125</Text>
             </View>
           </View>
-          <PrimaryButton label="查看跑团" variant="light" style={styles.heroButton} />
+          <PrimaryButton label="查看跑团" variant="light" onPress={() => router.push('/club')} style={styles.heroButton} />
         </View>
       </Card>
+
+      <SectionTitle title="跑团公告" action="全部公告" onAction={() => router.push('/announcements')} />
+      {announcements.slice(0, 2).map((item) => {
+        const meta = ANNOUNCEMENT_META[item.category];
+        return (
+          <Card
+            key={item.id}
+            onPress={() => router.push('/announcements/' + item.id)}
+            style={styles.announcementCard}>
+            <View style={styles.announcementTop}>
+              <View style={styles.announcementBadges}>
+                {item.pinned ? <Pill text="置顶" tone="gold" /> : null}
+                <Pill text={meta.label} tone={meta.tone} />
+              </View>
+              {!item.read ? <View style={styles.announcementDot} /> : null}
+            </View>
+            <Text style={styles.announcementTitle} numberOfLines={2}>{item.title}</Text>
+            <Text style={styles.announcementMeta}>{item.author} · {formatAnnouncementDate(item.publishedAt)}</Text>
+          </Card>
+        );
+      })}
 
       <SectionTitle title="同城跑团" action="北京" />
       <View style={styles.clubList}>
@@ -235,6 +265,12 @@ const styles = StyleSheet.create({
   avatarMore: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F1EDE4' },
   avatarMoreText: { fontSize: 9, fontWeight: '700', color: colors.muted },
   heroButton: { minHeight: 38, paddingHorizontal: 14 },
+  announcementCard: { padding: space.lg, marginBottom: space.sm, borderWidth: 1, borderColor: colors.line },
+  announcementTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  announcementBadges: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  announcementDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent },
+  announcementTitle: { marginTop: 8, fontSize: 15, fontWeight: '800', lineHeight: 22, color: colors.ink },
+  announcementMeta: { marginTop: 6, fontSize: 11, color: colors.muted },
   clubList: { gap: 10 },
   clubCard: { padding: space.lg },
   clubCardTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },

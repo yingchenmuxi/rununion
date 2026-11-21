@@ -1,0 +1,252 @@
+{
+  "checks": [
+    {
+      "name": "API 初始 4 活动 / 3 条已发布公告 / 1 条草稿",
+      "pass": true,
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"serves\":\"mobile/dist\"}"
+    },
+    {
+      "name": "后台公告列表 3 已发布 + 1 草稿",
+      "pass": true,
+      "detail": "[\"published\",\"published\",\"published\",\"draft\"]"
+    },
+    {
+      "name": "成员端只看到 3 条已发布公告",
+      "pass": true,
+      "detail": "3"
+    },
+    {
+      "name": "置顶公告排在最前",
+      "pass": true,
+      "detail": "雾霾天训练调整：改到体育馆做核心"
+    },
+    {
+      "name": "初始 2 条未读公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "初始消息 3 条 / 未读 2 条",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "登录页可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "进入跑团页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "跑团页加载公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "跑团页显示置顶和最新公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开跑团主页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "跑团主页路径正确",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "跑团主页加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "跑团主页展示公告、活动与跑团信息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开置顶公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "公告详情路径正确",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "公告详情加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "公告详情显示分类、作者与安全提示",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开后公告标记已读",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "返回跑团主页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开全部公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "公告列表路径正确",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "公告列表加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "列表显示 1 条未读",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "切换到未读筛选",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "未读筛选只剩周六集合提醒",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开周六集合提醒",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开第二条公告详情",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "公告详情正文加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "两条公告都已读",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "发布公告后消息增至 4 条 / 未读 3 条",
+      "pass": true,
+      "detail": "{\"n\":4,\"unread\":3}"
+    },
+    {
+      "name": "新增消息类型为跑团公告",
+      "pass": true,
+      "detail": "{\"id\":\"ntf-1795247923270-g2xf3\",\"memberId\":\"m-001\",\"type\":\"announcement\",\"title\":\"跑团公告：周末集合改到南门\",\"body\":\"这周六的校园环湖改到学校南门集合，07:00 出发。南门在修路，骑车来的同学停到图书馆西侧车棚。\",\"announcementId\":\"ann-1795247923243\",\"createdAt\":\"2026-11-21T07:58:43.270Z\"}"
+    },
+    {
+      "name": "成员端公告增至 4 条且置顶在前",
+      "pass": true,
+      "detail": "[\"ann-1795247923243\",\"ann-001\",\"ann-002\",\"ann-003\"]"
+    },
+    {
+      "name": "回首页看铃铛",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "铃铛显示 3 条未读",
+      "pass": true,
+      "detail": "铃\n3"
+    },
+    {
+      "name": "进入消息中心",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "消息中心加载公告消息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "消息中心显示 4 条 / 3 条未读",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "公告消息带公告入口",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开公告消息",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "消息跳转到公告详情",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "公告详情显示南门集合",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "撤回后公告消息被清理，回到 3 条 / 未读 2 条",
+      "pass": true,
+      "detail": "{\"n\":3,\"unread\":2}"
+    },
+    {
+      "name": "撤回后成员端只剩 3 条公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "回到跑团页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "跑团页不再显示撤回公告",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "进入公告列表",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "测试结束恢复 3 条已发布 + 1 条草稿",
+      "pass": true,
+      "detail": "4"
+    }
+  ],
+  "failures": [],
+  "events": [],
+  "finishedAt": "2026-11-21T07:58:47.120Z"
+}

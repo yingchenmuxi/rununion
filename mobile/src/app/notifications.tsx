@@ -28,7 +28,11 @@ export default function NotificationsScreen() {
 
   const open = async (item: MemberNotification) => {
     await markRead(item.id);
-    router.push('/activity/' + item.activityId);
+    if (item.announcementId) {
+      router.push('/announcements/' + item.announcementId);
+      return;
+    }
+    if (item.activityId) router.push('/activity/' + item.activityId);
   };
 
   return (
@@ -41,7 +45,7 @@ export default function NotificationsScreen() {
       </View>
 
       <Text style={styles.title}>消息</Text>
-      <Text style={styles.subtitle}>报名结果、活动变更和赛后出勤，团长处理后会出现在这里。</Text>
+      <Text style={styles.subtitle}>报名结果、活动变更、赛后出勤和跑团公告，团长处理后会出现在这里。</Text>
 
       <View style={styles.filterRow}>
         <Pressable
@@ -75,7 +79,7 @@ export default function NotificationsScreen() {
         </Card>
       ) : rows.length === 0 ? (
         <Card style={styles.stateCard}>
-          <Text style={styles.stateTitle}>{filter === 'unread' ? '没有未读消息' : '还没有活动消息'}</Text>
+          <Text style={styles.stateTitle}>{filter === 'unread' ? '没有未读消息' : '还没有消息'}</Text>
           <Text style={styles.stateBody}>
             {filter === 'unread'
               ? '团长处理报名、改期或核对出勤后，会在这里留下一条记录。'
@@ -109,14 +113,14 @@ export default function NotificationsScreen() {
                   </View>
                 </View>
                 <Text style={styles.messageBody}>{item.body}</Text>
-                <Text style={styles.messageLink}>查看活动详情 ›</Text>
+                <Text style={styles.messageLink}>{item.announcementId ? '查看公告详情 ›' : '查看活动详情 ›'}</Text>
               </Card>
             );
           })}
         </View>
       )}
 
-      <Text style={styles.footnote}>消息只覆盖活动相关事件，不做真实推送；刷新后仍会保留在当前演示数据里。</Text>
+      <Text style={styles.footnote}>消息覆盖活动和公告事件，不做真实推送；刷新后仍会保留在当前演示数据里。</Text>
       <DemoNote />
     </Screen>
   );

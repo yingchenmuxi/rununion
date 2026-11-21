@@ -1,23 +1,28 @@
 import { useMemo, useState } from 'react';
-import { repository } from '../../data';
+import { announcementApi, type AdminAnnouncement, type AnnouncementCategory } from '../../data/announcementApi';
 import { useAsync } from '../../lib/useAsync';
 import { formatDateTime } from '../../lib/format';
-import type { Announcement } from '../../types/models';
 import { Badge, Button, Card, EmptyState, Field, PageHeader, Spinner } from '../../components/ui/primitives';
 import { Icon } from '../../components/ui/Icon';
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { useToast } from '../../components/ui/Toast';
 
+const categoryLabel: Record<AnnouncementCategory, string> = {
+  notice: '通知',
+  training: '训练',
+  safety: '安全',
+};
+
 export function AnnouncementsPage() {
   const toast = useToast();
-  const { data, loading, error, reload } = useAsync(() => repository.listAnnouncements(), []);
+  const { data, loading, error, reload } = useAsync(() => announcementApi.listAnnouncements(), []);
   const [editorOpen, setEditorOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: '', content: '', pinned: false });
+  const [form, setForm] = useState({ title: '', content: '', category: 'notice' as AnnouncementCategory, pinned: false });
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Announcement | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminAnnouncement | null>(null);
 
   const summary = useMemo(() => {
     const list = data ?? [];
@@ -29,7 +34,7 @@ export function AnnouncementsPage() {
   }, [data]);
 
   const openEditor = () => {
-    setForm({ title: '', content: '', pinned: false });
+    setForm({ title: '', content: '', category: 'notice', pinned: false });
     setFormError(null);
     setEditorOpen(true);
   };
@@ -42,8 +47,8 @@ export function AnnouncementsPage() {
     }
     setSaving(true);
     try {
-      await repository.createAnnouncement(form);
-      toast('公告已保存为草稿。');
+      await announcementApi.createAnnouncement(form);
+      toast('公告已保存为草稿，发布后成员才会看到。');
       setEditorOpen(false);
       reload();
     } catch (reason) {
@@ -53,12 +58,31 @@ export function AnnouncementsPage() {
     }
   };
 
-  const toggleStatus = async (announcement: Announcement) => {
+  const toggleStatus = async (announcement: AdminAnnouncement) => {
     setBusyId(announcement.id);
     try {
       const nextStatus = announcement.status === 'published' ? 'draft' : 'published';
-      await repository.updateAnnouncementStatus(announcement.id, nextStatus);
-      toast(nextStatus === 'published' ? '公告已发布。' : '公告已撤回为草稿。', 'info');
+      await announcementApi.setStatus(announcement.id, nextStatus);
+      toast(
+        nextStatus === 'published'
+          ? '公告已发布，成员会在手机端看到，并收到一条站内消息。'
+          : '公告已撤回，成员端不再展示。',
+        nextStatus === 'published' ? 'success' : 'info',
+      );
+      reload();
+    } catch (reason) {
+      toast(reason instanceof Error ? reason.message : '操作失败。', 'error');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const togglePinned = async (announcement: AdminAnnouncement) => {
+    setBusyId(announcement.id);
+    try {
+      const next = !announcement.pinned;
+      await announcementApi.setPinned(announcement.id, next);
+      toast(next ? '公告已置顶，会排在成员端最前面。' : '公告已取消置顶。', 'info');
       reload();
     } catch (reason) {
       toast(reason instanceof Error ? reason.message : '操作失败。', 'error');
@@ -71,7 +95,7 @@ export function AnnouncementsPage() {
     if (!deleteTarget) return;
     setBusyId(deleteTarget.id);
     try {
-      await repository.deleteAnnouncement(deleteTarget.id);
+      await announcementApi.removeAnnouncement(deleteTarget.id);
       toast('公告已删除。', 'info');
       setDeleteTarget(null);
       reload();
@@ -97,7 +121,7 @@ export function AnnouncementsPage() {
     <div>
       <PageHeader
         title="公告"
-        description="把集合时间、天气提醒和社团安排说清楚。先保存草稿，确认后再发布。"
+        description="把集合时间、天气提醒和社团安排说清楚。先保存草稿，发布后成员会在手机端看到，并收到一条站内消息。"
         actions={<Button variant="primary" icon="plus" onClick={openEditor}>新建公告</Button>}
       />
 
@@ -115,8 +139,12 @@ export function AnnouncementsPage() {
                 <div className="announcement-badges">
                   {announcement.pinned ? <Badge tone="gold">置顶</Badge> : null}
                   <Badge tone={announcement.status === 'published' ? 'green' : 'gray'}>{announcement.status === 'published' ? '已发布' : '草稿'}</Badge>
+                  <Badge tone="gray">{categoryLabel[announcement.category]}</Badge>
                 </div>
                 <div className="row-actions">
+                  <Button variant="ghost" size="sm" loading={busyId === announcement.id} onClick={() => togglePinned(announcement)}>
+                    {announcement.pinned ? '取消置顶' : '置顶'}
+                  </Button>
                   <Button variant={announcement.status === 'published' ? 'ghost' : 'primary'} size="sm" loading={busyId === announcement.id} onClick={() => toggleStatus(announcement)}>
                     {announcement.status === 'published' ? '撤回' : '发布'}
                   </Button>
@@ -128,6 +156,7 @@ export function AnnouncementsPage() {
               <div className="announcement-meta">
                 <span>{announcement.author}</span>
                 <span>{announcement.status === 'published' && announcement.publishedAt ? '发布于 ' + formatDateTime(announcement.publishedAt) : '创建于 ' + formatDateTime(announcement.createdAt)}</span>
+                {announcement.status === 'published' ? <span>已读 {announcement.readCount} 人</span> : null}
               </div>
             </Card>
           ))}
@@ -152,14 +181,21 @@ export function AnnouncementsPage() {
       >
         <div className="form-grid">
           <Field label="标题" htmlFor="announcement-title" required className="field-full">
-            <input id="announcement-title" className="input" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="例如：周六校园环湖 5K，7:00 东门集合" maxLength={80} />
+            <input id="announcement-title" className="input" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="例如：周六校园环湖 5K，7:00 东门集合" maxLength={60} />
+          </Field>
+          <Field label="分类" htmlFor="announcement-category">
+            <select id="announcement-category" className="input" value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value as AnnouncementCategory })}>
+              <option value="notice">通知</option>
+              <option value="training">训练</option>
+              <option value="safety">安全</option>
+            </select>
           </Field>
           <Field label="正文" htmlFor="announcement-content" required hint="写清楚时间、地点、装备和注意事项。" className="field-full">
             <textarea id="announcement-content" className="input textarea" rows={7} value={form.content} onChange={(event) => setForm({ ...form, content: event.target.value })} placeholder="集合时间、路线、配速要求、天气提醒……" maxLength={1000} />
           </Field>
           <label className="checkbox-row field-full">
             <input type="checkbox" checked={form.pinned} onChange={(event) => setForm({ ...form, pinned: event.target.checked })} />
-            <span>设为置顶公告</span>
+            <span>设为置顶公告（成员端排在前面）</span>
           </label>
           {formError ? <div className="form-error field-full"><Icon name="alert" size={16} /><span>{formError}</span></div> : null}
         </div>
