@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { repository } from '../../data';
+import { memberApi } from '../../data/memberApi';
 import { useAsync } from '../../lib/useAsync';
 import { formatDate, relativeTime } from '../../lib/format';
 import type { Member } from '../../types/models';
@@ -25,15 +26,27 @@ const activityIcon: Record<string, IconName> = {
 
 export function OverviewPage() {
   const toast = useToast();
-  const { data, loading, error, reload } = useAsync(() => repository.getOverview(), []);
+  const { data, loading, error, reload } = useAsync(async () => {
+    const [overview, members] = await Promise.all([repository.getOverview(), memberApi.listMembers()]);
+    const pending = members.filter((member) => member.status === 'pending');
+    return {
+      ...overview,
+      pending,
+      stats: {
+        ...overview.stats,
+        pendingMembers: pending.length,
+        activeMembers: members.filter((member) => member.status === 'active').length,
+      },
+    };
+  }, []);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [rejectTarget, setRejectTarget] = useState<Member | null>(null);
 
   const approve = async (member: Member) => {
     setProcessingId(member.id);
     try {
-      await repository.updateMemberStatus(member.id, 'active');
-      toast(member.name + ' 已通过审批。');
+      await memberApi.updateMemberStatus(member.id, 'active', '已通过审批，欢迎加入跑团。');
+      toast(member.name + ' 已通过审批，成员端会自动看到结果。');
       reload();
     } catch (reason) {
       toast(reason instanceof Error ? reason.message : '审批失败。', 'error');
@@ -46,8 +59,8 @@ export function OverviewPage() {
     if (!rejectTarget) return;
     setProcessingId(rejectTarget.id);
     try {
-      await repository.updateMemberStatus(rejectTarget.id, 'rejected');
-      toast(rejectTarget.name + ' 已拒绝。', 'info');
+      await memberApi.updateMemberStatus(rejectTarget.id, 'rejected', '资料还不完整，请补充后重新申请。');
+      toast(rejectTarget.name + ' 已拒绝，成员端会显示原因。', 'info');
       setRejectTarget(null);
       reload();
     } catch (reason) {
@@ -175,7 +188,7 @@ export function OverviewPage() {
       <ConfirmDialog
         open={Boolean(rejectTarget)}
         title={'拒绝 ' + (rejectTarget?.name ?? '') + ' 的申请？'}
-        description="拒绝后，对方会进入已拒绝列表。V0.1 暂不支持成员自行重新申请，需要重新生成邀请码。"
+        description="拒绝后，对方会在手机端看到原因，并可以补充资料后重新申请。"
         confirmText="拒绝申请"
         tone="danger"
         loading={processingId === rejectTarget?.id}

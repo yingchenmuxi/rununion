@@ -6,7 +6,7 @@ export interface Member {
   name: string;
   username: string;
   grade: string;
-  gender: '男' | '女';
+  gender: '男' | '女' | '未填写';
   status: MemberStatus;
   role: MemberRole;
   joinedAt: string;
@@ -14,6 +14,8 @@ export interface Member {
   weeklyKm: number;
   totalKm: number;
   note?: string;
+  reviewedAt?: string;
+  reviewNote?: string;
 }
 
 export type InviteStatus = 'active' | 'expired' | 'disabled';

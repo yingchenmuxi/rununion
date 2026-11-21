@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Card, DemoNote, Pill, PrimaryButton, Screen } from '@/components/qingrun-ui';
@@ -10,18 +10,19 @@ const GRADES = ['初三', '高一', '高二', '高三', '大学/其他'];
 type Mode = 'login' | 'join';
 
 export function AuthScreen() {
-  const { login, requestJoin } = useAuth();
-  const [mode, setMode] = useState<Mode>('login');
+  const { login, requestJoin, application } = useAuth();
+  const retry = application?.status === 'rejected' ? application : null;
+  const [mode, setMode] = useState<Mode>(retry ? 'join' : 'login');
   const [loginName, setLoginName] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [joinStep, setJoinStep] = useState<'code' | 'profile'>('code');
-  const [invite, setInvite] = useState('');
+  const [joinStep, setJoinStep] = useState<'code' | 'profile'>(retry ? 'profile' : 'code');
+  const [invite, setInvite] = useState(retry ? DEMO_INVITE : '');
   const [codeError, setCodeError] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [grade, setGrade] = useState('高一');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [nickname, setNickname] = useState(retry?.nickname ?? '');
+  const [grade, setGrade] = useState(retry?.grade ?? '高一');
+  const [username, setUsername] = useState(retry?.username ?? '');
+  const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState('');
 
   const switchMode = (next: Mode) => {
@@ -49,22 +50,18 @@ export function AuthScreen() {
     setJoinStep('profile');
   };
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     setJoinError('');
     if (nickname.trim().length < 2) {
       setJoinError('昵称至少 2 个字，方便社团里的同学认识你。');
       return;
     }
-    if (username.trim().length < 3) {
-      setJoinError('用户名至少 3 个字符。');
-      return;
+    setJoining(true);
+    const error = await requestJoin({ nickname, grade, username, inviteCode: invite });
+    if (error) {
+      setJoinError(error);
+      setJoining(false);
     }
-    if (password.length < 6) {
-      setJoinError('密码至少 6 位。');
-      return;
-    }
-    const error = requestJoin({ nickname, grade, username, password, inviteCode: invite });
-    if (error) setJoinError(error);
   };
 
   return (
@@ -218,27 +215,24 @@ export function AuthScreen() {
             <TextInput
               value={username}
               onChangeText={setUsername}
-              placeholder="3–20 个字符，登录时使用"
+              placeholder="3–20 位小写字母、数字或下划线"
               placeholderTextColor={colors.muted}
               autoCapitalize="none"
               autoCorrect={false}
               style={styles.input}
             />
 
-            <Text style={styles.label}>密码</Text>
-            <TextInput
-              value={password}
-              onChangeText={setPassword}
-              placeholder="至少 6 位"
-              placeholderTextColor={colors.muted}
-              secureTextEntry
-              style={styles.input}
-            />
-
             {joinError ? <Text style={styles.error}>{joinError}</Text> : null}
 
-            <PrimaryButton label="提交入团申请" onPress={handleJoin} style={styles.submit} />
-            <Text style={styles.formFootnote}>提交后由社长在后台审批；演示版提供“一键通过”按钮。</Text>
+            <PrimaryButton
+              label={joining ? '正在提交申请…' : '提交入团申请'}
+              onPress={handleJoin}
+              disabled={joining}
+              style={styles.submit}
+            />
+            <Text style={styles.formFootnote}>
+              提交后由社长在后台审批，审批结果会自动同步到这里。演示版不保存密码。
+            </Text>
           </View>
         )}
       </Card>
@@ -251,21 +245,35 @@ export function AuthScreen() {
   );
 }
 
+function AuthBrand() {
+  return (
+    <View style={styles.brandRow}>
+      <View style={styles.brandMark}>
+        <Text style={styles.brandMarkText}>青</Text>
+      </View>
+      <View>
+        <Text style={styles.brandName}>青跑团</Text>
+        <Text style={styles.brandClub}>{mock.club.name}</Text>
+      </View>
+    </View>
+  );
+}
+
 export function PendingScreen() {
-  const { profile, approveDemo, logout } = useAuth();
+  const { profile, application, refreshApplication, logout } = useAuth();
   const name = profile?.nickname ?? '新同学';
+
+  useEffect(() => {
+    if (!application?.id) return;
+    const timer = setInterval(() => {
+      void refreshApplication();
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [application?.id, refreshApplication]);
 
   return (
     <Screen contentStyle={styles.screen}>
-      <View style={styles.brandRow}>
-        <View style={styles.brandMark}>
-          <Text style={styles.brandMarkText}>青</Text>
-        </View>
-        <View>
-          <Text style={styles.brandName}>青跑团</Text>
-          <Text style={styles.brandClub}>{mock.club.name}</Text>
-        </View>
-      </View>
+      <AuthBrand />
 
       <Card style={styles.pendingCard}>
         <View style={styles.pendingMark}>
@@ -274,27 +282,122 @@ export function PendingScreen() {
         <Pill text="待社长审批" tone="gold" />
         <Text style={styles.pendingTitle}>申请已提交</Text>
         <Text style={styles.pendingBody}>
-          {name + '，你的入团申请已经记下了。社长会在管理后台看到你的昵称、年级和申请时间。'}
+          {name + '，你的入团申请已经记下了。社长在后台通过后，这里会自动进入跑团首页。'}
         </Text>
 
         <View style={styles.pendingSteps}>
           <View style={styles.pendingStep}>
             <Text style={styles.pendingStepNumber}>1</Text>
-            <Text style={styles.pendingStepText}>社长在后台查看申请</Text>
+            <Text style={styles.pendingStepText}>邀请码已验证，资料已提交给社长</Text>
           </View>
           <View style={styles.pendingStep}>
             <Text style={styles.pendingStepNumber}>2</Text>
-            <Text style={styles.pendingStepText}>通过后就能看到跑团动态和挑战</Text>
+            <Text style={styles.pendingStepText}>社长在「成员」页看到你的申请</Text>
+          </View>
+          <View style={styles.pendingStep}>
+            <Text style={styles.pendingStepNumber}>3</Text>
+            <Text style={styles.pendingStepText}>通过后自动进入跑团，不用手动刷新</Text>
           </View>
         </View>
 
-        <PrimaryButton label="演示：立即通过" onPress={approveDemo} style={[styles.submit, styles.pendingButton]} />
+        <Text style={styles.statusHint}>正在自动检查审批结果 · 每 2.5 秒一次</Text>
+        <PrimaryButton
+          label="手动刷新审批状态"
+          variant="outline"
+          onPress={() => {
+            void refreshApplication();
+          }}
+          style={[styles.submit, styles.pendingButton]}
+        />
         <PrimaryButton label="返回登录" variant="outline" onPress={logout} style={[styles.secondary, styles.pendingButton]} />
       </Card>
 
       <Text style={styles.privacy}>
-        正式版必须由社长在管理后台审批，成员不能自己通过。这里的按钮只用于演示。
+        审批结果来自本地共享 Mock 数据，不接真实账号，也不做真实推送。
       </Text>
+      <DemoNote />
+    </Screen>
+  );
+}
+
+export function ApprovedScreen() {
+  const { profile, enterClub } = useAuth();
+  const name = profile?.nickname ?? '新同学';
+
+  return (
+    <Screen contentStyle={styles.screen}>
+      <AuthBrand />
+
+      <Card style={styles.pendingCard}>
+        <View style={styles.pendingMark}>
+          <Text style={styles.pendingMarkText}>通</Text>
+        </View>
+        <Pill text="已通过审批" tone="green" />
+        <Text style={styles.pendingTitle}>欢迎加入跑团</Text>
+        <Text style={styles.pendingBody}>
+          {name + '，社长已经通过你的入团申请。先去首页看看本周活动，第一次参加不用追配速。'}
+        </Text>
+
+        <View style={styles.pendingSteps}>
+          <View style={styles.pendingStep}>
+            <Text style={styles.pendingStepNumber}>1</Text>
+            <Text style={styles.pendingStepText}>{mock.club.name} · {profile?.grade ?? '新成员'}</Text>
+          </View>
+          <View style={styles.pendingStep}>
+            <Text style={styles.pendingStepNumber}>2</Text>
+            <Text style={styles.pendingStepText}>用户名 @{profile?.username ?? 'newmember'}</Text>
+          </View>
+          <View style={styles.pendingStep}>
+            <Text style={styles.pendingStepNumber}>3</Text>
+            <Text style={styles.pendingStepText}>进团后可以先看活动，再决定报名哪一场</Text>
+          </View>
+        </View>
+
+        <PrimaryButton label="进入跑团" onPress={enterClub} style={[styles.submit, styles.pendingButton]} />
+      </Card>
+
+      <Text style={styles.privacy}>
+        演示版用本地共享数据模拟审批，不接真实账号；进团后仍使用社团演示数据。
+      </Text>
+      <DemoNote />
+    </Screen>
+  );
+}
+
+export function RejectedScreen() {
+  const { profile, application, startReapply, logout } = useAuth();
+  const name = profile?.nickname ?? '新同学';
+  const reason = application?.reviewNote || '资料还不完整，请补充后重新申请。';
+
+  return (
+    <Screen contentStyle={styles.screen}>
+      <AuthBrand />
+
+      <Card style={styles.pendingCard}>
+        <View style={styles.pendingMark}>
+          <Text style={styles.pendingMarkText}>退</Text>
+        </View>
+        <Pill text="申请未通过" tone="coral" />
+        <Text style={styles.pendingTitle}>这次先补充资料</Text>
+        <Text style={styles.pendingBody}>
+          {name + '，社长看过了你的申请，这次没有通过。可以按下面的留言补充后再提交。'}
+        </Text>
+
+        <View style={styles.reviewBox}>
+          <Text style={styles.reviewLabel}>社长留言</Text>
+          <Text style={styles.reviewText}>{reason}</Text>
+        </View>
+
+        <Text style={styles.statusHint}>修改昵称、年级或用户名后可以重新申请，不需要新的邀请码。</Text>
+
+        <PrimaryButton label="修改资料并重新申请" onPress={startReapply} style={[styles.submit, styles.pendingButton]} />
+        <PrimaryButton label="返回登录" variant="outline" onPress={logout} style={[styles.secondary, styles.pendingButton]} />
+      </Card>
+
+      <Text style={styles.privacy}>
+        拒绝原因来自后台审批，成员端只读；演示版不接真实账号。
+      </Text>
+      <DemoNote />
     </Screen>
   );
 }
@@ -430,4 +533,15 @@ const styles = StyleSheet.create({
   pendingStepText: { flex: 1, fontSize: 11, color: colors.inkSoft },
   pendingButton: { alignSelf: 'stretch' },
   secondary: { marginTop: 9 },
+  statusHint: { marginTop: 12, fontSize: 10, lineHeight: 16, color: colors.muted },
+  reviewBox: {
+    alignSelf: 'stretch',
+    marginTop: 16,
+    padding: 14,
+    borderRadius: radius.md,
+    backgroundColor: colors.bg,
+    gap: 5,
+  },
+  reviewLabel: { fontSize: 10, fontWeight: '800', color: colors.muted, letterSpacing: 0.4 },
+  reviewText: { fontSize: 12, lineHeight: 20, color: colors.ink },
 });

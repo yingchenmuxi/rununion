@@ -758,6 +758,7 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
 .inline-warning svg { flex-shrink: 0; margin-top: 1px; }
 .review-form .inline-warning { margin: 0; }
 .review-form .field-label { margin-bottom: -6px; }
+.review-reason { min-height: 82px; line-height: 1.6; resize: vertical; }
 .activity-status-grid { grid-template-columns: 1fr 1fr; }
 .checkin-card {
   margin: 14px 0 4px;

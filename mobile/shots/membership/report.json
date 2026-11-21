@@ -1,0 +1,297 @@
+{
+  "checks": [
+    {
+      "name": "共享 Mock 种子 12 名成员",
+      "pass": true,
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"serves\":\"mobile/dist\"}"
+    },
+    {
+      "name": "初始 3 条待审批申请",
+      "pass": true,
+      "detail": "12"
+    },
+    {
+      "name": "手机端登录页可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "切换到我有邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "邀请码步骤打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填入邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "验证邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "进入入团资料步骤",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写昵称",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "选择年级",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写用户名",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "入团表单不再要求密码",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "提示由社长审批",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "提交入团申请",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "进入待审批页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "待审批页不能自己通过",
+      "pass": true,
+      "detail": "青 青跑团 康福外国语学校长跑社 康 待社长审批 申请已提交 周小满，你的入团申请已经记下了。社长在后台通过后，这里会自动进入跑团首页。 1 邀请码已验证，资料已提交给社长 2 社长在「成员」页看到你的申请 3 通过后自动进入跑团，不用手动刷新 正在自动检查审批结果 · 每 2.5 秒一次 手动刷新审批状态 返回登录 "
+    },
+    {
+      "name": "待审批页显示自动刷新",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "共享 API 收到申请",
+      "pass": true,
+      "detail": "{\"id\":\"m-1795271614039\",\"name\":\"周小满\",\"username\":\"zhouxiaoman\",\"grade\":\"高一\",\"gender\":\"未填写\",\"status\":\"pending\",\"role\":\"member\",\"joinedAt\":\"2026-11-21T14:33:34.039Z\",\"lastActiveAt\":\"2026-11-21T14:33:34.039Z\",\"weeklyKm\":0,\"totalKm\":0,\"note\":\"通过邀请码 KANGFU-2026 提交申请。\"}"
+    },
+    {
+      "name": "成员数增至 13",
+      "pass": true,
+      "detail": "13"
+    },
+    {
+      "name": "社团后台登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开成员页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "成员页加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "搜索新申请",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台看到待审批的新成员",
+      "pass": true,
+      "detail": "青 青跑团 管理后台 当前社团 康福外国语学校长跑社 概览 成员 邀请码 公告 活动 挑战 记录与导出 当前为共享演示数据，可在右上角重置 V0.1 · 社团运营 青跑团 成员 示例数据 重置演示数据 林 林小满 退出 成员 审批新成员、查看年级和活跃情况，必要时重置密码或移出社团。 生成邀请码 全部 13 待审批 4 在团 8 已拒绝 1 已移出 0 成员 年级 / 性别 状态 本周 最近活跃 操作 周 周小满 @zhouxiaoma"
+    },
+    {
+      "name": "后台通过新成员",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "通过 toast 出现",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 申请变为在团",
+      "pass": true,
+      "detail": "{\"status\":\"active\",\"note\":\"已通过审批，欢迎加入跑团。\"}"
+    },
+    {
+      "name": "手机端自动出现通过页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "通过页显示申请人昵称和年级",
+      "pass": true,
+      "detail": "青 青跑团 康福外国语学校长跑社 通 已通过审批 欢迎加入跑团 周小满，社长已经通过你的入团申请。先去首页看看本周活动，第一次参加不用追配速。 1 康福外国语学校长跑社 · 高一 2 用户名 @zhouxiaoman 3 进团后可以先看活动，再决定报名哪一场 进入跑团 演示版用本地共享数据模拟审批，不接真实账号；进团后仍使用社团演示数据。 演示数据 · 本地"
+    },
+    {
+      "name": "点击进入跑团",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "进入首页并保留昵称",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "首页加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开我的页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "我的页加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "退出登录",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "回到登录页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "再次切换邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "提交第二条申请",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "第二条申请进入待审批",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台自动刷新看到第二条申请",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台看到第二条申请",
+      "pass": true,
+      "detail": "青 青跑团 管理后台 当前社团 康福外国语学校长跑社 概览 成员 邀请码 公告 活动 挑战 记录与导出 当前为共享演示数据，可在右上角重置 V0.1 · 社团运营 青跑团 成员 示例数据 重置演示数据 林 林小满 退出 成员 审批新成员、查看年级和活跃情况，必要时重置密码或移出社团。 生成邀请码 全部 14 待审批 4 在团 9 已拒绝 1 已移出 0 成员 年级 / 性别 状态 本周 最近活跃 "
+    },
+    {
+      "name": "打开拒绝弹窗",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写拒绝原因",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "确认拒绝",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "拒绝 toast 出现",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 申请变为已拒绝并保留原因",
+      "pass": true,
+      "detail": "{\"status\":\"rejected\",\"note\":\"请补充班级和监护人联系方式。\"}"
+    },
+    {
+      "name": "手机端自动出现拒绝页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "拒绝页显示社长留言",
+      "pass": true,
+      "detail": "青 青跑团 康福外国语学校长跑社 退 申请未通过 这次先补充资料 陈小满，社长看过了你的申请，这次没有通过。可以按下面的留言补充后再提交。 社长留言 请补充班级和监护人联系方式。 修改昵称、年级或用户名后可以重新申请，不需要新的邀请码。 修改资料并重新申请 返回登录 拒绝原因来自后台审批，成员端只读；演示版不接真实账号。 演示数据 · 本地 Mock，不接真实数据"
+    },
+    {
+      "name": "点击修改资料重新申请",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重新回到入团资料",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重新申请预填昵称和用户名",
+      "pass": true,
+      "detail": "[{\"placeholder\":\"社团里怎么称呼你\",\"value\":\"陈小满\"},{\"placeholder\":\"3–20 位小写字母、数字或下划线\",\"value\":\"chenxiaoman\"}]"
+    },
+    {
+      "name": "重新提交申请",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重新提交进入待审批",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "重提复用原申请记录",
+      "pass": true,
+      "detail": "{\"id\":\"m-1795271649291\",\"status\":\"pending\"}"
+    },
+    {
+      "name": "重提不增加成员数",
+      "pass": true,
+      "detail": "14"
+    },
+    {
+      "name": "后台重新看到待审批数回升",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台重新看到待审批",
+      "pass": true,
+      "detail": "青 青跑团 管理后台 当前社团 康福外国语学校长跑社 概览 成员 邀请码 公告 活动 挑战 记录与导出 当前为共享演示数据，可在右上角重置 V0.1 · 社团运营 青跑团 成员 示例数据 重置演示数据 林 林小满 退出 成员 审批新成员、查看年级和活跃情况，必要时重置密码或移出社团。 生成邀请码 全部 14 待审批 4 在团 9 已拒绝 1 已移出 0 成员 年级 / 性别 状态 本周 最近活跃 "
+    },
+    {
+      "name": "测试结束恢复 12 名成员",
+      "pass": true,
+      "detail": "12"
+    }
+  ],
+  "failures": [],
+  "events": [],
+  "finishedAt": "2026-11-21T14:34:18.695Z"
+}

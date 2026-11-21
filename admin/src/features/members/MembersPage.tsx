@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { repository } from '../../data';
+import { memberApi } from '../../data/memberApi';
 import { useAsync } from '../../lib/useAsync';
 import { formatDate, relativeTime } from '../../lib/format';
 import type { Member, MemberStatus } from '../../types/models';
@@ -32,11 +32,17 @@ interface PendingAction {
 
 export function MembersPage() {
   const toast = useToast();
-  const { data, loading, error, reload } = useAsync(() => repository.listMembers(), []);
+  const { data, loading, error, reload } = useAsync(() => memberApi.listMembers(), []);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [rejectReason, setRejectReason] = useState('资料还不完整，请补充后重新申请。');
+
+  useEffect(() => {
+    const timer = setInterval(() => reload(), 5000);
+    return () => clearInterval(timer);
+  }, [reload]);
 
   const counts = useMemo(() => {
     const members = data ?? [];
@@ -61,8 +67,8 @@ export function MembersPage() {
   const approve = async (member: Member) => {
     setBusyId(member.id);
     try {
-      await repository.updateMemberStatus(member.id, 'active');
-      toast(member.name + ' 已通过审批。');
+      await memberApi.updateMemberStatus(member.id, 'active', '已通过审批，欢迎加入跑团。');
+      toast(member.name + ' 已通过审批，成员端会自动看到结果。');
       reload();
     } catch (reason) {
       toast(reason instanceof Error ? reason.message : '审批失败。', 'error');
@@ -74,7 +80,7 @@ export function MembersPage() {
   const resetPassword = async (member: Member) => {
     setBusyId(member.id);
     try {
-      const password = await repository.resetMemberPassword(member.id);
+      const password = await memberApi.resetMemberPassword(member.id);
       toast(member.name + ' 的临时密码：' + password, 'info');
     } catch (reason) {
       toast(reason instanceof Error ? reason.message : '重置失败。', 'error');
@@ -83,12 +89,21 @@ export function MembersPage() {
     }
   };
 
+  const openReject = (member: Member) => {
+    setRejectReason('资料还不完整，请补充后重新申请。');
+    setPendingAction({ kind: 'reject', member });
+  };
+
   const confirmAction = async () => {
     if (!pendingAction) return;
     setBusyId(pendingAction.member.id);
     try {
-      await repository.updateMemberStatus(pendingAction.member.id, pendingAction.kind === 'reject' ? 'rejected' : 'removed');
-      toast(pendingAction.kind === 'reject' ? '申请已拒绝。' : pendingAction.member.name + ' 已移出社团。', 'info');
+      await memberApi.updateMemberStatus(
+        pendingAction.member.id,
+        pendingAction.kind === 'reject' ? 'rejected' : 'removed',
+        pendingAction.kind === 'reject' ? rejectReason.trim() : undefined,
+      );
+      toast(pendingAction.kind === 'reject' ? '申请已拒绝，拒绝原因会显示在成员端。' : pendingAction.member.name + ' 已移出社团。', 'info');
       setPendingAction(null);
       reload();
     } catch (reason) {
@@ -195,7 +210,7 @@ export function MembersPage() {
                         {member.status === 'pending' ? (
                           <>
                             <Button variant="primary" size="sm" loading={busyId === member.id} onClick={() => approve(member)}>通过</Button>
-                            <Button variant="ghost" size="sm" onClick={() => setPendingAction({ kind: 'reject', member })}>拒绝</Button>
+                            <Button variant="ghost" size="sm" onClick={() => openReject(member)}>拒绝</Button>
                           </>
                         ) : null}
                         {member.status === 'active' ? (
@@ -219,14 +234,33 @@ export function MembersPage() {
         open={Boolean(pendingAction)}
         title={pendingAction?.kind === 'reject' ? '拒绝这条申请？' : '移出 ' + (pendingAction?.member.name ?? '') + '？'}
         description={pendingAction?.kind === 'reject'
-          ? '拒绝后，对方会进入已拒绝列表。需要重新生成邀请码才能再次申请。'
+          ? '拒绝后，对方会在手机端看到原因，可以补充资料后重新申请。'
           : '移出后，该成员将无法继续查看社团内容；历史社团可见记录会转为私密。'}
         confirmText={pendingAction?.kind === 'reject' ? '拒绝申请' : '确认移出'}
         tone="danger"
         loading={busyId === pendingAction?.member.id}
         onConfirm={confirmAction}
         onClose={() => setPendingAction(null)}
-      />
+      >
+        {pendingAction?.kind === 'reject' ? (
+          <div>
+            <p className="confirm-text">对方会在手机端看到这条原因，并可以补充资料后重新申请。</p>
+            <div className="field" style={{ marginTop: 12 }}>
+              <label className="field-label" htmlFor="member-reject-reason">拒绝原因</label>
+              <textarea
+                id="member-reject-reason"
+                className="input review-reason"
+                value={rejectReason}
+                onChange={(event) => setRejectReason(event.target.value)}
+                rows={3}
+                maxLength={120}
+                placeholder="例如：请补充班级和监护人联系方式。"
+              />
+              <p className="field-hint">建议写清楚需要补充什么，成员端会原样展示。</p>
+            </div>
+          </div>
+        ) : undefined}
+      </ConfirmDialog>
     </div>
   );
 }

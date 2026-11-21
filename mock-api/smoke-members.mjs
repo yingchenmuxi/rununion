@@ -1,0 +1,17 @@
+const base = 'http://127.0.0.1:8090/api';
+const j = async (r) => ({ status: r.status, body: await r.json() });
+const post = (p, body) => fetch(base + p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(j);
+const patch = (p, body) => fetch(base + p, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(j);
+const get = (p) => fetch(base + p).then(j);
+console.log('reset', JSON.stringify((await post('/reset', {})).body));
+const created = await post('/member-applications', { inviteCode: 'KANGFU-2026', nickname: '周小满', username: 'zhouxiaoman', grade: '高一' });
+console.log('create', created.status, JSON.stringify(created.body));
+const id = created.body.application.id;
+console.log('get', JSON.stringify((await get('/member-applications/' + id)).body));
+console.log('approve', JSON.stringify((await patch('/members/' + id, { status: 'active' })).body));
+console.log('conflict', JSON.stringify(await post('/member-applications', { inviteCode: 'KANGFU-2026', nickname: '周小满', username: 'zhouxiaoman', grade: '高一' })));
+console.log('retry rejected', JSON.stringify((await post('/member-applications', { inviteCode: 'KANGFU-2026', nickname: '吴亦然', username: 'wuyiran', grade: '初三' })).body));
+console.log('reject', JSON.stringify((await patch('/members/m-012', { status: 'rejected', reviewNote: '请补充监护人联系方式。' })).body));
+console.log('bad invite', JSON.stringify(await post('/member-applications', { inviteCode: 'WRONG', nickname: '测试', username: 'tester', grade: '高一' })));
+console.log('reset2', JSON.stringify((await post('/reset', {})).body));
+console.log('members', (await get('/members')).body.length);

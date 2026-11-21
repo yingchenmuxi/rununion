@@ -27,6 +27,8 @@ const MIME = {
 const MEMBERS = {
   'm-001': { name: '林小满', grade: '高一', gender: '女', guardianName: '林建国', guardianPhone: '138-0000-1001' },
 };
+const INVITE_CODE = 'KANGFU-2026';
+const GRADES = ['初三', '高一', '高二', '高三', '大学/其他'];
 
 function pad(value) { return String(value).padStart(2, '0'); }
 function todayDate() {
@@ -53,6 +55,21 @@ function cnDate(iso) {
 }
 
 function buildSeed() {
+  const members = [
+    { id: 'm-001', name: '林小满', username: 'linxiaoman', grade: '高一', gender: '女', status: 'active', role: 'owner', joinedAt: '2026-09-01T08:00:00+08:00', lastActiveAt: '2026-11-17T06:40:00+08:00', weeklyKm: 18.6, totalKm: 126.4 },
+    { id: 'm-002', name: '陈予安', username: 'chenyuan', grade: '初二', gender: '男', status: 'pending', role: 'member', joinedAt: '2026-11-16T20:12:00+08:00', lastActiveAt: '2026-11-16T20:12:00+08:00', weeklyKm: 0, totalKm: 0, note: '同班同学推荐，想参加周末环湖跑。' },
+    { id: 'm-003', name: '周子墨', username: 'zhouzimo', grade: '初三', gender: '男', status: 'pending', role: 'member', joinedAt: '2026-11-16T19:05:00+08:00', lastActiveAt: '2026-11-16T19:05:00+08:00', weeklyKm: 0, totalKm: 0, note: '1500 米校队，希望跟练。' },
+    { id: 'm-004', name: '许知远', username: 'xuzhiyuan', grade: '高二', gender: '男', status: 'pending', role: 'member', joinedAt: '2026-11-15T21:30:00+08:00', lastActiveAt: '2026-11-15T21:30:00+08:00', weeklyKm: 0, totalKm: 0, note: '想从 3 公里开始，零基础。' },
+    { id: 'm-005', name: '陈一诺', username: 'chenyinuo', grade: '高一', gender: '女', status: 'active', role: 'member', joinedAt: '2026-09-03T08:00:00+08:00', lastActiveAt: '2026-11-17T06:10:00+08:00', weeklyKm: 22.4, totalKm: 148.2 },
+    { id: 'm-006', name: '周雨桐', username: 'zhouyutong', grade: '高二', gender: '女', status: 'active', role: 'member', joinedAt: '2026-09-05T08:00:00+08:00', lastActiveAt: '2026-11-16T18:20:00+08:00', weeklyKm: 16.8, totalKm: 112.7 },
+    { id: 'm-007', name: '许嘉禾', username: 'xujiahe', grade: '初三', gender: '男', status: 'active', role: 'member', joinedAt: '2026-09-08T08:00:00+08:00', lastActiveAt: '2026-11-16T17:35:00+08:00', weeklyKm: 24, totalKm: 168.9 },
+    { id: 'm-008', name: '王予辰', username: 'wangyuchen', grade: '高一', gender: '男', status: 'active', role: 'member', joinedAt: '2026-09-12T08:00:00+08:00', lastActiveAt: '2026-11-15T19:05:00+08:00', weeklyKm: 12.5, totalKm: 86.3 },
+    { id: 'm-009', name: '李思远', username: 'lisiyuan', grade: '高二', gender: '男', status: 'active', role: 'member', joinedAt: '2026-09-15T08:00:00+08:00', lastActiveAt: '2026-11-15T06:50:00+08:00', weeklyKm: 28.2, totalKm: 192.1 },
+    { id: 'm-010', name: '赵清和', username: 'zhaoqinghe', grade: '初二', gender: '女', status: 'active', role: 'member', joinedAt: '2026-10-02T08:00:00+08:00', lastActiveAt: '2026-11-14T18:40:00+08:00', weeklyKm: 9.6, totalKm: 54.8 },
+    { id: 'm-011', name: '孙可欣', username: 'sunkexin', grade: '高一', gender: '女', status: 'active', role: 'member', joinedAt: '2026-10-10T08:00:00+08:00', lastActiveAt: '2026-11-13T17:20:00+08:00', weeklyKm: 8.4, totalKm: 41.5 },
+    { id: 'm-012', name: '吴亦然', username: 'wuyiran', grade: '初三', gender: '男', status: 'rejected', role: 'member', joinedAt: '2026-11-12T20:00:00+08:00', lastActiveAt: '2026-11-12T20:00:00+08:00', weeklyKm: 0, totalKm: 0, reviewedAt: '2026-11-13T09:10:00+08:00', reviewNote: '信息填写不完整，请补充学校和监护人信息后重新申请。' },
+  ];
+
   const activities = [
     {
       id: 'act-001', title: '校园环湖 5K', tag: '轻松跑', date: dateOffset(2), startTime: '07:00',
@@ -159,7 +176,7 @@ function buildSeed() {
     },
   ];
 
-  return { activities, signups, notifications, announcements };
+  return { members, activities, signups, notifications, announcements };
 }
 
 let state = buildSeed();
@@ -283,6 +300,32 @@ function fail(res, status, message, code) {
 
 function findActivity(id) { return state.activities.find((a) => a.id === id); }
 function findSignup(id) { return state.signups.find((s) => s.id === id); }
+function findMember(id) { return state.members.find((m) => m.id === id); }
+
+function applicationView(member) {
+  return {
+    id: member.id,
+    nickname: member.name,
+    username: member.username,
+    grade: member.grade,
+    status: member.status === 'active' ? 'active' : member.status === 'rejected' ? 'rejected' : 'pending',
+    submittedAt: member.joinedAt,
+    reviewedAt: member.reviewedAt || null,
+    reviewNote: member.reviewNote || '',
+  };
+}
+
+function memberSort(a, b) {
+  const order = { pending: 0, active: 1, rejected: 2, removed: 3 };
+  return (order[a.status] ?? 9) - (order[b.status] ?? 9) || String(a.joinedAt).localeCompare(String(b.joinedAt));
+}
+
+function validateApplication(nickname, username, grade) {
+  if (nickname.length < 2 || nickname.length > 20) return '昵称需要 2 到 20 个字。';
+  if (!/^[a-z0-9_]{3,20}$/.test(username)) return '用户名需要 3 到 20 位小写字母、数字或下划线。';
+  if (!GRADES.includes(grade)) return '请选择年级。';
+  return null;
+}
 
 function validateActivity(activity) {
   if (!activity) return '活动不存在。';
@@ -328,12 +371,104 @@ async function handleApi(req, res, url) {
 
   try {
     if (method === 'GET' && path === '/health') {
-      return json(res, 200, { ok: true, activities: state.activities.length, signups: state.signups.length, notifications: state.notifications.length, announcements: state.announcements.length, serves: 'mobile/dist' });
+      return json(res, 200, { ok: true, activities: state.activities.length, signups: state.signups.length, notifications: state.notifications.length, announcements: state.announcements.length, members: state.members.length, serves: 'mobile/dist' });
     }
 
     if (method === 'POST' && path === '/reset') {
       state = buildSeed();
-      return json(res, 200, { ok: true, activities: activitySummaryList(), notifications: state.notifications.length, announcements: state.announcements.length });
+      return json(res, 200, { ok: true, activities: activitySummaryList(), notifications: state.notifications.length, announcements: state.announcements.length, members: state.members.length });
+    }
+
+    if (method === 'GET' && path === '/members') {
+      const items = state.members.slice().sort(memberSort).map((member) => clone(member));
+      return json(res, 200, items);
+    }
+
+    if (method === 'POST' && path === '/member-applications') {
+      const body = await readBody(req);
+      const inviteCode = String(body.inviteCode || '').trim().toUpperCase();
+      if (inviteCode !== INVITE_CODE) return fail(res, 400, '邀请码不对，请向社长要一个新的邀请码。');
+      const nickname = String(body.nickname || '').trim();
+      const username = String(body.username || '').trim().toLowerCase();
+      const grade = String(body.grade || '').trim();
+      const err = validateApplication(nickname, username, grade);
+      if (err) return fail(res, 400, err);
+      const existing = state.members.find((m) => m.username.toLowerCase() === username && m.status !== 'removed');
+      if (existing && existing.status !== 'rejected') {
+        return fail(res, 409, '这个用户名已经被占用了，换一个再试。', 'conflict');
+      }
+      const now = new Date().toISOString();
+      let member = existing;
+      if (member) {
+        member.name = nickname;
+        member.grade = grade;
+        member.status = 'pending';
+        member.joinedAt = now;
+        member.lastActiveAt = now;
+        member.reviewedAt = undefined;
+        member.reviewNote = undefined;
+        member.note = '通过邀请码 ' + INVITE_CODE + ' 重新提交申请。';
+      } else {
+        member = {
+          id: 'm-' + Date.now(),
+          name: nickname,
+          username,
+          grade,
+          gender: '未填写',
+          status: 'pending',
+          role: 'member',
+          joinedAt: now,
+          lastActiveAt: now,
+          weeklyKm: 0,
+          totalKm: 0,
+          note: '通过邀请码 ' + INVITE_CODE + ' 提交申请。',
+        };
+        state.members.unshift(member);
+      }
+      return json(res, 201, { application: applicationView(member), member: clone(member) });
+    }
+
+    const applicationId = parts[0] === 'member-applications' ? parts[1] : null;
+    if (applicationId && method === 'GET' && parts.length === 2) {
+      const member = findMember(applicationId);
+      if (!member) return fail(res, 404, '入团申请不存在。', 'not_found');
+      return json(res, 200, applicationView(member));
+    }
+
+    const memberId = parts[0] === 'members' ? parts[1] : null;
+    if (memberId) {
+      const member = findMember(memberId);
+      if (!member) return fail(res, 404, '成员不存在。', 'not_found');
+
+      if (method === 'GET' && parts.length === 2) return json(res, 200, clone(member));
+
+      if (method === 'PATCH' && parts.length === 2) {
+        const body = await readBody(req);
+        const status = body.status;
+        if (!['active', 'rejected', 'removed'].includes(status)) return fail(res, 400, '成员状态不正确。');
+        if (member.role === 'owner' && status !== 'active') return fail(res, 400, '社长账号不能被移出或拒绝。');
+        if (member.status === status) return fail(res, 400, '这条申请已经处理过了。');
+        if (member.status === 'removed' && status !== 'active') return fail(res, 400, '成员已经被移出社团。');
+        const now = new Date().toISOString();
+        member.status = status;
+        if (status === 'active') {
+          member.reviewedAt = now;
+          member.reviewNote = String(body.reviewNote || '').trim() || '已通过审批，成员端会同步看到结果。';
+          member.lastActiveAt = now;
+        } else if (status === 'rejected') {
+          member.reviewedAt = now;
+          member.reviewNote = String(body.reviewNote || '').trim() || '资料还不完整，请补充后重新申请。';
+        } else {
+          member.reviewedAt = now;
+          member.reviewNote = String(body.reviewNote || '').trim() || '已由社长移出社团。';
+        }
+        return json(res, 200, clone(member));
+      }
+
+      if (method === 'POST' && parts[2] === 'reset-password') {
+        const tail = Math.random().toString(36).slice(2, 8).toUpperCase();
+        return json(res, 200, { password: 'QR-' + tail });
+      }
     }
 
     if (method === 'GET' && path === '/member/notifications') {

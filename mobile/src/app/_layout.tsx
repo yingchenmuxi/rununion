@@ -7,7 +7,7 @@ import AppTabs from '@/components/app-tabs';
 import { ActivityProvider } from '@/features/activities/ActivityContext';
 import { AnnouncementProvider } from '@/features/announcements/AnnouncementContext';
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
-import { AuthScreen, PendingScreen } from '@/features/auth/AuthScreen';
+import { ApprovedScreen, AuthScreen, PendingScreen, RejectedScreen } from '@/features/auth/AuthScreen';
 import { KnowledgeProvider } from '@/features/knowledge/KnowledgeContext';
 import { NotificationProvider } from '@/features/notifications/NotificationContext';
 import { RunProvider } from '@/features/runs/RunContext';
@@ -19,6 +19,8 @@ function RootContent() {
 
   if (status === 'guest') return <AuthScreen />;
   if (status === 'pending') return <PendingScreen />;
+  if (status === 'approved') return <ApprovedScreen />;
+  if (status === 'rejected') return <RejectedScreen />;
   return <AppTabs />;
 }
 
