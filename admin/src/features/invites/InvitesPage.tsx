@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { repository } from '../../data';
+import { useEffect, useMemo, useState } from 'react';
+import { inviteApi } from '../../data/inviteApi';
 import { useAsync } from '../../lib/useAsync';
 import { formatDate } from '../../lib/format';
 import type { InviteCode } from '../../types/models';
@@ -11,25 +11,32 @@ import { useToast } from '../../components/ui/Toast';
 
 const statusLabel: Record<InviteCode['status'], string> = {
   active: '可用',
+  used: '已用完',
   expired: '已过期',
   disabled: '已停用',
 };
 
 const statusTone: Record<InviteCode['status'], 'green' | 'gray'> = {
   active: 'green',
+  used: 'gray',
   expired: 'gray',
   disabled: 'gray',
 };
 
 export function InvitesPage() {
   const toast = useToast();
-  const { data, loading, error, reload } = useAsync(() => repository.listInvites(), []);
+  const { data, loading, error, reload } = useAsync(() => inviteApi.listInvites(), []);
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [form, setForm] = useState({ note: '', maxUses: 10, expiresInDays: 30 });
   const [disableTarget, setDisableTarget] = useState<InviteCode | null>(null);
   const [disabling, setDisabling] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => reload(), 5000);
+    return () => clearInterval(timer);
+  }, [reload]);
 
   const summary = useMemo(() => {
     const invites = data ?? [];
@@ -62,7 +69,7 @@ export function InvitesPage() {
     }
     setCreating(true);
     try {
-      await repository.createInvite(form);
+      await inviteApi.createInvite(form);
       toast('新的邀请码已生成。');
       setCreateOpen(false);
       setForm({ note: '', maxUses: 10, expiresInDays: 30 });
@@ -78,7 +85,7 @@ export function InvitesPage() {
     if (!disableTarget) return;
     setDisabling(true);
     try {
-      await repository.disableInvite(disableTarget.id);
+      await inviteApi.disableInvite(disableTarget.id);
       toast(disableTarget.code + ' 已停用。', 'info');
       setDisableTarget(null);
       reload();

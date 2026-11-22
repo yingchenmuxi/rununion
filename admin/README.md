@@ -6,14 +6,15 @@
 
 - 社团后台：登录、概览、成员、邀请码、公告、活动、挑战、记录与导出。
 - 平台总后台：总览、学校与社团、社团详情、全部用户、用户详情、内容与活动、跑步记录、审核与举报、系统与权限。
-- 数据：活动、报名、出勤、站内消息、跑团公告、成员名册和入团申请走本地 Mock API，和手机端共享；其他页面仍是前端示例数据。刷新活动页会保留当前状态，重启 Mock API 或点“重置演示数据”回种子。
+- 数据：活动、报名、出勤、站内消息、跑团公告、邀请码、成员名册和入团申请走本地 Mock API，和手机端共享；其他页面仍是前端示例数据。刷新活动页会保留当前状态，重启 Mock API 或点“重置演示数据”回种子。
 - 活动支持编辑已发布内容；改时间、地点、教练等字段后，会向待确认和已确认成员写站内变更消息，手机端在消息中心查看。
 - 公告管理支持新建草稿、发布、撤回、置顶、删除和已读人数；发布后手机端跑团页 / 公告页可见并收到站内消息，撤回会清理消息。
 - 成员审批走共享 Mock API：手机端提交后成员页 5 秒内出现，可通过、填写原因拒绝、重置临时密码和移出；通过后手机端自动进团，拒绝后展示留言并可预填资料重提。
+- 邀请码走共享 Mock API：后台生成、复制、停用，手机端验证通过后才能填资料；列表每 5 秒刷新，手机端用掉一次后后台能看到使用次数变化。
 - 社团账号：`admin@qingrun.local` / `Qingrun-Dev-2026` → `/`
 - 平台账号：`ops@qingrun.local` / `Qingrun-Dev-2026` → `/platform`
-- 已通过：`npm run typecheck`、`npm run build`、1440×1000 平台九页截图检查、社团活动发布与报名审核全流程、社团赛后签到与出勤全流程、编辑活动与变更消息、跑团公告管理与发布通知、入团申请与成员审批跨端、社团/平台主要交互流程、1280/1024 响应式检查。
-- 还没接：PocketBase 真实表、真实登录、邮件邀请、审计日志落库；活动和公告已接本地 Mock API，其他模块尚未共享。
+- 已通过：`npm run typecheck`、`npm run build`、1440×1000 平台九页截图检查、社团活动发布与报名审核全流程、社团赛后签到与出勤全流程、编辑活动与变更消息、跑团公告管理与发布通知、入团申请与成员审批跨端、邀请码生成与手机端使用跨端、社团/平台主要交互流程、1280/1024 响应式检查。
+- 还没接：PocketBase 真实表、真实登录、邮件邀请、审计日志落库；活动、公告、成员和邀请码已接本地 Mock API，其他模块尚未共享。
 
 ## 启动
 
@@ -31,7 +32,7 @@ cd /d E:\QPTapp\admin
 npm run dev
 ```
 
-浏览器打开 <http://127.0.0.1:5173>。活动和公告页需要 8090 的 Mock API；不启动时会显示请求失败。
+浏览器打开 <http://127.0.0.1:5173>。活动、公告、成员和邀请码页需要 8090 的 Mock API；不启动时会显示请求失败。
 
 以后接真实数据时，再启动 PocketBase：
 
@@ -46,7 +47,7 @@ server\pocketbase.exe serve --http 127.0.0.1:8091 --dir server\pb_data --dev
 | --- | --- |
 | 概览 | 看待审批数、在团人数、本周活跃、本周里程；直接通过/拒绝申请 |
 | 成员 | 读共享名册，5 秒自动刷新；按状态筛选、搜索、通过/填写原因拒绝、重置临时密码、移出成员；结果同步手机端 |
-| 邀请码 | 生成邀请码、复制、停用；限制次数和有效期 |
+| 邀请码 | 生成邀请码、复制、停用；限制次数和有效期；生成后手机端可直接验证使用，列表每 5 秒刷新使用次数 |
 | 公告 | 新建草稿、发布、撤回、删除、置顶；显示已读人数，发布后成员端可见并收到站内消息，撤回后消息一起清理；数据与手机端共享 |
 | 活动 | 发布新活动、编辑已发布活动、待确认筛选、补登记监护人同意、通过/拒绝报名、结束活动、发布草稿；结束后逐条签到/标未到、撤销签到、查看出勤统计；数据与手机端共享，改期等变更会生成站内消息 |
 | 挑战 | 新建挑战、查看社团平均进度、结束挑战 |
@@ -95,11 +96,12 @@ node verify-checkin-admin.mjs
 node verify-edit-activity.mjs
 node verify-announcements.mjs
 node ../verify-membership.mjs
+node ../verify-invites.mjs
 ```
 
-`verify-activities-admin`、`verify-checkin-admin`、`verify-edit-activity` 和 `verify-announcements` 需要先启动 8090 的 Mock API。`verify-membership` 是项目根的跨端脚本，需要 8090 的 Mock API 和 5173 的后台同时运行。
+`verify-activities-admin`、`verify-checkin-admin`、`verify-edit-activity` 和 `verify-announcements` 需要先启动 8090 的 Mock API。`verify-membership` 和 `verify-invites` 是项目根的跨端脚本，需要 8090 的 Mock API 和 5173 的后台同时运行。
 
-截图目录：`admin/shots/`（社团后台）、`admin/shots/activities/`（活动发布与报名审核）、`admin/shots/checkin/`（赛后签到与出勤）、`admin/shots/edit-activity/`（编辑活动与变更消息）、`admin/shots/announcements/`（公告管理与发布通知）、`admin/shots/membership/`（成员审批）和 `admin/shots/platform/`（平台总后台）。
+截图目录：`admin/shots/`（社团后台）、`admin/shots/activities/`（活动发布与报名审核）、`admin/shots/checkin/`（赛后签到与出勤）、`admin/shots/edit-activity/`（编辑活动与变更消息）、`admin/shots/announcements/`（公告管理与发布通知）、`admin/shots/membership/`（成员审批）、`admin/shots/invites/`（邀请码生成与使用）和 `admin/shots/platform/`（平台总后台）。
 
 ## 代码结构
 
@@ -107,16 +109,16 @@ node ../verify-membership.mjs
 admin/src/
   config.ts                 全局配置、社团与平台侧栏导航
   types/models.ts           数据模型
-  data/                     数据层（repository 接口 + mock 实现 + activityApi / announcementApi / memberApi 共享接口）
+  data/                     数据层（repository 接口 + mock 实现 + activityApi / announcementApi / memberApi / inviteApi 共享接口）
   features/                 社团页面、platform/ 平台页面、auth/ 登录
   components/ui/            按钮、卡片、弹窗、Toast 等共享组件
   components/layout/        社团后台与平台后台框架
   styles/index.css          统一样式与响应式规则
 ```
 
-活动共享接口在 `admin/src/data/activityApi.ts`（含 `updateActivity`），公告共享接口在 `admin/src/data/announcementApi.ts`，成员与入团申请在 `admin/src/data/memberApi.ts`，其余模块仍走 `admin/src/data/index.ts` 的 repository。以后接 PocketBase 时，优先只替换这几层，不把 API 代码写进页面。
+活动共享接口在 `admin/src/data/activityApi.ts`（含 `updateActivity`），公告共享接口在 `admin/src/data/announcementApi.ts`，成员与入团申请在 `admin/src/data/memberApi.ts`，邀请码在 `admin/src/data/inviteApi.ts`，其余模块仍走 `admin/src/data/index.ts` 的 repository。以后接 PocketBase 时，优先只替换这几层，不把 API 代码写进页面。
 
-活动跨端闭环的实现与验收见[活动出勤跨端闭环 v0.1](../docs/15-活动出勤跨端闭环-v0.1.md)；消息、成长与公益账本见[活动消息、成长沉淀与公益账本 v0.1](../docs/16-活动消息与成长公益账本-v0.1.md)；公告与跑团主页见[跑团公告与跑团主页 v0.1](../docs/17-跑团公告与跑团主页-v0.1.md)；入团与成员审批见[入团申请与成员审批 v0.1](../docs/18-入团申请与成员审批-v0.1.md)。
+活动跨端闭环的实现与验收见[活动出勤跨端闭环 v0.1](../docs/15-活动出勤跨端闭环-v0.1.md)；消息、成长与公益账本见[活动消息、成长沉淀与公益账本 v0.1](../docs/16-活动消息与成长公益账本-v0.1.md)；公告与跑团主页见[跑团公告与跑团主页 v0.1](../docs/17-跑团公告与跑团主页-v0.1.md)；入团与成员审批见[入团申请与成员审批 v0.1](../docs/18-入团申请与成员审批-v0.1.md)；邀请码接入见[邀请码接入入团 v0.1](../docs/19-邀请码接入入团-v0.1.md)。
 
 ## 安全提醒
 

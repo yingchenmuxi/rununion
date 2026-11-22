@@ -18,7 +18,7 @@ export interface Member {
   reviewNote?: string;
 }
 
-export type InviteStatus = 'active' | 'expired' | 'disabled';
+export type InviteStatus = 'active' | 'used' | 'expired' | 'disabled';
 
 export interface InviteCode {
   id: string;

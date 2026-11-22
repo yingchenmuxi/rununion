@@ -27,7 +27,6 @@ const MIME = {
 const MEMBERS = {
   'm-001': { name: '林小满', grade: '高一', gender: '女', guardianName: '林建国', guardianPhone: '138-0000-1001' },
 };
-const INVITE_CODE = 'KANGFU-2026';
 const GRADES = ['初三', '高一', '高二', '高三', '大学/其他'];
 
 function pad(value) { return String(value).padStart(2, '0'); }
@@ -153,6 +152,25 @@ function buildSeed() {
     },
   ];
 
+  const invites = [
+    {
+      id: 'inv-001', code: 'KANGFU-2026', note: '演示邀请码（可直接分享）', createdAt: isoOffset(-14, 9, 0),
+      expiresAt: isoOffset(30, 23, 59), maxUses: 30, usedCount: 3, disabled: false,
+    },
+    {
+      id: 'inv-002', code: 'QINGRUN-1101', note: '高一（3）班专场', createdAt: isoOffset(-21, 9, 0),
+      expiresAt: isoOffset(8, 23, 59), maxUses: 10, usedCount: 7, disabled: false,
+    },
+    {
+      id: 'inv-003', code: 'QINGRUN-1015', note: '校运会招募', createdAt: isoOffset(-38, 9, 0),
+      expiresAt: isoOffset(-1, 23, 59), maxUses: 20, usedCount: 20, disabled: false,
+    },
+    {
+      id: 'inv-004', code: 'QINGRUN-0920', note: '开学季体验码', createdAt: isoOffset(-63, 9, 0),
+      expiresAt: isoOffset(-5, 23, 59), maxUses: 30, usedCount: 18, disabled: true,
+    },
+  ];
+
   const announcements = [
     {
       id: 'ann-001', title: '雾霾天训练调整：改到体育馆做核心', category: 'safety', pinned: true,
@@ -176,7 +194,7 @@ function buildSeed() {
     },
   ];
 
-  return { members, activities, signups, notifications, announcements };
+  return { members, activities, signups, notifications, announcements, invites };
 }
 
 let state = buildSeed();
@@ -327,6 +345,35 @@ function validateApplication(nickname, username, grade) {
   return null;
 }
 
+function inviteStatus(invite) {
+  if (invite.disabled) return 'disabled';
+  if (new Date(invite.expiresAt).getTime() < Date.now()) return 'expired';
+  if (invite.usedCount >= invite.maxUses) return 'used';
+  return 'active';
+}
+
+function summarizeInvite(invite) {
+  return {
+    ...clone(invite),
+    status: inviteStatus(invite),
+    remaining: Math.max(0, invite.maxUses - invite.usedCount),
+  };
+}
+
+function inviteIssue(invite) {
+  const status = inviteStatus(invite);
+  if (status === 'disabled') return '这个邀请码已停用，请向社长要一个新的邀请码。';
+  if (status === 'expired') return '这个邀请码已过期，请向社长要一个新的邀请码。';
+  if (status === 'used') return '这个邀请码已经用完了，请向社长要一个新的邀请码。';
+  return null;
+}
+
+function findInviteByCode(code) {
+  const normalized = String(code || '').trim().toUpperCase();
+  if (!normalized) return null;
+  return state.invites.find((invite) => invite.code.toUpperCase() === normalized) || null;
+}
+
 function validateActivity(activity) {
   if (!activity) return '活动不存在。';
   return null;
@@ -371,12 +418,65 @@ async function handleApi(req, res, url) {
 
   try {
     if (method === 'GET' && path === '/health') {
-      return json(res, 200, { ok: true, activities: state.activities.length, signups: state.signups.length, notifications: state.notifications.length, announcements: state.announcements.length, members: state.members.length, serves: 'mobile/dist' });
+      return json(res, 200, { ok: true, activities: state.activities.length, signups: state.signups.length, notifications: state.notifications.length, announcements: state.announcements.length, members: state.members.length, invites: state.invites.length, serves: 'mobile/dist' });
     }
 
     if (method === 'POST' && path === '/reset') {
       state = buildSeed();
-      return json(res, 200, { ok: true, activities: activitySummaryList(), notifications: state.notifications.length, announcements: state.announcements.length, members: state.members.length });
+      return json(res, 200, { ok: true, activities: activitySummaryList(), notifications: state.notifications.length, announcements: state.announcements.length, members: state.members.length, invites: state.invites.length });
+    }
+
+    if (method === 'GET' && path === '/invites') {
+      const order = { active: 0, used: 1, expired: 2, disabled: 3 };
+      const items = state.invites
+        .slice()
+        .sort((a, b) => order[inviteStatus(a)] - order[inviteStatus(b)] || String(b.createdAt).localeCompare(String(a.createdAt)))
+        .map(summarizeInvite);
+      return json(res, 200, items);
+    }
+
+    if (method === 'POST' && path === '/invites') {
+      const body = await readBody(req);
+      const note = String(body.note || '').trim() || '成员邀请';
+      const maxUses = Number(body.maxUses);
+      const expiresInDays = Number(body.expiresInDays);
+      if (!Number.isInteger(maxUses) || maxUses < 1 || maxUses > 100) return fail(res, 400, '使用次数需要在 1 到 100 之间。');
+      if (!Number.isInteger(expiresInDays) || expiresInDays < 1 || expiresInDays > 90) return fail(res, 400, '有效期需要在 1 到 90 天之间。');
+      let code = '';
+      do {
+        code = 'QINGRUN-' + String(Math.floor(1000 + Math.random() * 9000));
+      } while (state.invites.some((invite) => invite.code === code));
+      const invite = {
+        id: 'inv-' + Date.now(),
+        code,
+        note: note.slice(0, 40),
+        createdAt: new Date().toISOString(),
+        expiresAt: isoOffset(expiresInDays, 23, 59),
+        maxUses,
+        usedCount: 0,
+        disabled: false,
+      };
+      state.invites.unshift(invite);
+      return json(res, 201, summarizeInvite(invite));
+    }
+
+    if (method === 'POST' && path === '/invites/validate') {
+      const body = await readBody(req);
+      const invite = findInviteByCode(body.code);
+      if (!invite) return fail(res, 400, '邀请码不对，请向社长要一个新的邀请码。');
+      const issue = inviteIssue(invite);
+      if (issue) return fail(res, 400, issue);
+      return json(res, 200, { ok: true, invite: summarizeInvite(invite) });
+    }
+
+    const inviteId = parts[0] === 'invites' ? parts[1] : null;
+    if (inviteId && method === 'PATCH' && parts.length === 2) {
+      const invite = state.invites.find((item) => item.id === inviteId);
+      if (!invite) return fail(res, 404, '邀请码不存在。', 'not_found');
+      const body = await readBody(req);
+      if (body.status !== 'disabled') return fail(res, 400, '邀请码状态不正确。');
+      invite.disabled = true;
+      return json(res, 200, summarizeInvite(invite));
     }
 
     if (method === 'GET' && path === '/members') {
@@ -387,7 +487,10 @@ async function handleApi(req, res, url) {
     if (method === 'POST' && path === '/member-applications') {
       const body = await readBody(req);
       const inviteCode = String(body.inviteCode || '').trim().toUpperCase();
-      if (inviteCode !== INVITE_CODE) return fail(res, 400, '邀请码不对，请向社长要一个新的邀请码。');
+      const invite = findInviteByCode(inviteCode);
+      if (!invite) return fail(res, 400, '邀请码不对，请向社长要一个新的邀请码。');
+      const inviteIssueMessage = inviteIssue(invite);
+      if (inviteIssueMessage) return fail(res, 400, inviteIssueMessage);
       const nickname = String(body.nickname || '').trim();
       const username = String(body.username || '').trim().toLowerCase();
       const grade = String(body.grade || '').trim();
@@ -407,7 +510,7 @@ async function handleApi(req, res, url) {
         member.lastActiveAt = now;
         member.reviewedAt = undefined;
         member.reviewNote = undefined;
-        member.note = '通过邀请码 ' + INVITE_CODE + ' 重新提交申请。';
+        member.note = '通过邀请码 ' + invite.code + ' 重新提交申请。';
       } else {
         member = {
           id: 'm-' + Date.now(),
@@ -421,10 +524,11 @@ async function handleApi(req, res, url) {
           lastActiveAt: now,
           weeklyKm: 0,
           totalKm: 0,
-          note: '通过邀请码 ' + INVITE_CODE + ' 提交申请。',
+          note: '通过邀请码 ' + invite.code + ' 提交申请。',
         };
         state.members.unshift(member);
       }
+      if (!existing) invite.usedCount = Math.min(invite.maxUses, invite.usedCount + 1);
       return json(res, 201, { application: applicationView(member), member: clone(member) });
     }
 

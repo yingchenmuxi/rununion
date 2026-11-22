@@ -1,0 +1,227 @@
+{
+  "checks": [
+    {
+      "name": "Mock API 返回 4 个邀请码",
+      "pass": true,
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"invites\":4,\"serves\":\"mobile/dist\"}"
+    },
+    {
+      "name": "初始 2 个可用邀请码",
+      "pass": true,
+      "detail": "4"
+    },
+    {
+      "name": "社团后台登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开邀请码页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "邀请码页加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "邀请码页显示 4 条记录",
+      "pass": true,
+      "detail": "青 青跑团 管理后台 当前社团 康福外国语学校长跑社 概览 成员 邀请码 公告 活动 挑战 记录与导出 当前为共享演示数据，可在右上角重置 V0.1 · 社团运营 青跑团 邀请码 示例数据 重置演示数据 林 林小满 退出 邀请码 生成一次性或多次可用的邀请码，让新成员带着明确入口加入社团。 生成邀请码 可用邀请码 2 现在可以分享 累计使用 48 来自所有邀"
+    },
+    {
+      "name": "邀请码页显示可用 2 个",
+      "pass": true,
+      "detail": "青 青跑团 管理后台 当前社团 康福外国语学校长跑社 概览 成员 邀请码 公告 活动 挑战 记录与导出 当前为共享演示数据，可在右上角重置 V0.1 · 社团运营 青跑团 邀请码 示例数据 重置演示数据 林 林小满 退出 邀请码 生成一次性或多次可用的邀请码，让新成员带着明确入口加入社团。 生成邀请码 可用邀请码 2 现在可以分享 累计使用 48 来自所有邀"
+    },
+    {
+      "name": "点击生成邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "生成弹窗打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写用途备注",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写使用次数和有效期",
+      "pass": true,
+      "detail": "[\"2\",\"7\"]"
+    },
+    {
+      "name": "提交生成邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "生成成功 toast",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "共享 API 生成新邀请码",
+      "pass": true,
+      "detail": "{\"id\":\"inv-1795347769131\",\"code\":\"QINGRUN-5064\",\"note\":\"联调邀请码\",\"createdAt\":\"2026-11-22T11:42:49.131Z\",\"expiresAt\":\"2026-11-29T15:59:00.000Z\",\"maxUses\":2,\"usedCount\":0,\"disabled\":false,\"status\":\"active\",\"remaining\":2}"
+    },
+    {
+      "name": "邀请码格式可识别",
+      "pass": true,
+      "detail": "QINGRUN-5064"
+    },
+    {
+      "name": "后台列表出现新邀请码",
+      "pass": true,
+      "detail": "青 青跑团 管理后台 当前社团 康福外国语学校长跑社 概览 成员 邀请码 公告 活动 挑战 记录与导出 当前为共享演示数据，可在右上角重置 V0.1 · 社团运营 青跑团 邀请码 示例数据 重置演示数据 林 林小满 退出 邀请码 生成一次性或多次可用的邀请码，让新成员带着明确入口加入社团。 生成邀请码 可用邀请码 3 现在可以分享 累计使用 48 来自所有邀请码 名额上限 92 已生成的总名额 已停用 1 不再接受新成员 全部邀请码 过"
+    },
+    {
+      "name": "手机端登录页可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "切换到我有邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "邀请码步骤打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填入后台生成的邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "验证后台生成的邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "生成码验证通过并进入资料",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写昵称",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "选择年级",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写用户名",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "提交入团申请",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "进入待审批页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "邀请码使用次数加一",
+      "pass": true,
+      "detail": "{\"id\":\"inv-1795347769131\",\"code\":\"QINGRUN-5064\",\"note\":\"联调邀请码\",\"createdAt\":\"2026-11-22T11:42:49.131Z\",\"expiresAt\":\"2026-11-29T15:59:00.000Z\",\"maxUses\":2,\"usedCount\":1,\"disabled\":false,\"status\":\"active\",\"remaining\":1}"
+    },
+    {
+      "name": "共享 API 收到新申请",
+      "pass": true,
+      "detail": "{\"id\":\"m-1795347774223\",\"name\":\"邀请测试\",\"username\":\"invitetest\",\"grade\":\"高二\",\"gender\":\"未填写\",\"status\":\"pending\",\"role\":\"member\",\"joinedAt\":\"2026-11-22T11:42:54.223Z\",\"lastActiveAt\":\"2026-11-22T11:42:54.223Z\",\"weeklyKm\":0,\"totalKm\":0,\"note\":\"通过邀请码 QINGRUN-5064 提交申请。\"}"
+    },
+    {
+      "name": "申请备注记录生成码",
+      "pass": true,
+      "detail": "通过邀请码 QINGRUN-5064 提交申请。"
+    },
+    {
+      "name": "新成员共 13 人",
+      "pass": true,
+      "detail": "13"
+    },
+    {
+      "name": "后台重新打开邀请码页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台刷新邀请码使用 1 / 2",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "后台显示邀请码使用 1 / 2",
+      "pass": true,
+      "detail": "青 青跑团 管理后台 当前社团 康福外国语学校长跑社 概览 成员 邀请码 公告 活动 挑战 记录与导出 当前为共享演示数据，可在右上角重置 V0.1 · 社团运营 青跑团 邀请码 示例数据 重置演示数据 林 林小满 退出 邀请码 生成一次性或多次可用的邀请码，让新成员带着明确入口加入社团。 生成邀请码 可用邀请码 3 现在可以分享 累计使用 49 来自所有邀请码 名额上限 92 已生成的总名额 已停用 1 不再接受新成员 全部邀请码 过期或停用后，已加入的成员不受影响。 5 个 邀请码 用途 有效期 使用情况 状态"
+    },
+    {
+      "name": "点击停用生成码",
+      "pass": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "停用确认弹窗打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "确认停用邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "停用 toast 出现",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 邀请码变为停用",
+      "pass": true,
+      "detail": "{\"id\":\"inv-1795347769131\",\"code\":\"QINGRUN-5064\",\"note\":\"联调邀请码\",\"createdAt\":\"2026-11-22T11:42:49.131Z\",\"expiresAt\":\"2026-11-29T15:59:00.000Z\",\"maxUses\":2,\"usedCount\":1,\"disabled\":true,\"status\":\"disabled\",\"remaining\":1}"
+    },
+    {
+      "name": "手机端回到登录页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "再次验证已停用邀请码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "手机端提示邀请码已停用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "测试结束恢复 4 个邀请码",
+      "pass": true,
+      "detail": "4"
+    },
+    {
+      "name": "测试结束恢复 12 名成员",
+      "pass": true,
+      "detail": "12"
+    }
+  ],
+  "failures": [],
+  "events": [],
+  "finishedAt": "2026-11-22T11:43:00.636Z"
+}

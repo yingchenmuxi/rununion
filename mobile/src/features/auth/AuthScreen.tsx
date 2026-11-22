@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Card, DemoNote, Pill, PrimaryButton, Screen } from '@/components/qingrun-ui';
 import { colors, mock, radius, space } from '@/constants/qingrun';
 import { DEMO_INVITE, DEMO_PASSWORD, DEMO_USERNAME, useAuth } from '@/features/auth/AuthContext';
+import { validateInviteCode } from '@/features/auth/memberApi';
 
 const GRADES = ['初三', '高一', '高二', '高三', '大学/其他'];
 
@@ -22,6 +23,7 @@ export function AuthScreen() {
   const [nickname, setNickname] = useState(retry?.nickname ?? '');
   const [grade, setGrade] = useState(retry?.grade ?? '高一');
   const [username, setUsername] = useState(retry?.username ?? '');
+  const [verifying, setVerifying] = useState(false);
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState('');
 
@@ -41,13 +43,23 @@ export function AuthScreen() {
     if (error) setLoginError(error);
   };
 
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     setCodeError('');
-    if (invite.trim().toUpperCase() !== DEMO_INVITE) {
-      setCodeError('邀请码不对，请向社长要一个新的邀请码。');
+    const code = invite.trim().toUpperCase();
+    if (!code) {
+      setCodeError('请先填写社长给你的邀请码。');
       return;
     }
-    setJoinStep('profile');
+    setVerifying(true);
+    try {
+      await validateInviteCode(code);
+      setInvite(code);
+      setJoinStep('profile');
+    } catch (error) {
+      setCodeError(error instanceof Error ? error.message : '邀请码验证失败，请稍后再试。');
+    } finally {
+      setVerifying(false);
+    }
   };
 
   const handleJoin = async () => {
@@ -160,7 +172,12 @@ export function AuthScreen() {
 
             {codeError ? <Text style={styles.error}>{codeError}</Text> : null}
 
-            <PrimaryButton label="验证邀请码" onPress={handleVerifyCode} style={styles.submit} />
+            <PrimaryButton
+              label={verifying ? '正在验证…' : '验证邀请码'}
+              onPress={handleVerifyCode}
+              disabled={verifying}
+              style={styles.submit}
+            />
 
             <Pressable
               onPress={() => {

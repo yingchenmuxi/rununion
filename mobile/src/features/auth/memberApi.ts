@@ -36,6 +36,23 @@ async function request<T>(path: string, init?: { method?: string; body?: string 
   return payload as T;
 }
 
+export type ValidatedInvite = {
+  code: string;
+  note: string;
+  status: 'active';
+  maxUses: number;
+  usedCount: number;
+  remaining: number;
+  expiresAt: string;
+};
+
+export function validateInviteCode(code: string) {
+  return request<{ ok: true; invite: ValidatedInvite }>('/invites/validate', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
 export function submitMemberApplication(input: JoinInput) {
   return request<{ application: MemberApplication }>('/member-applications', {
     method: 'POST',
