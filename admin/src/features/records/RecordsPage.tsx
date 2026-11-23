@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { repository } from '../../data';
+import { recordsApi } from '../../data/recordsApi';
 import { useAsync } from '../../lib/useAsync';
 import { downloadText, durationLabel, formatDate, toCsv } from '../../lib/format';
 import { Badge, Button, Card, EmptyState, PageHeader, Spinner } from '../../components/ui/primitives';
@@ -8,7 +8,7 @@ import { useToast } from '../../components/ui/Toast';
 
 export function RecordsPage() {
   const toast = useToast();
-  const { data, loading, error, reload } = useAsync(() => repository.listRecords(), []);
+  const { data, loading, error, reload } = useAsync(() => recordsApi.listRecords(), []);
   const [query, setQuery] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');

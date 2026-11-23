@@ -1,4 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+
+import { DEMO_MEMBER_ID } from '@/features/activities/activityData';
+import { createRun, fetchMemberRuns, type ApiRun } from './runApi';
 
 export type RunSource = 'gps' | 'screenshot' | 'file' | 'manual';
 
@@ -42,6 +45,8 @@ type RunContextValue = {
   recentRuns: RunRecord[];
   stats: RunStats;
   addRun: (draft: RunDraft) => RunRecord;
+  refresh: () => Promise<void>;
+  syncError: string;
 };
 
 const RunContext = createContext<RunContextValue | null>(null);
@@ -112,8 +117,36 @@ export function formatRunDate(iso: string) {
   return date.getMonth() + 1 + ' 月 ' + date.getDate() + ' 日';
 }
 
+const RUN_SOURCES: RunSource[] = ['gps', 'screenshot', 'file', 'manual'];
+
+function toRecord(row: ApiRun): RunRecord {
+  return {
+    id: row.id,
+    date: row.date,
+    title: row.title,
+    distanceKm: row.distanceKm,
+    durationMin: row.durationMin,
+    source: RUN_SOURCES.includes(row.source) ? row.source : 'manual',
+  };
+}
+
 export function RunProvider({ children }: { children: ReactNode }) {
   const [records, setRecords] = useState<RunRecord[]>(() => buildSeedRuns());
+  const [syncError, setSyncError] = useState('');
+
+  const refresh = useCallback(async () => {
+    try {
+      const rows = await fetchMemberRuns(DEMO_MEMBER_ID);
+      setRecords(rows.map(toRecord));
+      setSyncError('');
+    } catch (cause) {
+      setSyncError(cause instanceof Error ? cause.message : '跑步记录同步失败。');
+    }
+  }, []);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   const addRun = useCallback((draft: RunDraft) => {
     if (!Number.isFinite(draft.distanceKm) || draft.distanceKm <= 0) {
@@ -131,6 +164,21 @@ export function RunProvider({ children }: { children: ReactNode }) {
       source: draft.source,
     };
     setRecords((current) => [record, ...current]);
+    void createRun({
+      memberId: DEMO_MEMBER_ID,
+      title: record.title,
+      date: record.date,
+      distanceKm: record.distanceKm,
+      durationMin: record.durationMin,
+      source: record.source,
+    })
+      .then((saved) => {
+        setRecords((current) => current.map((item) => (item.id === record.id ? toRecord(saved) : item)));
+        setSyncError('');
+      })
+      .catch((cause) => {
+        setSyncError(cause instanceof Error ? cause.message : '这条记录还没同步到后台。');
+      });
     return record;
   }, []);
 
@@ -178,8 +226,8 @@ export function RunProvider({ children }: { children: ReactNode }) {
   }, [records]);
 
   const value = useMemo(
-    () => ({ records, stats, recentRuns: stats.recentRuns, addRun }),
-    [records, stats, addRun],
+    () => ({ records, stats, recentRuns: stats.recentRuns, addRun, refresh, syncError }),
+    [records, stats, addRun, refresh, syncError],
   );
 
   return <RunContext.Provider value={value}>{children}</RunContext.Provider>;

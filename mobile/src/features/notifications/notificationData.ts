@@ -5,7 +5,8 @@ export type NotificationType =
   | 'activity_changed'
   | 'activity_ended'
   | 'attendance'
-  | 'announcement';
+  | 'announcement'
+  | 'challenge';
 
 export type MemberNotification = {
   id: string;
@@ -15,6 +16,7 @@ export type MemberNotification = {
   body: string;
   activityId?: string;
   announcementId?: string;
+  challengeId?: string;
   createdAt: string;
   readAt?: string | null;
 };
@@ -30,6 +32,7 @@ export const NOTIFICATION_META: Record<
   activity_ended: { glyph: '止', label: '活动结束', tone: 'neutral' },
   attendance: { glyph: '勤', label: '出勤记录', tone: 'green' },
   announcement: { glyph: '公', label: '跑团公告', tone: 'green' },
+  challenge: { glyph: '挑', label: '跑团挑战', tone: 'green' },
 };
 
 export function notificationTone(notification: MemberNotification) {

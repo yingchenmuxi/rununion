@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { repository } from '../../data';
+import { challengeApi } from '../../data/challengeApi';
 import { useAsync } from '../../lib/useAsync';
 import { formatDate } from '../../lib/format';
 import type { Challenge } from '../../types/models';
@@ -36,7 +36,7 @@ function addDays(days: number): Date {
 
 export function ChallengesPage() {
   const toast = useToast();
-  const { data, loading, error, reload } = useAsync(() => repository.listChallenges(), []);
+  const { data, loading, error, reload } = useAsync(() => challengeApi.listChallenges(), []);
   const [createOpen, setCreateOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -87,7 +87,7 @@ export function ChallengesPage() {
     }
     setSaving(true);
     try {
-      await repository.createChallenge(form);
+      await challengeApi.createChallenge(form);
       toast('新的挑战已创建。');
       setCreateOpen(false);
       reload();
@@ -102,7 +102,7 @@ export function ChallengesPage() {
     if (!endTarget) return;
     setEnding(true);
     try {
-      await repository.endChallenge(endTarget.id);
+      await challengeApi.endChallenge(endTarget.id);
       toast('挑战已结束，记录进入只读。', 'info');
       setEndTarget(null);
       reload();

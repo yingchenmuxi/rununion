@@ -1,0 +1,203 @@
+{
+  "checks": [
+    {
+      "name": "API 初始 25 条记录 / 3 个挑战",
+      "pass": true,
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"invites\":4,\"runs\":25,\"challenges\":3,\"serves\":\"mobile/dist\"}"
+    },
+    {
+      "name": "记录接口 25 条 / 8 名成员",
+      "pass": true,
+      "detail": "8"
+    },
+    {
+      "name": "社团后台登录成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开记录页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "记录页加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "记录页统计卡显示条数、里程与人数",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "记录表 25 行",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "记录页合计里程 172.4 km",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "记录页参与成员 8 人",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "搜索成员林小满",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "筛选后 7 条记录",
+      "pass": true,
+      "detail": "青\n青跑团\n管理后台\n当前社团\n康福外国语学校长跑社\n概览\n成员\n邀请码\n公告\n活动\n挑战\n记录与导出\n当前为共享演示数据，可在右上角重置\nV0.1 · 社团运"
+    },
+    {
+      "name": "筛选后统计为 7 条",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "清除筛选",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "恢复 25 条记录",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "打开挑战页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "挑战页加载",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "挑战页 3 张卡片",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "挑战统计 进行中 1 / 未开始 1 / 参与人次 8",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "点击新建挑战",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "新建挑战弹窗打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写挑战名称",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "填写挑战说明",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "设置个人目标 40 km",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "设置开始日期为今天",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "设置结束日期",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "提交新建挑战",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "创建后弹窗关闭",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "创建 toast 出现",
+      "pass": true,
+      "detail": "新的挑战已创建。"
+    },
+    {
+      "name": "列表出现新挑战卡片",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 新挑战为进行中且目标 40 km",
+      "pass": true,
+      "detail": "{\"status\":\"active\",\"target\":40}"
+    },
+    {
+      "name": "API 新挑战日期正确",
+      "pass": true,
+      "detail": "{\"start\":\"2026-11-23\",\"end\":\"2026-12-13\"}"
+    },
+    {
+      "name": "成员收到挑战站内消息",
+      "pass": true,
+      "detail": "{\"total\":4,\"unread\":3,\"title\":\"跑团挑战：十一月 · 40 公里加练\"}"
+    },
+    {
+      "name": "挑战消息标题与正文正确",
+      "pass": true,
+      "detail": "{\"title\":\"跑团挑战：十一月 · 40 公里加练\",\"body\":\"11 月 23 日 至 12 月 13 日，个人目标 40 公里。只累计社团可见的跑步记录，不做排名。\"}"
+    },
+    {
+      "name": "点击结束新挑战",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "结束确认弹窗出现",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "确认结束挑战",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "结束后弹窗关闭",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "API 新挑战已结束",
+      "pass": true,
+      "detail": "{\"status\":\"ended\"}"
+    },
+    {
+      "name": "结束后卡片显示只读",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "failures": [],
+  "totalKm": 172.4,
+  "memberCount": 8,
+  "events": []
+}

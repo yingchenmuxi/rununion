@@ -1,4 +1,5 @@
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import {
@@ -14,6 +15,12 @@ import {
 import { colors, mock, radius, space } from '@/constants/qingrun';
 import { useActivities } from '@/features/activities/ActivityContext';
 import { formatActivityDate } from '@/features/activities/activityData';
+import { useChallenges } from '@/features/challenges/ChallengeContext';
+import {
+  CHALLENGE_STATUS_META,
+  challengeProgressText,
+  formatChallengeRange,
+} from '@/features/challenges/challengeData';
 import { RUN_SOURCE_LABELS, formatDuration, formatPace, formatRunDate, useRuns } from '@/features/runs/RunContext';
 
 const LEVELS = ['区级', '市级', '省级', '全国'];
@@ -22,6 +29,14 @@ export default function GrowthScreen() {
   const router = useRouter();
   const { stats, recentRuns } = useRuns();
   const { myUpcoming, myPast, attendedCount, absentCount, checkinPendingCount } = useActivities();
+  const { activeChallenge, upcomingChallenge, refresh: refreshChallenges } = useChallenges();
+  const challenge = activeChallenge ?? upcomingChallenge;
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshChallenges();
+    }, [refreshChallenges]),
+  );
   const lastActivity = myPast[0];
   const maxWeek = Math.max(1, ...stats.weeks.map((week) => week.km));
 
@@ -99,6 +114,35 @@ export default function GrowthScreen() {
         )}
         <Text style={styles.activityNote}>活动参与只沉淀出勤与参与场次，不把活动距离重复计入跑量。</Text>
       </Card>
+
+      <SectionTitle title="跑团挑战" action="全部挑战" onAction={() => router.push('/challenges')} />
+      {challenge ? (
+        <Card style={styles.challengeCard} onPress={() => router.push('/challenges')}>
+          <View style={styles.challengeTop}>
+            <Text style={styles.challengeTitle} numberOfLines={1}>{challenge.title}</Text>
+            <Pill text={CHALLENGE_STATUS_META[challenge.status].label} tone={CHALLENGE_STATUS_META[challenge.status].tone} />
+          </View>
+          <View style={styles.challengeProgressRow}>
+            <Text style={styles.challengeKm}>{challenge.myKm.toFixed(1)} / {challenge.targetKm} km</Text>
+            <Text style={styles.challengePercent}>{challenge.myCompleted ? '已完成' : challenge.myPercent + '%'}</Text>
+          </View>
+          <ProgressBar value={challenge.myPercent} />
+          <View style={styles.challengeFoot}>
+            <Text style={styles.challengeHint}>{challengeProgressText(challenge)}</Text>
+            <Text style={styles.challengeMeta}>
+              {challenge.status === 'active'
+                ? challenge.participantCount + ' 人参与 · ' + challenge.completedCount + ' 人完成'
+                : formatChallengeRange(challenge.startDate, challenge.endDate)}
+            </Text>
+          </View>
+          <Text style={styles.challengeNote}>只累计社团可见的跑步记录；活动出勤不重复计入，私密记录不计入。</Text>
+        </Card>
+      ) : (
+        <Card style={styles.challengeCard}>
+          <Text style={styles.challengeTitle}>还没有挑战</Text>
+          <Text style={styles.challengeNote}>团长发布累计里程挑战后，会在这里看到目标和自己的进度。</Text>
+        </Card>
+      )}
 
       <SectionTitle title="个人最好" action="添加记录" />
       <View style={styles.pbGrid}>
@@ -251,6 +295,16 @@ const styles = StyleSheet.create({
   lastActivityMeta: { fontSize: 10, color: colors.muted },
   activityEmpty: { marginTop: 12, fontSize: 12, color: colors.muted },
   activityNote: { marginTop: 10, fontSize: 10, lineHeight: 16, color: colors.muted },
+  challengeCard: { padding: space.lg, marginTop: 10 },
+  challengeTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  challengeTitle: { flex: 1, fontSize: 15, fontWeight: '800', color: colors.ink },
+  challengeProgressRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 12, marginBottom: 7 },
+  challengeKm: { fontSize: 14, fontWeight: '800', color: colors.brand },
+  challengePercent: { fontSize: 11, fontWeight: '700', color: colors.muted },
+  challengeFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, gap: 8 },
+  challengeHint: { fontSize: 11, fontWeight: '700', color: colors.inkSoft },
+  challengeMeta: { flexShrink: 1, textAlign: 'right', fontSize: 10, color: colors.muted },
+  challengeNote: { marginTop: 9, fontSize: 10, lineHeight: 16, color: colors.muted },
   pbGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8 },
   pbCard: { width: '48%', padding: 14 },
   pbDistance: { fontSize: 11, fontWeight: '700', color: colors.muted },

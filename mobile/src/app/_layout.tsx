@@ -9,6 +9,7 @@ import { AnnouncementProvider } from '@/features/announcements/AnnouncementConte
 import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import { ApprovedScreen, AuthScreen, PendingScreen, RejectedScreen } from '@/features/auth/AuthScreen';
 import { KnowledgeProvider } from '@/features/knowledge/KnowledgeContext';
+import { ChallengeProvider } from '@/features/challenges/ChallengeContext';
 import { NotificationProvider } from '@/features/notifications/NotificationContext';
 import { RunProvider } from '@/features/runs/RunContext';
 
@@ -38,7 +39,9 @@ export default function RootLayout() {
           <AnnouncementProvider>
           <KnowledgeProvider>
             <RunProvider>
-              <RootContent />
+              <ChallengeProvider>
+                <RootContent />
+              </ChallengeProvider>
             </RunProvider>
           </KnowledgeProvider>
           </AnnouncementProvider>

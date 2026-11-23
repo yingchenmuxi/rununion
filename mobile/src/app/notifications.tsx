@@ -28,6 +28,10 @@ export default function NotificationsScreen() {
 
   const open = async (item: MemberNotification) => {
     await markRead(item.id);
+    if (item.challengeId) {
+      router.push('/challenges');
+      return;
+    }
     if (item.announcementId) {
       router.push('/announcements/' + item.announcementId);
       return;
@@ -45,7 +49,7 @@ export default function NotificationsScreen() {
       </View>
 
       <Text style={styles.title}>消息</Text>
-      <Text style={styles.subtitle}>报名结果、活动变更、赛后出勤和跑团公告，团长处理后会出现在这里。</Text>
+      <Text style={styles.subtitle}>报名结果、活动变更、赛后出勤、跑团公告和挑战，团长处理后会出现在这里。</Text>
 
       <View style={styles.filterRow}>
         <Pressable
@@ -113,7 +117,9 @@ export default function NotificationsScreen() {
                   </View>
                 </View>
                 <Text style={styles.messageBody}>{item.body}</Text>
-                <Text style={styles.messageLink}>{item.announcementId ? '查看公告详情 ›' : '查看活动详情 ›'}</Text>
+                <Text style={styles.messageLink}>
+                  {item.challengeId ? '查看挑战进度 ›' : item.announcementId ? '查看公告详情 ›' : '查看活动详情 ›'}
+                </Text>
               </Card>
             );
           })}

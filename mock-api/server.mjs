@@ -53,6 +53,33 @@ function cnDate(iso) {
   return Number(parts[1]) + ' 月 ' + Number(parts[2]) + ' 日';
 }
 
+function startOfWeekDate() {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+  return date;
+}
+
+function weekDate(offset) {
+  const date = startOfWeekDate();
+  date.setDate(date.getDate() + offset);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const safe = date > today ? today : date;
+  return safe.getFullYear() + '-' + pad(safe.getMonth() + 1) + '-' + pad(safe.getDate());
+}
+
+function monthRange(offset) {
+  const base = new Date();
+  base.setDate(1);
+  base.setMonth(base.getMonth() + offset);
+  const last = new Date(base.getFullYear(), base.getMonth() + 1, 0);
+  return {
+    start: base.getFullYear() + '-' + pad(base.getMonth() + 1) + '-01',
+    end: last.getFullYear() + '-' + pad(last.getMonth() + 1) + '-' + pad(last.getDate()),
+  };
+}
+
 function buildSeed() {
   const members = [
     { id: 'm-001', name: '林小满', username: 'linxiaoman', grade: '高一', gender: '女', status: 'active', role: 'owner', joinedAt: '2026-09-01T08:00:00+08:00', lastActiveAt: '2026-11-17T06:40:00+08:00', weeklyKm: 18.6, totalKm: 126.4 },
@@ -194,17 +221,78 @@ function buildSeed() {
     },
   ];
 
-  return { members, activities, signups, notifications, announcements, invites };
+  const runRows = [
+    ['m-001', '林小满', 2, 7.2, 42.5, '公园慢跑', '周末补一次慢跑，全程能说短句。', 'manual'],
+    ['m-001', '林小满', 1, 5.2, 28.7, '校园环湖', '和同学一起跑，最后一段走回来的。', 'gps'],
+    ['m-001', '林小满', 0, 6.2, 37.3, '操场节奏跑', '按能说短句的强度跑完。', 'manual'],
+    ['m-001', '林小满', -4, 7.4, 43.8, '放学慢跑', '', 'manual'],
+    ['m-001', '林小满', -7, 5.6, 33.7, '校园环湖', '', 'manual'],
+    ['m-001', '林小满', -12, 10.7, 63.5, '周末拉练', '第一次跑到 10 公里。', 'manual'],
+    ['m-001', '林小满', -17, 8.2, 48.3, '公园慢跑', '', 'file'],
+    ['m-005', '陈一诺', 0, 8.0, 48, '操场晨跑', '早起跑一圈。', 'manual'],
+    ['m-005', '陈一诺', 1, 6.4, 38, '校园环湖', '', 'screenshot'],
+    ['m-005', '陈一诺', 2, 5.0, 30, '放学慢跑', '', 'manual'],
+    ['m-005', '陈一诺', 3, 3.0, 18, '热身跑', '活动前热身。', 'manual'],
+    ['m-006', '周雨桐', 0, 10.0, 62, '周末长距离', '第一次跑 10 公里，最后两公里降速。', 'manual'],
+    ['m-006', '周雨桐', 2, 6.8, 41, '校园环湖', '', 'gps'],
+    ['m-007', '许嘉禾', 0, 11.0, 63, '河堤拉练', '', 'manual'],
+    ['m-007', '许嘉禾', 1, 8.8, 50, '操场节奏跑', '快慢交替。', 'manual'],
+    ['m-007', '许嘉禾', 3, 4.2, 24, '放松跑', '', 'manual'],
+    ['m-008', '王予辰', 0, 6.5, 40, '和同学一起跑', '', 'manual'],
+    ['m-008', '王予辰', 2, 6.0, 37, '校园环湖', '', 'manual'],
+    ['m-009', '李思远', 0, 12.2, 67, '周末长距离', '后半程有点顶，但坚持跑完。', 'manual'],
+    ['m-009', '李思远', 1, 8.0, 44, '操场间歇', '', 'manual'],
+    ['m-009', '李思远', 3, 8.0, 45, '公园慢跑', '', 'screenshot'],
+    ['m-010', '赵清和', 0, 6.1, 41, '跑走结合', '第一次连续跑 6 公里。', 'manual'],
+    ['m-010', '赵清和', 2, 3.5, 23, '放学慢跑', '', 'manual'],
+    ['m-011', '孙可欣', 1, 5.0, 33, '按体感跑', '没有看表。', 'manual'],
+    ['m-011', '孙可欣', 3, 3.4, 22, '校园环湖', '', 'file'],
+  ];
+  const runs = runRows.map((row, index) => {
+    const [memberId, memberName, weekOffset, distanceKm, durationMin, title, note, source] = row;
+    const date = weekDate(weekOffset);
+    return {
+      id: 'run-' + String(index + 1).padStart(3, '0'),
+      memberId, memberName, date, title, distanceKm, durationMin, note,
+      source: source || 'manual', visibility: 'club',
+      createdAt: date + 'T0' + (6 + (index % 3)) + ':30:00+08:00',
+    };
+  });
+
+  const currentMonth = monthRange(0);
+  const nextMonth = monthRange(1);
+  const previousMonth = monthRange(-1);
+  const challenges = [
+    {
+      id: 'chl-001', title: Number(currentMonth.start.slice(5, 7)) + ' 月 · 80 公里挑战',
+      description: '本月累计跑满 80 公里。按个人进度记录，不做排名；私密记录和活动出勤不重复计入。',
+      targetKm: 80, startDate: currentMonth.start, endDate: currentMonth.end, createdAt: isoOffset(-10, 9, 0),
+    },
+    {
+      id: 'chl-002', title: Number(nextMonth.start.slice(5, 7)) + ' 月 · 60 公里挑战',
+      description: '下个月每天动一动，累计 60 公里即可完成。开始后自动累计社团可见的跑步记录。',
+      targetKm: 60, startDate: nextMonth.start, endDate: nextMonth.end, createdAt: isoOffset(-2, 20, 0),
+    },
+    {
+      id: 'chl-003', title: Number(previousMonth.start.slice(5, 7)) + ' 月 · 60 公里挑战',
+      description: '上个月的累计里程挑战，已经结束，进度只读；补录的记录不再计入。',
+      targetKm: 60, startDate: previousMonth.start, endDate: previousMonth.end,
+      createdAt: isoOffset(-40, 9, 0), endedAt: isoOffset(-30, 9, 0),
+    },
+  ];
+
+  return { members, activities, signups, notifications, announcements, invites, runs, challenges };
 }
 
 let state = buildSeed();
 
-function addNotification({ memberId, type, title, body, activityId, announcementId }) {
+function addNotification({ memberId, type, title, body, activityId, announcementId, challengeId }) {
   const notification = {
     id: 'ntf-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
     memberId, type, title, body,
     activityId: activityId || undefined,
     announcementId: announcementId || undefined,
+    challengeId: challengeId || undefined,
     createdAt: new Date().toISOString(),
     readAt: undefined,
   };
@@ -254,6 +342,88 @@ function validateAnnouncement(title, content) {
 function summarizeAnnouncement(announcement) {
   const { readBy, ...rest } = announcement;
   return { ...clone(rest), readCount: (readBy || []).length };
+}
+
+function paceLabel(distanceKm, durationMin) {
+  if (!distanceKm || !durationMin) return '--';
+  const seconds = Math.round((durationMin * 60) / distanceKm);
+  return Math.floor(seconds / 60) + "'" + pad(seconds % 60) + '"';
+}
+
+function summarizeRun(run) {
+  return { ...clone(run), pace: paceLabel(run.distanceKm, run.durationMin) };
+}
+
+function challengeStatus(challenge) {
+  if (challenge.endedAt) return 'ended';
+  const today = todayDate();
+  if (today < challenge.startDate) return 'upcoming';
+  if (today > challenge.endDate) return 'ended';
+  return 'active';
+}
+
+function challengeKm(challenge, memberId) {
+  return state.runs
+    .filter((run) => run.memberId === memberId
+      && run.date >= challenge.startDate
+      && run.date <= challenge.endDate
+      && run.visibility !== 'private'
+      && (!challenge.endedAt || run.createdAt <= challenge.endedAt))
+    .reduce((sum, run) => sum + run.distanceKm, 0);
+}
+
+function summarizeChallenge(challenge, memberId) {
+  const status = challengeStatus(challenge);
+  const activeMembers = state.members.filter((member) => member.status === 'active');
+  const rows = activeMembers.map((member) => challengeKm(challenge, member.id));
+  const total = rows.reduce((sum, km) => sum + km, 0);
+  const summary = {
+    ...clone(challenge),
+    status,
+    startAt: challenge.startDate + 'T00:00:00+08:00',
+    endAt: challenge.endDate + 'T23:59:59+08:00',
+    participantCount: activeMembers.length,
+    completedCount: rows.filter((km) => km >= challenge.targetKm).length,
+    clubProgressKm: rows.length ? Math.round((total / rows.length) * 10) / 10 : 0,
+  };
+  if (memberId) {
+    const km = challengeKm(challenge, memberId);
+    summary.myKm = Math.round(km * 10) / 10;
+    summary.myPercent = Math.min(100, Math.round((km / challenge.targetKm) * 100));
+    summary.myCompleted = km >= challenge.targetKm;
+    const left = Math.ceil((new Date(challenge.endDate + 'T23:59:59+08:00').getTime() - Date.now()) / 86400000);
+    summary.daysLeft = status === 'active' ? Math.max(0, left) : 0;
+  }
+  return summary;
+}
+
+function challengeOrder(challenge) {
+  return { active: 0, upcoming: 1, ended: 2 }[challengeStatus(challenge)];
+}
+
+function validateChallenge(body) {
+  const title = String(body.title || '').trim();
+  const description = String(body.description || '').trim();
+  if (title.length < 2 || title.length > 60) return '挑战名称需要在 2 到 60 个字之间。';
+  if (description.length < 5 || description.length > 300) return '挑战说明需要在 5 到 300 个字之间。';
+  const targetKm = Number(body.targetKm);
+  if (!Number.isFinite(targetKm) || targetKm < 1 || targetKm > 1000) return '个人目标需要在 1 到 1000 公里之间。';
+  const startDate = String(body.startDate || body.startAt || '').slice(0, 10);
+  const endDate = String(body.endDate || body.endAt || '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) return '请选择挑战的开始和结束日期。';
+  if (endDate < startDate) return '结束日期不能早于开始日期。';
+  return null;
+}
+
+function notifyChallenge(challenge) {
+  const body = cnDate(challenge.startDate) + ' 至 ' + cnDate(challenge.endDate)
+    + '，个人目标 ' + challenge.targetKm + ' 公里。只累计社团可见的跑步记录，不做排名。';
+  state.members
+    .filter((member) => member.status === 'active')
+    .forEach((member) => addNotification({
+      memberId: member.id, type: 'challenge', challengeId: challenge.id,
+      title: '跑团挑战：' + challenge.title, body,
+    }));
 }
 
 function changeSummary(before, after) {
@@ -418,12 +588,12 @@ async function handleApi(req, res, url) {
 
   try {
     if (method === 'GET' && path === '/health') {
-      return json(res, 200, { ok: true, activities: state.activities.length, signups: state.signups.length, notifications: state.notifications.length, announcements: state.announcements.length, members: state.members.length, invites: state.invites.length, serves: 'mobile/dist' });
+      return json(res, 200, { ok: true, activities: state.activities.length, signups: state.signups.length, notifications: state.notifications.length, announcements: state.announcements.length, members: state.members.length, invites: state.invites.length, runs: state.runs.length, challenges: state.challenges.length, serves: 'mobile/dist' });
     }
 
     if (method === 'POST' && path === '/reset') {
       state = buildSeed();
-      return json(res, 200, { ok: true, activities: activitySummaryList(), notifications: state.notifications.length, announcements: state.announcements.length, members: state.members.length, invites: state.invites.length });
+      return json(res, 200, { ok: true, activities: activitySummaryList(), notifications: state.notifications.length, announcements: state.announcements.length, members: state.members.length, invites: state.invites.length, runs: state.runs.length, challenges: state.challenges.length });
     }
 
     if (method === 'GET' && path === '/invites') {
@@ -482,6 +652,76 @@ async function handleApi(req, res, url) {
     if (method === 'GET' && path === '/members') {
       const items = state.members.slice().sort(memberSort).map((member) => clone(member));
       return json(res, 200, items);
+    }
+
+    if (method === 'GET' && path === '/runs') {
+      const filterMemberId = url.searchParams.get('memberId');
+      const items = state.runs
+        .filter((run) => !filterMemberId || run.memberId === filterMemberId)
+        .slice()
+        .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt))
+        .map(summarizeRun);
+      return json(res, 200, items);
+    }
+
+    if (method === 'POST' && path === '/runs') {
+      const body = await readBody(req);
+      const member = findMember(String(body.memberId || ''));
+      if (!member) return fail(res, 404, '成员不存在。', 'not_found');
+      const distanceKm = Math.round(Number(body.distanceKm) * 10) / 10;
+      const durationMin = Math.round(Number(body.durationMin) * 10) / 10;
+      if (!Number.isFinite(distanceKm) || distanceKm <= 0 || distanceKm > 100) return fail(res, 400, '距离需要在 0.1 到 100 公里之间。');
+      if (!Number.isFinite(durationMin) || durationMin <= 0 || durationMin > 1440) return fail(res, 400, '时长需要在 1 到 1440 分钟之间。');
+      const date = String(body.date || todayDate()).slice(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date > todayDate()) return fail(res, 400, '记录日期不正确。');
+      const source = ['gps', 'screenshot', 'file', 'manual'].includes(body.source) ? body.source : 'manual';
+      const run = {
+        id: 'run-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5),
+        memberId: member.id, memberName: member.name, date,
+        title: String(body.title || '').trim().slice(0, 40) || '跑步记录',
+        distanceKm, durationMin, note: String(body.note || '').trim().slice(0, 200),
+        source, visibility: 'club', createdAt: new Date().toISOString(),
+      };
+      state.runs.unshift(run);
+      return json(res, 201, summarizeRun(run));
+    }
+
+    if (method === 'GET' && path === '/challenges') {
+      const filterMemberId = url.searchParams.get('memberId') || null;
+      const items = state.challenges
+        .slice()
+        .sort((a, b) => challengeOrder(a) - challengeOrder(b) || b.startDate.localeCompare(a.startDate))
+        .map((challenge) => summarizeChallenge(challenge, filterMemberId));
+      return json(res, 200, items);
+    }
+
+    if (method === 'POST' && path === '/challenges') {
+      const body = await readBody(req);
+      const err = validateChallenge(body);
+      if (err) return fail(res, 400, err);
+      const challenge = {
+        id: 'chl-' + Date.now(),
+        title: String(body.title).trim(),
+        description: String(body.description).trim(),
+        targetKm: Number(body.targetKm),
+        startDate: String(body.startDate || body.startAt).slice(0, 10),
+        endDate: String(body.endDate || body.endAt).slice(0, 10),
+        createdAt: new Date().toISOString(),
+      };
+      state.challenges.push(challenge);
+      notifyChallenge(challenge);
+      return json(res, 201, summarizeChallenge(challenge));
+    }
+
+    const challengeId = parts[0] === 'challenges' ? parts[1] : null;
+    if (challengeId && method === 'PATCH' && parts.length === 2) {
+      const challenge = state.challenges.find((item) => item.id === challengeId);
+      if (!challenge) return fail(res, 404, '挑战不存在。', 'not_found');
+      const body = await readBody(req);
+      if (body.status !== 'ended') return fail(res, 400, '挑战状态不正确。');
+      if (challengeStatus(challenge) === 'ended') return fail(res, 400, '这个挑战已经结束了。');
+      challenge.endedAt = new Date().toISOString();
+      return json(res, 200, summarizeChallenge(challenge));
     }
 
     if (method === 'POST' && path === '/member-applications') {

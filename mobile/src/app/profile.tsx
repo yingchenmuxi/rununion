@@ -17,6 +17,7 @@ import {
 import { colors, mock, radius, space } from '@/constants/qingrun';
 import { useActivities } from '@/features/activities/ActivityContext';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useChallenges } from '@/features/challenges/ChallengeContext';
 import { useKnowledge } from '@/features/knowledge/KnowledgeContext';
 import { useNotifications } from '@/features/notifications/NotificationContext';
 import { useRuns } from '@/features/runs/RunContext';
@@ -28,6 +29,7 @@ export default function ProfileScreen() {
   const { stats } = useRuns();
   const { myUpcoming, pendingCount, attendedCount, resetDemo } = useActivities();
   const { unread, refresh: refreshNotifications } = useNotifications();
+  const { refresh: refreshChallenges } = useChallenges();
   const activitySubtitle =
     pendingCount > 0
       ? '已报名 ' + myUpcoming.length + ' 场 · 待确认 ' + pendingCount + ' 场'
@@ -57,7 +59,8 @@ export default function ProfileScreen() {
     try {
       await resetDemo();
       await refreshNotifications();
-      setResetMessage('活动演示数据和消息已重置，后台和手机端都回到初始状态。');
+      await refreshChallenges();
+      setResetMessage('活动演示数据、消息和挑战已重置，后台和手机端都回到初始状态。');
     } catch {
       setResetMessage('重置失败，请确认演示数据服务已启动。');
     } finally {
