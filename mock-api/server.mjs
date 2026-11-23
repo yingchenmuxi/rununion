@@ -3,6 +3,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 
 const PORT = Number(process.env.PORT || 8090);
+const HOST = process.env.HOST || '127.0.0.1';
 const ROOT = resolve(process.env.DIST_DIR || 'mobile/dist');
 const DATA_FILE = resolve('mock-api/data.json');
 const MIME = {
@@ -1221,9 +1222,9 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log('Qingrun prototype: http://127.0.0.1:' + PORT);
-  console.log('Mock API: http://127.0.0.1:' + PORT + '/api/health');
+server.listen(PORT, HOST, () => {
+  console.log('Qingrun prototype: http://' + HOST + ':' + PORT);
+  console.log('Mock API: http://' + HOST + ':' + PORT + '/api/health');
   console.log('Static root: ' + ROOT);
   console.log('Seed data: ' + DATA_FILE);
 });

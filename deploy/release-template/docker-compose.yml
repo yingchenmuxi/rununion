@@ -1,0 +1,48 @@
+name: qingrun
+
+services:
+  api:
+    image: node:22-alpine
+    restart: unless-stopped
+    working_dir: /app
+    command: ["node", "server.mjs"]
+    environment:
+      NODE_ENV: production
+      PORT: "8090"
+      HOST: "0.0.0.0"
+    volumes:
+      - ./api/server.mjs:/app/server.mjs:ro
+    expose:
+      - "8090"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8090/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  web:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+      - "${ADMIN_BIND:-127.0.0.1}:8081:8081"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-http://localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./web:/srv/mobile:ro
+      - ./admin:/srv/admin:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+    name: qingrun_caddy_data
+  caddy_config:
+    name: qingrun_caddy_config

@@ -58,14 +58,37 @@ docker --version
 docker compose version
 ```
 
-## 3. 上传并启动
+## 3. 上传并启动（推荐：版本发布包）
 
-把整个项目目录上传到服务器，例如 `/opt/qingrun`。不要只传 `deploy/`，因为镜像构建需要 `mobile/`、`admin/` 和 `mock-api/`。
+每次发版，在项目根生成一个自包含目录：
 
 ```bash
-cd /opt/qingrun
-cp deploy/.env.example deploy/.env
-vi deploy/.env
+node scripts/make-server-release.mjs v0.1.0
+```
+
+生成 `releases/qingrun-server-v0.1.0/`。里面已经有手机端静态文件、后台静态文件、Mock API、Caddyfile、compose 和启动脚本；服务器不需要 Node、npm，也不需要重新构建。
+
+本地可以先验证发布包：
+
+```bash
+MOBILE_DIR=releases/qingrun-server-v0.1.0/web \
+ADMIN_DIR=releases/qingrun-server-v0.1.0/admin \
+PORT=8082 ADMIN_PORT=8083 node deploy/preview.mjs
+```
+
+复制整个目录到服务器：
+
+```bash
+scp -r releases/qingrun-server-v0.1.0 用户@服务器:/opt/qingrun/
+```
+
+服务器上：
+
+```bash
+cd /opt/qingrun/qingrun-server-v0.1.0
+cp .env.example .env
+vi .env
+sh start.sh
 ```
 
 最小配置：
@@ -76,22 +99,16 @@ ADMIN_BIND=127.0.0.1
 ```
 
 - `SITE_ADDRESS` 填域名时，Caddy 会自动申请并续期 HTTPS 证书。
-- 只测试 IP 时可写 `SITE_ADDRESS=:80`，这时是 HTTP。
+- 只测试 IP 时可写 `SITE_ADDRESS=http://服务器IP`，这时是 HTTP。
 - `ADMIN_BIND=127.0.0.1` 表示后台只绑本机；不要随便改成 `0.0.0.0`。
 
-启动：
+首次启动会拉取 `node:22-alpine` 和 `caddy:2.8-alpine`，不会编译源码。看到两个服务都为 `running`、`api` 为 `healthy` 后，打开 `https://run.example.com/`。
+
+如果只是开发调试，不想生成发布包，也可以把整个项目传到服务器，按原来的方式直接构建：
 
 ```bash
-cd deploy
+cd /opt/qingrun/deploy
 docker compose up -d --build
-docker compose ps
-docker compose logs -f web
-```
-
-首次构建会下载 Node 和 Caddy 镜像，并编译手机端和后台，通常几分钟。看到两个服务都为 `running`、`api` 为 `healthy` 后，打开：
-
-```text
-https://run.example.com/
 ```
 
 ## 4. 手机上怎么用
@@ -139,14 +156,32 @@ http://127.0.0.1:8081
 - 手机端“我的 → 重置演示数据”和后台“重置演示数据”都会调用 `POST /api/reset`。
 - 公开演示时，任何访问者都能调用这个接口重置数据；只把链接发给可信的人，正式版必须加鉴权。
 
-## 7. 更新版本
+## 7. 版本备份与更新
+
+每个版本生成一个独立目录，目录生成后不再修改；旧版本就是回滚备份。
+
+发下一版：
 
 ```bash
-cd /opt/qingrun
-# 用你的方式更新代码，例如 git pull / rsync
-cd deploy
-docker compose up -d --build
+node scripts/make-server-release.mjs v0.1.1
 ```
+
+脚本会生成 `releases/qingrun-server-v0.1.1/`，并更新 `releases/LATEST.txt` 和 `releases/index.json`。`releases/qingrun-server-v0.1.0/` 不会被覆盖。
+
+服务器更新时保留旧目录：
+
+```bash
+cd /opt/qingrun/qingrun-server-v0.1.0
+docker compose down
+
+cd /opt/qingrun/qingrun-server-v0.1.1
+cp ../qingrun-server-v0.1.0/.env .env
+sh start.sh
+```
+
+回滚同理：停新版本，回到旧目录 `docker compose up -d`。HTTPS 证书在命名卷 `qingrun_caddy_data` 里，跨版本保留；不要执行 `docker compose down -v`。
+
+发布目录只保留在本机 `releases/`，不塞进 Git 仓库；Git 里保留生成脚本 `scripts/make-server-release.mjs` 和模板 `deploy/release-template/`，随时可以重建发布包。发布包的 `SHA256SUMS.txt` 可在服务器上执行 `sha256sum -c SHA256SUMS.txt` 校验。
 
 静态资源文件名带 hash，可以长期缓存；`index.html`、`sw.js`、`manifest.webmanifest` 不缓存。修改 Service Worker 缓存内容时，记得同步改 `mobile/pwa/sw.js` 里的 `qingrun-shell-v1` 版本号。
 
@@ -181,5 +216,9 @@ deploy/
 ├─ .env.example           SITE_ADDRESS / ADMIN_BIND
 ├─ preview.mjs            本地生产态预览（8080/8081）
 ├─ verify-deploy.mjs      静态与代理冒烟
-└─ verify-browser.mjs     无头浏览器登录与 PWA 冒烟
+├─ verify-browser.mjs     无头浏览器登录与 PWA 冒烟
+└─ release-template/      版本发布包的 compose/启动脚本/README 模板
+
+scripts/
+└─ make-server-release.mjs  生成 releases/qingrun-server-vX.Y.Z/
 ```

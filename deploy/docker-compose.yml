@@ -6,6 +6,8 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile.api
     restart: unless-stopped
+    environment:
+      HOST: "0.0.0.0"
     expose:
       - "8090"
     healthcheck:

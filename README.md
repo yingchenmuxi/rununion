@@ -117,12 +117,18 @@
     node deploy/verify-deploy.mjs
     node deploy/verify-browser.mjs
 
-服务器上：
+生成一个可以直接复制到服务器的版本目录：
 
-    cd deploy
+    node scripts/make-server-release.mjs v0.1.0
+
+把 `releases/qingrun-server-v0.1.0/` 整个目录复制到服务器，旧版本目录保留作回滚备份。服务器上：
+
+    cd qingrun-server-v0.1.0
     cp .env.example .env
     # 编辑 .env，填 SITE_ADDRESS=你的域名
-    docker compose up -d --build
+    sh start.sh
+
+发布目录自带手机端、后台和 Mock API，服务器不需要 Node/npm，也不会重新构建。每版用新的版本号生成独立目录，`releases/LATEST.txt` 和 `releases/index.json` 记录当前版本与校验值；完整说明见 [deploy/README.md](deploy/README.md)。
 
 手机端打开 `https://你的域名/`，可添加到主屏幕；后台默认只监听服务器本机 `8081`，用 SSH 隧道访问，不直接暴露公网。演示 API 无鉴权、数据在内存、重启回种子，不能直接当生产环境。
 
@@ -220,7 +226,8 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
     QPTapp/
     ├─ docs/                     产品、流程、后台与登录文档
     ├─ mock-api/                 手机端与社团后台共享的本地活动 Mock API
-    ├─ deploy/                   Caddy + Docker Compose 服务器部署包
+    ├─ deploy/                   Caddy + Docker Compose 服务器部署包与发布模板
+    ├─ releases/                本地服务器版本包与回滚备份（不入 Git）
     ├─ mobile/                   Expo 应用
     │  ├─ src/app/               页面与路由
     │  ├─ src/features/auth/     登录、入团、待审批
@@ -240,7 +247,7 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
     │  ├─ src/data/              repository 接口 + 示例数据实现
     │  └─ shots/                 后台页面截图
     ├─ server/                   PocketBase 可执行文件与本地数据
-    ├─ scripts/                  GitHub 镜像与发布脚本
+    ├─ scripts/                  GitHub 镜像、发布与服务器版本包脚本
     └─ README.md
 
 ## 文档

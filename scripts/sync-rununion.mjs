@@ -4,7 +4,7 @@ import path from 'node:path';
 const source = path.resolve(process.argv[2] ?? '.');
 const target = path.resolve(process.argv[3] ?? 'E:/_src/rununion');
 
-const skippedNames = new Set(['.git', 'node_modules', 'dist', '.expo', '.vite', 'web-build', 'server']);
+const skippedNames = new Set(['.git', 'node_modules', 'dist', '.expo', '.vite', 'web-build', 'server', 'releases']);
 
 function shouldCopy(sourcePath) {
   const relative = path.relative(source, sourcePath);
