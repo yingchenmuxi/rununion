@@ -5,6 +5,9 @@
 **/shots
 **/.edge-*
 **/*.log
+releases
+**/__pycache__
+**/*.pyc
 .git
 .gitignore
 docs
