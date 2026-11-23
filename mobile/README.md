@@ -29,6 +29,14 @@ npm run preview:web
 
 `preview:web` 会同时启动 Mock API 和静态文件服务，地址为 <http://127.0.0.1:8090>。服务带 SPA fallback，直接访问 `/school`、`/run`、`/growth`、`/profile`、`/knowledge`、`/knowledge/knee`、`/activities`、`/my-activities`、`/activity/act-001`、`/club`、`/announcements`、`/announcements/ann-001` 不会 404。
 
+生产 PWA 构建：
+
+```bash
+npm run web:deploy
+```
+
+输出 `dist/` 会带 manifest、Service Worker 和安装图标，默认请求同源 `/api`。本地生产态预览、Docker 部署和 HTTPS 步骤见 [../deploy/README.md](../deploy/README.md)。
+
 真机预览：安装 Expo Go，电脑和手机连同一 Wi-Fi，在 mobile 目录运行 `npm start`，扫描二维码。局域网不通时用 `npx expo start --tunnel`。
 
 ## 演示账号
@@ -122,6 +130,7 @@ cd .. && node verify-invites.mjs
 - 公告不能带图片、附件或富文本；已读数只统计演示成员打开详情，没有已读回执。跑团主页的成员数、本周公里和安全约定仍是静态演示数据。
 - 手机端与社团后台的活动、公告、跑步记录和挑战数据已互通；消息也随重置一起回到种子。
 - 公益账本是写死的示例数据，不接捐赠、支付、库存或受助人档案，也没有后台维护界面。
+- PWA 是网页壳，不是 App Store / APK 安装包；登录状态只存在页面内存，刷新会退出，Service Worker 只缓存应用外壳，不缓存 `/api/` 数据。
 - 签到是团长手工记录，不是到场验证。
 - GPS 只在前台累计距离，不保存轨迹；真实设备上的精度、耗电和锁屏行为尚未验证。
 - 截图通道不自动 OCR，保存前必须人工确认数字；文件通道暂不支持 FIT。
@@ -138,8 +147,3 @@ cd .. && node verify-invites.mjs
 - [手机端活动报名与我的活动 v0.1](../docs/12-手机端活动报名与我的活动-v0.1.md)
 - [社团后台活动发布与报名审核 v0.1](../docs/13-社团后台活动发布与报名审核-v0.1.md)
 - [社团后台赛后签到与出勤 v0.1](../docs/14-赛后签到与出勤-v0.1.md)
-- [活动出勤跨端闭环 v0.1](../docs/15-活动出勤跨端闭环-v0.1.md)
-- [活动消息、成长沉淀与公益账本 v0.1](../docs/16-活动消息与成长公益账本-v0.1.md)
-- [跑团公告与跑团主页 v0.1](../docs/17-跑团公告与跑团主页-v0.1.md)
-- [邀请码接入入团 v0.1](../docs/19-邀请码接入入团-v0.1.md)
-- [开跑记录与挑战跨端 v0.1](../docs/20-开跑记录与挑战跨端-v0.1.md)

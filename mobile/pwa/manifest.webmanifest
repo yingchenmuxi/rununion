@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "青跑团 · 青少年公益长跑",
+  "short_name": "青跑团",
+  "description": "面向 10–20 岁青少年的公益长跑成长平台：跑团、活动、开跑记录、成长档案和公益账本。",
+  "lang": "zh-CN",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F4EC",
+  "theme_color": "#0E5A4A",
+  "categories": ["health", "fitness", "sports", "education"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+  ]
+}

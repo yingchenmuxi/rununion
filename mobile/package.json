@@ -44,6 +44,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "web:export": "expo export --platform web",
+    "web:deploy": "node scripts/build-web.mjs",
     "preview:web": "node scripts/preview-shared.mjs"
   },
   "private": true

@@ -14,7 +14,7 @@ function shouldCopy(sourcePath) {
     return false;
   }
   if (relative.endsWith('.log')) return false;
-  if (parts.some((part) => part === '.env' || part.startsWith('.env.'))) return false;
+  if (parts.some((part) => part !== '.env.example' && (part === '.env' || part.startsWith('.env.')))) return false;
   return true;
 }
 

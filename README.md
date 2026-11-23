@@ -100,6 +100,32 @@
 然后打开 <http://127.0.0.1:8090>。  
 `preview:web` 会同时启动 Mock API 和静态文件服务，带 SPA fallback，直接访问 `/school`、`/run`、`/growth`、`/profile`、`/knowledge`、`/knowledge/knee`、`/activities`、`/my-activities`、`/activity/act-001`、`/club`、`/announcements`、`/announcements/ann-001` 不会 404。
 
+## 部署到服务器（PWA + 后台）
+
+手机端网页已经带 PWA manifest、Service Worker 和安装图标，后台和手机端可以一起用 Docker Compose 部署。完整步骤、HTTPS、后台 SSH 隧道和常见问题见 [deploy/README.md](deploy/README.md)。
+
+本地生产态验证：
+
+    cd mobile
+    npm run web:deploy
+
+    cd ../admin
+    VITE_ACTIVITY_API=/api npm run build
+
+    cd ..
+    node deploy/preview.mjs
+    node deploy/verify-deploy.mjs
+    node deploy/verify-browser.mjs
+
+服务器上：
+
+    cd deploy
+    cp .env.example .env
+    # 编辑 .env，填 SITE_ADDRESS=你的域名
+    docker compose up -d --build
+
+手机端打开 `https://你的域名/`，可添加到主屏幕；后台默认只监听服务器本机 `8081`，用 SSH 隧道访问，不直接暴露公网。演示 API 无鉴权、数据在内存、重启回种子，不能直接当生产环境。
+
 ## 手机预览
 
 1. 手机安装 Expo Go。
@@ -194,6 +220,7 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
     QPTapp/
     ├─ docs/                     产品、流程、后台与登录文档
     ├─ mock-api/                 手机端与社团后台共享的本地活动 Mock API
+    ├─ deploy/                   Caddy + Docker Compose 服务器部署包
     ├─ mobile/                   Expo 应用
     │  ├─ src/app/               页面与路由
     │  ├─ src/features/auth/     登录、入团、待审批
@@ -239,6 +266,7 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
 - [入团申请与成员审批 v0.1](docs/18-入团申请与成员审批-v0.1.md)
 - [邀请码接入入团 v0.1](docs/19-邀请码接入入团-v0.1.md)
 - [开跑记录与挑战跨端 v0.1](docs/20-开跑记录与挑战跨端-v0.1.md)
+- [服务器部署与 PWA](deploy/README.md)
 
 ## 重要说明
 
@@ -252,4 +280,5 @@ Expo Go 需要支持项目的 SDK 版本（当前 Expo SDK 58）。如果商店�
 - 知识库内容是为演示写的项目稿，没有作者署名、外部来源或医学审核，不能当作正式科普或医疗建议。
 - 不做 AI 问答、不做支付、不直接收现金；AI 检索要等审核语料和引用规范确定后再接。
 - 正式试点前需要：学校书面同意、监护人同意、隐私政策、境内服务器、活动安全方案。
+- 当前部署包用于演示：Mock API 没有鉴权、数据不落库，公开链接前先看 [deploy/README.md](deploy/README.md) 的安全边界。
 - 上线前请找属地律师/网信/教育/民政部门确认合规要求。

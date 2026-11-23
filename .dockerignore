@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/.expo
+**/.vite
+**/shots
+**/.edge-*
+**/*.log
+.git
+.gitignore
+docs

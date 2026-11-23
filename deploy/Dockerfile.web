@@ -1,0 +1,25 @@
+FROM node:22-alpine AS build
+
+WORKDIR /src
+ENV CI=1
+ENV EXPO_NO_TELEMETRY=1
+
+COPY mobile/package.json mobile/package-lock.json ./mobile/
+RUN cd mobile && npm ci --no-audit --no-fund
+
+COPY mobile ./mobile
+RUN cd mobile && npm run web:deploy
+
+COPY admin/package.json admin/package-lock.json ./admin/
+RUN cd admin && npm ci --no-audit --no-fund
+
+COPY admin ./admin
+RUN cd admin && VITE_ACTIVITY_API=/api npm run build
+
+FROM caddy:2.8-alpine
+
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /src/mobile/dist /srv/mobile
+COPY --from=build /src/admin/dist /srv/admin
+
+EXPOSE 80 443 8081
