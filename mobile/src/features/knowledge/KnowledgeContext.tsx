@@ -12,7 +12,7 @@ type KnowledgeContextValue = {
 
 const KnowledgeContext = createContext<KnowledgeContextValue | undefined>(undefined);
 
-const INITIAL_SAVED = ['breathing', 'easy-pace', 'knee'];
+const INITIAL_SAVED: string[] = [];
 
 export function KnowledgeProvider({ children }: { children: ReactNode }) {
   const [savedIds, setSavedIds] = useState<string[]>(INITIAL_SAVED);

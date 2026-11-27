@@ -7,13 +7,6 @@ import {
   PLATFORM_DISPLAY_NAME,
   PLATFORM_EMAIL,
   PLATFORM_PASSWORD,
-  seedActivities,
-  seedActivitySignups,
-  seedAnnouncements,
-  seedChallenges,
-  seedInvites,
-  seedMembers,
-  seedRecords,
 } from './mock/mockData';
 import type {
   ActivitySignup,
@@ -54,13 +47,13 @@ function challengeStatus(startAt: string, endAt: string): Challenge['status'] {
 }
 
 export class MockAdminRepository implements AdminRepository {
-  private members: Member[] = clone(seedMembers);
-  private invites: InviteCode[] = clone(seedInvites);
-  private announcements: Announcement[] = clone(seedAnnouncements);
-  private challenges: Challenge[] = clone(seedChallenges);
-  private records: RunRecord[] = clone(seedRecords);
-  private activities: ClubActivity[] = clone(seedActivities);
-  private activitySignups: ActivitySignup[] = clone(seedActivitySignups);
+  private members: Member[] = [];
+  private invites: InviteCode[] = [];
+  private announcements: Announcement[] = [];
+  private challenges: Challenge[] = [];
+  private records: RunRecord[] = [];
+  private activities: ClubActivity[] = [];
+  private activitySignups: ActivitySignup[] = [];
 
   async login(email: string, password: string): Promise<AdminUser> {
     await wait(220);
@@ -107,21 +100,7 @@ export class MockAdminRepository implements AdminRepository {
         detail: m.grade + ' · ' + (m.note || '等待管理员审批'),
         time: i === 0 ? '昨天 20:12' : '昨天 19:05',
       })),
-      {
-        id: 'act-challenge-001',
-        type: 'challenge' as const,
-        title: '十一月 · 80 公里挑战进行中',
-        detail: '64 人参加，21 人完成',
-        time: '本月',
-      },
-      {
-        id: 'act-announcement-001',
-        type: 'announcement' as const,
-        title: '公告《周六校园环湖 5K》已发布',
-        detail: '作者：林小满',
-        time: '昨天 20:35',
-      },
-    ].slice(0, 7);
+    ];
 
     return {
       stats: {
@@ -129,7 +108,7 @@ export class MockAdminRepository implements AdminRepository {
         activeMembers: this.members.filter((m) => m.status === 'active').length,
         weeklyActive: this.members.filter((m) => m.status === 'active' && m.weeklyKm > 0).length,
         weeklyKm: Math.round(this.members.filter((m) => m.status === 'active').reduce((sum, m) => sum + m.weeklyKm, 0) * 10) / 10,
-        monthlyKm: 1284,
+        monthlyKm: Math.round(this.records.reduce((sum, r) => sum + r.distanceKm, 0) * 10) / 10,
         activeChallenges: this.challenges.filter((c) => c.status === 'active').length,
       },
       pending: clone(pending),

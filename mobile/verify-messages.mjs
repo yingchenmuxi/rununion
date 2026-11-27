@@ -194,7 +194,7 @@ try {
   await evaluate("(() => { const nodes=[...document.querySelectorAll('div')]; const target=nodes.reverse().find((node)=>(node.innerText||'').includes('重置活动演示数据')&&node.getBoundingClientRect().width>0); if(target) target.scrollIntoView({block:'center'}); return true; })()");
   await sleep(300);
   check('点击重置演示数据', (await clickButton('重置活动演示数据')).ok);
-  check('重置成功提示可见', await waitForText('活动演示数据和消息已重置'));
+  check('重置成功提示可见', await waitForText('活动演示数据、消息和挑战已重置'));
   inbox = await api('/member/notifications?memberId=m-001');
   check('重置后消息恢复 3 条 / 未读 2 条', inbox.items.length === 3 && inbox.unread === 2, JSON.stringify({ n: inbox.items.length, unread: inbox.unread }));
   await screenshot('07-profile-reset');

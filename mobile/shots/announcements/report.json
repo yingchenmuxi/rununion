@@ -3,7 +3,7 @@
     {
       "name": "API 初始 4 活动 / 3 条已发布公告 / 1 条草稿",
       "pass": true,
-      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"serves\":\"mobile/dist\"}"
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"invites\":4,\"runs\":25,\"challenges\":3,\"serves\":\"mobile/dist\"}"
     },
     {
       "name": "后台公告列表 3 已发布 + 1 草稿",
@@ -163,12 +163,12 @@
     {
       "name": "新增消息类型为跑团公告",
       "pass": true,
-      "detail": "{\"id\":\"ntf-1795247923270-g2xf3\",\"memberId\":\"m-001\",\"type\":\"announcement\",\"title\":\"跑团公告：周末集合改到南门\",\"body\":\"这周六的校园环湖改到学校南门集合，07:00 出发。南门在修路，骑车来的同学停到图书馆西侧车棚。\",\"announcementId\":\"ann-1795247923243\",\"createdAt\":\"2026-11-21T07:58:43.270Z\"}"
+      "detail": "{\"id\":\"ntf-1795737077120-gwzvv\",\"memberId\":\"m-001\",\"type\":\"announcement\",\"title\":\"跑团公告：周末集合改到南门\",\"body\":\"这周六的校园环湖改到学校南门集合，07:00 出发。南门在修路，骑车来的同学停到图书馆西侧车棚。\",\"announcementId\":\"ann-1795737077116\",\"createdAt\":\"2026-11-26T23:51:17.120Z\"}"
     },
     {
       "name": "成员端公告增至 4 条且置顶在前",
       "pass": true,
-      "detail": "[\"ann-1795247923243\",\"ann-001\",\"ann-002\",\"ann-003\"]"
+      "detail": "[\"ann-1795737077116\",\"ann-001\",\"ann-002\",\"ann-003\"]"
     },
     {
       "name": "回首页看铃铛",
@@ -248,5 +248,5 @@
   ],
   "failures": [],
   "events": [],
-  "finishedAt": "2026-11-21T07:58:47.120Z"
+  "finishedAt": "2026-11-26T23:51:19.869Z"
 }

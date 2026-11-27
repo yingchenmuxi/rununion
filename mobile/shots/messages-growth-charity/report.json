@@ -3,7 +3,7 @@
     {
       "name": "API 初始 4 场活动 / 19 条报名 / 3 条消息",
       "pass": true,
-      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"serves\":\"mobile/dist\"}"
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"invites\":4,\"runs\":25,\"challenges\":3,\"serves\":\"mobile/dist\"}"
     },
     {
       "name": "初始消息 3 条、未读 2 条",
@@ -268,5 +268,5 @@
   ],
   "failures": [],
   "events": [],
-  "finishedAt": "2026-11-20T11:33:52.286Z"
+  "finishedAt": "2026-11-26T23:58:44.869Z"
 }

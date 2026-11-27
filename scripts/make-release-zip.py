@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""把 releases/qingrun-server-vX.Y.Z 打成同版本 zip，并写 sha256。"""
+"""把 releases 下指定版本目录打成同名 zip，并写 sha256。"""
 import hashlib
 import os
 import sys
@@ -10,12 +10,14 @@ RELEASES = os.path.join(ROOT, "releases")
 
 def main():
     if len(sys.argv) != 2:
-        print("用法：python scripts/make-release-zip.py v0.1.0")
+        print("用法：python scripts/make-release-zip.py v0.1.0 | qingrun-windows-v0.2.0")
         return 1
-    version = sys.argv[1]
-    if not version.startswith("v"):
-        version = "v" + version
-    name = "qingrun-server-" + version
+    arg = sys.argv[1]
+    if arg.startswith("qingrun-"):
+        name = arg
+    else:
+        version = arg if arg.startswith("v") else "v" + arg
+        name = "qingrun-server-" + version
     source = os.path.join(RELEASES, name)
     if not os.path.isdir(source):
         print("发布目录不存在：" + source)

@@ -35,7 +35,8 @@ check('m-001 消息 4 条 / 未读 3 条', inbox.items.length === 4 && inbox.unr
 check('最新消息是挑战通知', inbox.items[0]?.type === 'challenge' && inbox.items[0]?.title === '跑团挑战：十一月 · 40 公里加练', inbox.items[0]?.title);
 let memberChallenges = await api('/challenges?memberId=m-001');
 let active = memberChallenges.find((item) => item.id === 'chl-001');
-check('11 月挑战初始 50.5 / 80 km · 63%', active?.myKm === 50.5 && active?.myPercent === 63 && active?.daysLeft === 8, JSON.stringify(active && { km: active.myKm, pct: active.myPercent, days: active.daysLeft }));
+const activeDays = active ? Math.max(0, Math.ceil((new Date(active.endDate + 'T23:59:59+08:00').getTime() - Date.now()) / 86400000)) : -1;
+check('11 月挑战初始 50.5 / 80 km · 63% · 剩余天数一致', active?.myKm === 50.5 && active?.myPercent === 63 && active?.daysLeft === activeDays, JSON.stringify(active && { km: active.myKm, pct: active.myPercent, days: active.daysLeft, expectedDays: activeDays }));
 check('后台新建挑战已结束且出现在成员端', memberChallenges.some((item) => item.title === '十一月 · 40 公里加练' && item.status === 'ended') && memberChallenges.length === 4);
 
 const edge = spawn(EDGE, [
@@ -146,7 +147,7 @@ try {
   check('成长页加载挑战卡', await waitForText('跑团挑战'));
   let body = await bodyText();
   check('成长卡显示挑战名与进度', body.includes('11 月 · 80 公里挑战') && body.includes('50.5 / 80 km') && body.includes('63%'), body.slice(0, 200));
-  check('成长卡显示剩余天数与参与人数', body.includes('还剩 8 天') && body.includes('8 人参与 · 0 人完成'));
+  check('成长卡显示剩余天数与参与人数', body.includes('还剩 ' + active.daysLeft + ' 天') && body.includes(active.participantCount + ' 人参与 · ' + active.completedCount + ' 人完成'), JSON.stringify({ days: active.daysLeft, people: active.participantCount }));
   check('成长卡显示不重复计入说明', body.includes('活动出勤不重复计入'));
   await screenshot('01-growth-challenge');
 
@@ -155,7 +156,8 @@ try {
   check('挑战列表加载', await waitForText('跑团挑战'));
   body = await bodyText();
   check('挑战列表显示 4 个挑战', ['11 月 · 80 公里挑战', '12 月 · 60 公里挑战', '十一月 · 40 公里加练', '10 月 · 60 公里挑战'].every((title) => body.includes(title)));
-  check('新挑战显示已结束只读', body.includes('47%') && body.includes('已结束 · 进度只读') && body.includes('18.6 / 40 km'));
+  const added = memberChallenges.find((item) => item.title === '十一月 · 40 公里加练');
+check('新挑战显示已结束只读', Boolean(added) && body.includes(added.myKm.toFixed(1) + ' / ' + added.targetKm + ' km') && body.includes(added.myPercent + '%') && body.includes('已结束 · 进度只读'), JSON.stringify(added && { km: added.myKm, pct: added.myPercent }));
   await screenshot('02-challenges-list');
 
   await evaluate('history.back()');

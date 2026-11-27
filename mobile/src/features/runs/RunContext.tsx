@@ -78,25 +78,6 @@ function addDays(date: Date, days: number) {
   return next;
 }
 
-function buildSeedRuns(): RunRecord[] {
-  const today = new Date();
-  const weekStart = startOfWeek(today);
-  const currentDate = (offset: number) => {
-    const day = addDays(weekStart, offset);
-    return toISODate(day > today ? today : day);
-  };
-
-  return [
-    { id: 'seed-current-3', date: currentDate(2), title: '公园慢跑', distanceKm: 7.2, durationMin: 42.5, source: 'manual' },
-    { id: 'seed-current-2', date: currentDate(1), title: '校园环湖', distanceKm: 5.2, durationMin: 28 + 40 / 60, source: 'gps' },
-    { id: 'seed-current-1', date: currentDate(0), title: '操场节奏跑', distanceKm: 6.2, durationMin: 37 + 20 / 60, source: 'manual' },
-    { id: 'seed-last-2', date: toISODate(addDays(weekStart, -4)), title: '放学慢跑', distanceKm: 7.4, durationMin: 43 + 50 / 60, source: 'manual' },
-    { id: 'seed-last-1', date: toISODate(addDays(weekStart, -7)), title: '校园环湖', distanceKm: 5.6, durationMin: 33 + 40 / 60, source: 'manual' },
-    { id: 'seed-two-weeks', date: toISODate(addDays(weekStart, -12)), title: '周末拉练', distanceKm: 10.7, durationMin: 63 + 30 / 60, source: 'manual' },
-    { id: 'seed-three-weeks', date: toISODate(addDays(weekStart, -17)), title: '公园慢跑', distanceKm: 8.2, durationMin: 48 + 20 / 60, source: 'file' },
-  ];
-}
-
 export function formatDuration(minutes: number) {
   const totalSeconds = Math.max(0, Math.round(minutes * 60));
   const hours = Math.floor(totalSeconds / 3600);
@@ -131,7 +112,7 @@ function toRecord(row: ApiRun): RunRecord {
 }
 
 export function RunProvider({ children }: { children: ReactNode }) {
-  const [records, setRecords] = useState<RunRecord[]>(() => buildSeedRuns());
+  const [records, setRecords] = useState<RunRecord[]>([]);
   const [syncError, setSyncError] = useState('');
 
   const refresh = useCallback(async () => {

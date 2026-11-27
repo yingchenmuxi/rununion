@@ -12,6 +12,8 @@ const adminDir = resolve(process.env.ADMIN_DIR || resolve(root, 'admin', 'dist')
 const apiTarget = new URL(process.env.API_TARGET || 'http://127.0.0.1:8090');
 const port = Number(process.env.PORT || 8080);
 const adminPort = Number(process.env.ADMIN_PORT || 8081);
+const mobileBind = process.env.MOBILE_BIND || '127.0.0.1';
+const adminBind = process.env.ADMIN_BIND || '127.0.0.1';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -115,8 +117,8 @@ function makeServer(baseDir, label) {
       if (!res.headersSent) sendJson(res, 500, { error: error.message });
       else res.destroy();
     }
-  }).listen(label === 'mobile' ? port : adminPort, '127.0.0.1', () => {
-    console.log(label + ' preview: http://127.0.0.1:' + (label === 'mobile' ? port : adminPort));
+  }).listen(label === 'mobile' ? port : adminPort, label === 'mobile' ? mobileBind : adminBind, () => {
+    console.log(label + ' preview: http://' + (label === 'mobile' ? mobileBind : adminBind) + ':' + (label === 'mobile' ? port : adminPort));
   });
 }
 

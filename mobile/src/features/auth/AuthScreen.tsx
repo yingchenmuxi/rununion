@@ -195,7 +195,7 @@ export function AuthScreen() {
               <View style={styles.clubInfo}>
                 <Text style={styles.clubName}>{mock.club.name}</Text>
                 <Text style={styles.clubMeta}>
-                  {mock.club.city} · {mock.club.members} 名成员 · 已认证
+                  {mock.club.city} · {mock.club.members > 0 ? mock.club.members + ' 名成员' : '等待同学加入'} · 已认证
                 </Text>
               </View>
             </View>

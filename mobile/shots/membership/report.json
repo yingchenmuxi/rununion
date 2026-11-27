@@ -3,7 +3,7 @@
     {
       "name": "共享 Mock 种子 12 名成员",
       "pass": true,
-      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"invites\":4,\"serves\":\"mobile/dist\"}"
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"invites\":4,\"runs\":25,\"challenges\":3,\"serves\":\"mobile/dist\"}"
     },
     {
       "name": "初始 3 条待审批申请",
@@ -88,7 +88,7 @@
     {
       "name": "共享 API 收到申请",
       "pass": true,
-      "detail": "{\"id\":\"m-1795348031025\",\"name\":\"周小满\",\"username\":\"zhouxiaoman\",\"grade\":\"高一\",\"gender\":\"未填写\",\"status\":\"pending\",\"role\":\"member\",\"joinedAt\":\"2026-11-22T11:47:11.025Z\",\"lastActiveAt\":\"2026-11-22T11:47:11.025Z\",\"weeklyKm\":0,\"totalKm\":0,\"note\":\"通过邀请码 KANGFU-2026 提交申请。\"}"
+      "detail": "{\"id\":\"m-1795737300324\",\"name\":\"周小满\",\"username\":\"zhouxiaoman\",\"grade\":\"高一\",\"gender\":\"未填写\",\"status\":\"pending\",\"role\":\"member\",\"joinedAt\":\"2026-11-26T23:55:00.324Z\",\"lastActiveAt\":\"2026-11-26T23:55:00.324Z\",\"weeklyKm\":0,\"totalKm\":0,\"note\":\"通过邀请码 KANGFU-2026 提交申请。\"}"
     },
     {
       "name": "成员数增至 13",
@@ -268,7 +268,7 @@
     {
       "name": "重提复用原申请记录",
       "pass": true,
-      "detail": "{\"id\":\"m-1795348062966\",\"status\":\"pending\"}"
+      "detail": "{\"id\":\"m-1795737331891\",\"status\":\"pending\"}"
     },
     {
       "name": "重提不增加成员数",
@@ -293,5 +293,5 @@
   ],
   "failures": [],
   "events": [],
-  "finishedAt": "2026-11-22T11:47:49.042Z"
+  "finishedAt": "2026-11-26T23:55:37.966Z"
 }

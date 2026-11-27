@@ -18,35 +18,15 @@ import { useAnnouncements } from '@/features/announcements/AnnouncementContext';
 import { ANNOUNCEMENT_META, formatAnnouncementDate } from '@/features/announcements/announcementData';
 import { useAuth } from '@/features/auth/AuthContext';
 
-const CLUBS = [
-  {
-    name: '康福外国语学校长跑社',
-    city: '北京',
-    members: 128,
-    weekly: '326 km',
-    note: '校园操场 · 每周六 07:00',
-    badge: '已认证',
-    current: true,
-  },
-  {
-    name: '朝阳公园少年跑团',
-    city: '北京',
-    members: 86,
-    weekly: '214 km',
-    note: '朝阳公园 · 每周日 06:30',
-    badge: '同城',
-    current: false,
-  },
-  {
-    name: '奥森晨跑少年组',
-    city: '北京',
-    members: 54,
-    weekly: '168 km',
-    note: '奥森南园 · 每周三 19:30',
-    badge: '同城',
-    current: false,
-  },
-];
+const CLUBS: {
+  name: string;
+  city: string;
+  members: number;
+  weekly: string;
+  note: string;
+  badge: string;
+  current: boolean;
+}[] = [];
 
 export default function SchoolScreen() {
   const router = useRouter();
@@ -82,27 +62,33 @@ export default function SchoolScreen() {
               <Pill text="已认证" tone="green" />
             </View>
             <Text style={styles.clubMeta}>
-              {mock.club.members} 名成员 · 本周 {mock.club.weekKm} km · {activities.length} 场活动
+              {mock.club.members > 0 ? mock.club.members + ' 名成员' : '还没有成员加入'} · 本周 {mock.club.weekKm} km · {activities.length} 场活动
             </Text>
           </View>
         </View>
         <View style={styles.heroBottom}>
-          <View style={styles.avatars}>
-            {['林', '周', '陈'].map((name, index) => (
-              <View key={name} style={[styles.avatarStack, index > 0 && styles.avatarOverlap]}>
-                <Avatar label={name} size={30} tone={index} />
+          {mock.club.members > 0 ? (
+            <View style={styles.avatars}>
+              {['林', '周', '陈'].map((name, index) => (
+                <View key={name} style={[styles.avatarStack, index > 0 && styles.avatarOverlap]}>
+                  <Avatar label={name} size={30} tone={index} />
+                </View>
+              ))}
+              <View style={[styles.avatarStack, styles.avatarOverlap, styles.avatarMore]}>
+                <Text style={styles.avatarMoreText}>+{Math.max(0, mock.club.members - 3)}</Text>
               </View>
-            ))}
-            <View style={[styles.avatarStack, styles.avatarOverlap, styles.avatarMore]}>
-              <Text style={styles.avatarMoreText}>+125</Text>
             </View>
-          </View>
+          ) : (
+            <Text style={styles.emptyText}>等待同学加入</Text>
+          )}
           <PrimaryButton label="查看跑团" variant="light" onPress={() => router.push('/club')} style={styles.heroButton} />
         </View>
       </Card>
 
       <SectionTitle title="跑团公告" action="全部公告" onAction={() => router.push('/announcements')} />
-      {announcements.slice(0, 2).map((item) => {
+      {announcements.length === 0 ? (
+        <Card><Text style={styles.emptyText}>还没有跑团公告，团长发布后会出现在这里。</Text></Card>
+      ) : announcements.slice(0, 2).map((item) => {
         const meta = ANNOUNCEMENT_META[item.category];
         return (
           <Card
@@ -124,7 +110,9 @@ export default function SchoolScreen() {
 
       <SectionTitle title="同城跑团" action="北京" />
       <View style={styles.clubList}>
-        {CLUBS.slice(1).map((club) => (
+        {CLUBS.length <= 1 ? (
+          <Card><Text style={styles.emptyText}>还没有同城跑团数据，平台接入后会显示附近跑团。</Text></Card>
+        ) : CLUBS.slice(1).map((club) => (
           <Card key={club.name} style={styles.clubCard}>
             <View style={styles.clubCardTop}>
               <View style={styles.clubInitial}>
@@ -153,7 +141,9 @@ export default function SchoolScreen() {
 
       <SectionTitle title="近期活动" action="全部活动" onAction={() => router.push('/activities')} />
       <View style={styles.activityList}>
-        {upcomingActivities.map((activity) => {
+        {upcomingActivities.length === 0 ? (
+          <Card><Text style={styles.emptyText}>近期还没有活动，等团长发布后就能报名。</Text></Card>
+        ) : upcomingActivities.map((activity) => {
           const status = getSignupStatus(activity.id);
           const active = status === 'pending' || status === 'approved';
           const label = status === 'pending' ? '待确认' : status === 'approved' ? '已报名' : '报名';
@@ -340,4 +330,5 @@ const styles = StyleSheet.create({
   safetyCard: { marginTop: 16, padding: space.lg, backgroundColor: colors.brandSoft, borderColor: colors.brandSoft },
   safetyTitle: { fontSize: 13, fontWeight: '800', color: colors.brand },
   safetyBody: { marginTop: 5, fontSize: 11, lineHeight: 18, color: colors.brandDeep },
+  emptyText: { fontSize: 12, lineHeight: 19, color: colors.muted, paddingVertical: 8 },
 });

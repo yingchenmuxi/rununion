@@ -97,7 +97,7 @@
       "title": "青跑团 · 管理后台",
       "scrollWidth": 1425,
       "innerWidth": 1440,
-      "rows": 19,
+      "rows": 10,
       "buttons": [
         "退出",
         "全部 19",
@@ -115,15 +115,10 @@
         "详情",
         "详情",
         "详情",
-        "详情",
-        "详情",
-        "详情",
-        "详情",
-        "详情",
-        "详情",
-        "详情",
-        "详情",
-        "详情"
+        "上一页",
+        "1",
+        "2",
+        "下一页"
       ],
       "headings": [],
       "text": "青 青跑团 平台总后台 管理范围 全国社团 · 平台治理 总览 学校与社团 全部用户 内容与活动 跑步记录 审核与举报 系统与权限 平台示例数据，变更只在本次会话生效 V0.1 · 平台治理 青跑团 全部用户 示例数据 周 周明 退出 全部用户 跨社团查询成员状态。平台能看全量资料，但日常成员审批仍由各自社团负责人完成。 4 个风险标记 · 1 人监护人同意待补 全部 19 在团 15 待审批 3 已暂停 1 已离团 0 用户 所属社团"
@@ -159,7 +154,7 @@
       "title": "青跑团 · 管理后台",
       "scrollWidth": 1425,
       "innerWidth": 1440,
-      "rows": 14,
+      "rows": 10,
       "buttons": [
         "退出",
         "全部 14",
@@ -187,10 +182,10 @@
         "查看",
         "发布",
         "查看",
-        "下线",
-        "查看",
-        "下线",
-        "查看"
+        "上一页",
+        "1",
+        "2",
+        "下一页"
       ],
       "headings": [],
       "text": "青 青跑团 平台总后台 管理范围 全国社团 · 平台治理 总览 学校与社团 全部用户 内容与活动 跑步记录 审核与举报 系统与权限 平台示例数据，变更只在本次会话生效 V0.1 · 平台治理 青跑团 内容与活动 示例数据 周 周明 退出 内容与活动 平台可查看所有社团的公告、文章、活动与挑战。日常发布由社团负责，平台只处理违规与高风险内容。 全量可见 · 3 条待审核 全部 14 待审核 3 已发布 9 已下线 1 草稿 1 全部类型 "
@@ -202,7 +197,7 @@
       "title": "青跑团 · 管理后台",
       "scrollWidth": 1425,
       "innerWidth": 1440,
-      "rows": 12,
+      "rows": 10,
       "buttons": [
         "退出",
         "查看操作日志",
@@ -220,8 +215,10 @@
         "更正",
         "更正",
         "更正",
-        "更正",
-        "更正"
+        "上一页",
+        "1",
+        "2",
+        "下一页"
       ],
       "headings": [],
       "text": "青 青跑团 平台总后台 管理范围 全国社团 · 平台治理 总览 学校与社团 全部用户 内容与活动 跑步记录 审核与举报 系统与权限 平台示例数据，变更只在本次会话生效 V0.1 · 平台治理 青跑团 跑步记录 示例数据 周 周明 退出 跑步记录 平台可以查看和更正全部记录，但这不是日常功能。更正会同步影响成员端统计，并写入审计日志。 查看操作日志 数据边界 私密记录只对成员本人可见，平台仅在有明确审计需要时查看；导出与更正都会留痕。V0"
@@ -357,13 +354,23 @@
       "aria": null
     },
     {
-      "text": "更正",
-      "cls": "btn btn-ghost btn-sm",
+      "text": "上一页",
+      "cls": "",
       "aria": null
     },
     {
-      "text": "更正",
-      "cls": "btn btn-ghost btn-sm",
+      "text": "1",
+      "cls": "is-active",
+      "aria": null
+    },
+    {
+      "text": "2",
+      "cls": "",
+      "aria": null
+    },
+    {
+      "text": "下一页",
+      "cls": "",
       "aria": null
     }
   ],
@@ -371,77 +378,8 @@
     {
       "text": "退出",
       "cls": "btn btn-ghost btn-sm"
-    },
-    {
-      "text": "待处理 3",
-      "cls": "filter-tab filter-tab-active"
-    },
-    {
-      "text": "已处理 2",
-      "cls": "filter-tab"
-    },
-    {
-      "text": "已驳回 1",
-      "cls": "filter-tab"
-    },
-    {
-      "text": "全部 6",
-      "cls": "filter-tab"
-    },
-    {
-      "text": "处理并留痕",
-      "cls": "btn btn-primary btn-sm"
-    },
-    {
-      "text": "驳回",
-      "cls": "btn btn-ghost btn-sm"
-    },
-    {
-      "text": "处理并留痕",
-      "cls": "btn btn-primary btn-sm"
-    },
-    {
-      "text": "驳回",
-      "cls": "btn btn-ghost btn-sm"
-    },
-    {
-      "text": "处理并留痕",
-      "cls": "btn btn-primary btn-sm"
-    },
-    {
-      "text": "驳回",
-      "cls": "btn btn-ghost btn-sm"
     }
   ],
-  "systemButtons": [
-    {
-      "text": "退出",
-      "cls": "btn btn-ghost btn-sm"
-    },
-    {
-      "text": "新增管理员",
-      "cls": "btn btn-primary btn-md"
-    },
-    {
-      "text": "账号与权限 3",
-      "cls": "detail-tab detail-tab-active"
-    },
-    {
-      "text": "操作日志 8",
-      "cls": "detail-tab"
-    },
-    {
-      "text": "停用",
-      "cls": "btn btn-dangerGhost btn-sm"
-    },
-    {
-      "text": "启用",
-      "cls": "btn btn-secondary btn-sm"
-    },
-    {
-      "text": "停用",
-      "cls": "btn btn-dangerGhost btn-sm"
-    }
-  ],
+  "systemButtons": [],
   "events": []
 }

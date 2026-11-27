@@ -3,7 +3,7 @@
     {
       "name": "API 初始 4 场活动 / 19 条报名",
       "pass": true,
-      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"serves\":\"mobile/dist\"}"
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"invites\":4,\"runs\":25,\"challenges\":3,\"serves\":\"mobile/dist\"}"
     },
     {
       "name": "act-001 初始 7/40 已报名",
@@ -288,7 +288,7 @@
     {
       "name": "重置后 API 回到 4 场 / 19 条报名",
       "pass": true,
-      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"serves\":\"mobile/dist\"}"
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"invites\":4,\"runs\":25,\"challenges\":3,\"serves\":\"mobile/dist\"}"
     },
     {
       "name": "重置后 act-001 回到 7/40",

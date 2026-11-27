@@ -39,6 +39,10 @@ export default function GrowthScreen() {
   );
   const lastActivity = myPast[0];
   const maxWeek = Math.max(1, ...stats.weeks.map((week) => week.km));
+  const levelPercent = Math.min(100, Math.round((stats.monthKm / 25) * 100));
+  const levelHint = stats.monthKm > 0
+    ? '本月累计 ' + stats.monthKm.toFixed(1) + ' km，继续积累成长等级'
+    : '完成第一次开跑，开始积累成长等级';
 
   return (
     <Screen>
@@ -71,7 +75,7 @@ export default function GrowthScreen() {
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryStat}>
-            <Text style={styles.summaryStatValue}>第 {mock.week.rank}</Text>
+            <Text style={styles.summaryStatValue}>{mock.week.rank > 0 ? '第 ' + mock.week.rank : '未上榜'}</Text>
             <Text style={styles.summaryStatLabel}>队内参与</Text>
           </View>
         </View>
@@ -146,7 +150,9 @@ export default function GrowthScreen() {
 
       <SectionTitle title="个人最好" action="添加记录" />
       <View style={styles.pbGrid}>
-        {mock.pbs.map((pb) => {
+        {mock.pbs.length === 0 ? (
+          <Text style={styles.emptyText}>还没有个人最好成绩，完成一次计时跑后会记录在这里。</Text>
+        ) : mock.pbs.map((pb) => {
           const pending = pb.result === '待记录';
           return (
             <Card key={pb.distance} style={styles.pbCard}>
@@ -176,6 +182,9 @@ export default function GrowthScreen() {
 
       <SectionTitle title="最近记录" action="去开跑" onAction={() => router.push('/run')} />
       <Card>
+        {recentRuns.length === 0 ? (
+          <Text style={styles.emptyText}>还没有跑步记录，完成第一次开跑后会出现在这里。</Text>
+        ) : null}
         {recentRuns.slice(0, 5).map((run, index) => (
           <View key={run.id} style={[styles.runRow, index > 0 && styles.runRowLine]}>
             <View style={styles.runDate}>
@@ -198,7 +207,9 @@ export default function GrowthScreen() {
           <Text style={styles.boardHeaderName}>班级 / 跑团</Text>
           <Text style={styles.boardHeaderKm}>本周</Text>
         </View>
-        {mock.teamBoard.map((row) => (
+        {mock.teamBoard.length === 0 ? (
+          <Text style={styles.emptyText}>还没有团队数据，班级同学开始记录后会出现在这里。</Text>
+        ) : mock.teamBoard.map((row) => (
           <View key={row.name} style={styles.boardRow}>
             <View style={[styles.rankBadge, row.rank === 1 && styles.rankBadgeFirst]}>
               <Text style={[styles.rankText, row.rank === 1 && styles.rankTextFirst]}>{row.rank}</Text>
@@ -219,17 +230,19 @@ export default function GrowthScreen() {
           </View>
           <View style={styles.levelInfo}>
             <Text style={styles.levelName}>{mock.user.level}</Text>
-            <Text style={styles.levelHint}>再完成 3 次跑步，升到 Lv.4</Text>
+            <Text style={styles.levelHint}>{levelHint}</Text>
           </View>
-          <Text style={styles.levelPercent}>70%</Text>
+          <Text style={styles.levelPercent}>{levelPercent}%</Text>
         </View>
-        <ProgressBar value={70} />
+        <ProgressBar value={levelPercent} />
         <Text style={styles.levelNote}>等级只看持续参与和完赛，不与配速、名次挂钩。</Text>
       </Card>
 
       <SectionTitle title="我的徽章" action="全部" />
       <View style={styles.badgeRow}>
-        {mock.badges.map((badge) => (
+        {mock.badges.length === 0 ? (
+          <Text style={styles.emptyText}>还没有徽章，连续记录和完成挑战会点亮徽章。</Text>
+        ) : mock.badges.map((badge) => (
           <View key={badge.label} style={styles.badgeItem}>
             <View style={styles.badgeCircle}>
               <Text style={styles.badgeGlyph}>★</Text>
@@ -392,4 +405,5 @@ const styles = StyleSheet.create({
   levelChipText: { fontSize: 11, fontWeight: '700', color: colors.muted },
   levelChipTextActive: { color: colors.white },
   levelsBody: { marginTop: 10, fontSize: 10, lineHeight: 17, color: colors.muted },
+  emptyText: { flex: 1, fontSize: 12, lineHeight: 19, color: colors.muted, paddingVertical: 8 },
 });

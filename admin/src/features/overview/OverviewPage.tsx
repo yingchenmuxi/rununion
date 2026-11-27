@@ -152,18 +152,22 @@ export function OverviewPage() {
             <Icon name="activity" size={19} className="panel-head-icon" />
           </div>
 
-          <div className="activity-list">
-            {data.activities.map((activity) => (
-              <div className="activity-item" key={activity.id}>
-                <span className={'activity-icon activity-' + activity.type}><Icon name={activityIcon[activity.type]} size={16} /></span>
-                <div>
-                  <strong>{activity.title}</strong>
-                  <p>{activity.detail}</p>
+          {data.activities.length === 0 ? (
+            <EmptyState icon="activity" title="还没有社团动态" description="成员加入、跑步记录、挑战和公告会出现在这里。" />
+          ) : (
+            <div className="activity-list">
+              {data.activities.map((activity) => (
+                <div className="activity-item" key={activity.id}>
+                  <span className={'activity-icon activity-' + activity.type}><Icon name={activityIcon[activity.type]} size={16} /></span>
+                  <div>
+                    <strong>{activity.title}</strong>
+                    <p>{activity.detail}</p>
+                  </div>
+                  <small>{activity.time}</small>
                 </div>
-                <small>{activity.time}</small>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
 

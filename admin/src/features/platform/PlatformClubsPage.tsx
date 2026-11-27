@@ -83,7 +83,11 @@ export function PlatformClubsPage() {
         </div>
 
         {rows.length === 0 ? (
-          <EmptyState icon="search" title="没有匹配的社团" description="换个筛选条件或关键词再试。" />
+          <EmptyState
+            icon={clubs.length === 0 ? 'users' : 'search'}
+            title={clubs.length === 0 ? '还没有入驻社团' : '没有匹配的社团'}
+            description={clubs.length === 0 ? '新社团提交入驻申请后，会出现在这里。' : '换个筛选条件或关键词再试。'}
+          />
         ) : (
           <div className="table-wrap">
             <table className="data-table platform-table">

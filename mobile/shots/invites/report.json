@@ -3,7 +3,7 @@
     {
       "name": "Mock API 返回 4 个邀请码",
       "pass": true,
-      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"invites\":4,\"serves\":\"mobile/dist\"}"
+      "detail": "{\"ok\":true,\"activities\":4,\"signups\":19,\"notifications\":3,\"announcements\":4,\"members\":12,\"invites\":4,\"runs\":25,\"challenges\":3,\"serves\":\"mobile/dist\"}"
     },
     {
       "name": "初始 2 个可用邀请码",
@@ -68,12 +68,12 @@
     {
       "name": "共享 API 生成新邀请码",
       "pass": true,
-      "detail": "{\"id\":\"inv-1795347769131\",\"code\":\"QINGRUN-5064\",\"note\":\"联调邀请码\",\"createdAt\":\"2026-11-22T11:42:49.131Z\",\"expiresAt\":\"2026-11-29T15:59:00.000Z\",\"maxUses\":2,\"usedCount\":0,\"disabled\":false,\"status\":\"active\",\"remaining\":2}"
+      "detail": "{\"id\":\"inv-1795737366672\",\"code\":\"QINGRUN-8996\",\"note\":\"联调邀请码\",\"createdAt\":\"2026-11-26T23:56:06.672Z\",\"expiresAt\":\"2026-12-04T15:59:00.000Z\",\"maxUses\":2,\"usedCount\":0,\"disabled\":false,\"status\":\"active\",\"remaining\":2}"
     },
     {
       "name": "邀请码格式可识别",
       "pass": true,
-      "detail": "QINGRUN-5064"
+      "detail": "QINGRUN-8996"
     },
     {
       "name": "后台列表出现新邀请码",
@@ -138,17 +138,17 @@
     {
       "name": "邀请码使用次数加一",
       "pass": true,
-      "detail": "{\"id\":\"inv-1795347769131\",\"code\":\"QINGRUN-5064\",\"note\":\"联调邀请码\",\"createdAt\":\"2026-11-22T11:42:49.131Z\",\"expiresAt\":\"2026-11-29T15:59:00.000Z\",\"maxUses\":2,\"usedCount\":1,\"disabled\":false,\"status\":\"active\",\"remaining\":1}"
+      "detail": "{\"id\":\"inv-1795737366672\",\"code\":\"QINGRUN-8996\",\"note\":\"联调邀请码\",\"createdAt\":\"2026-11-26T23:56:06.672Z\",\"expiresAt\":\"2026-12-04T15:59:00.000Z\",\"maxUses\":2,\"usedCount\":1,\"disabled\":false,\"status\":\"active\",\"remaining\":1}"
     },
     {
       "name": "共享 API 收到新申请",
       "pass": true,
-      "detail": "{\"id\":\"m-1795347774223\",\"name\":\"邀请测试\",\"username\":\"invitetest\",\"grade\":\"高二\",\"gender\":\"未填写\",\"status\":\"pending\",\"role\":\"member\",\"joinedAt\":\"2026-11-22T11:42:54.223Z\",\"lastActiveAt\":\"2026-11-22T11:42:54.223Z\",\"weeklyKm\":0,\"totalKm\":0,\"note\":\"通过邀请码 QINGRUN-5064 提交申请。\"}"
+      "detail": "{\"id\":\"m-1795737371186\",\"name\":\"邀请测试\",\"username\":\"invitetest\",\"grade\":\"高二\",\"gender\":\"未填写\",\"status\":\"pending\",\"role\":\"member\",\"joinedAt\":\"2026-11-26T23:56:11.186Z\",\"lastActiveAt\":\"2026-11-26T23:56:11.186Z\",\"weeklyKm\":0,\"totalKm\":0,\"note\":\"通过邀请码 QINGRUN-8996 提交申请。\"}"
     },
     {
       "name": "申请备注记录生成码",
       "pass": true,
-      "detail": "通过邀请码 QINGRUN-5064 提交申请。"
+      "detail": "通过邀请码 QINGRUN-8996 提交申请。"
     },
     {
       "name": "新成员共 13 人",
@@ -193,7 +193,7 @@
     {
       "name": "API 邀请码变为停用",
       "pass": true,
-      "detail": "{\"id\":\"inv-1795347769131\",\"code\":\"QINGRUN-5064\",\"note\":\"联调邀请码\",\"createdAt\":\"2026-11-22T11:42:49.131Z\",\"expiresAt\":\"2026-11-29T15:59:00.000Z\",\"maxUses\":2,\"usedCount\":1,\"disabled\":true,\"status\":\"disabled\",\"remaining\":1}"
+      "detail": "{\"id\":\"inv-1795737366672\",\"code\":\"QINGRUN-8996\",\"note\":\"联调邀请码\",\"createdAt\":\"2026-11-26T23:56:06.672Z\",\"expiresAt\":\"2026-12-04T15:59:00.000Z\",\"maxUses\":2,\"usedCount\":1,\"disabled\":true,\"status\":\"disabled\",\"remaining\":1}"
     },
     {
       "name": "手机端回到登录页",
@@ -223,5 +223,5 @@
   ],
   "failures": [],
   "events": [],
-  "finishedAt": "2026-11-22T11:43:00.636Z"
+  "finishedAt": "2026-11-26T23:56:17.960Z"
 }

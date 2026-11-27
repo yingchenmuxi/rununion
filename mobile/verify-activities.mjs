@@ -106,6 +106,7 @@ const bodyText = async () => (await evaluate('document.body.innerText')).replace
 const path = () => evaluate('location.pathname');
 const clickText = (text) => evaluate('(() => { const nodes=[...document.querySelectorAll("button,[role=button],[role=tab],div")].reverse(); const target=nodes.find((node)=>(node.innerText||"").includes(' + JSON.stringify(text) + ')&&node.getBoundingClientRect().width>0); if(!target) return {ok:false,body:document.body.innerText.slice(0,400)}; target.click(); return {ok:true,text:(target.innerText||"").replace(/\s+/g," ").trim().slice(0,100)}; })()');
 const clickButton = (text) => evaluate('(() => { const norm=(value)=>(value||"").replace(/\s+/g," ").trim(); const want=' + JSON.stringify(text) + '; const all=[...document.querySelectorAll("[role=button],[role=tab],button")].filter((node)=>node.getBoundingClientRect().width>0); const target=all.find((node)=>norm(node.innerText)===want)||all.find((node)=>norm(node.innerText).includes(want)); if(!target) return {ok:false,buttons:all.map((node)=>norm(node.innerText)).filter(Boolean).slice(0,20)}; target.click(); return {ok:true,text:norm(target.innerText).slice(0,100)}; })()');
+const cnDay = (iso) => { const [, month, day] = iso.split('-').map(Number); return month + ' 月 ' + day + ' 日'; };
 const clickCard = (text) => evaluate('(() => { const norm=(value)=>(value||"").replace(/\s+/g," ").trim(); const want=' + JSON.stringify(text) + '; const all=[...document.querySelectorAll("[role=button]")].filter((node)=>node.getBoundingClientRect().width>0); const target=all.find((node)=>norm(node.innerText).includes(want)&&norm(node.innerText).length>20); if(!target) return {ok:false,cards:all.map((node)=>norm(node.innerText)).filter(Boolean).slice(0,15)}; target.click(); return {ok:true,text:norm(target.innerText).slice(0,120)}; })()');
 const scrollToText = (text) => evaluate('(() => { const want=' + JSON.stringify(text) + '; const nodes=[...document.querySelectorAll("div")]; const target=nodes.reverse().find((node)=>(node.innerText||"").includes(want)&&node.getBoundingClientRect().width>0); if(!target) return {ok:false}; target.scrollIntoView({block:"center"}); return {ok:true}; })()');
 async function waitForText(text, timeout = 8000) {
@@ -212,6 +213,7 @@ try {
   check('后台可把 m-001 标记为未到', markedAbsent.status === 'absent');
   const afterAbsent = await api('/activities/act-004');
   check('后台 act-004 未到数变为 1', afterAbsent.absentCount === 1 && afterAbsent.attendedCount === 2);
+  const act004Day = cnDay(afterAbsent.date);
 
   await reloadAndLogin();
   await clickText('我的');
@@ -223,7 +225,7 @@ try {
   check('手机端已参加数降为 0', body.includes('0') && body.includes('未到'));
   await screenshot('09-my-absent');
 
-  check('打开已结束 act-004 卡片', (await clickCard('11 月 15 日')).ok);
+  check('打开已结束 act-004 卡片', (await clickCard(act004Day)).ok);
   check('act-004 详情路径', (await waitForPath('/activity/act-004')) === '/activity/act-004');
   await scrollToText('报名与出勤');
   await sleep(900);
@@ -245,7 +247,7 @@ try {
   check('手机端刷新后显示待核对', body.includes('待核对') && body.includes('1'));
   await screenshot('11-my-awaiting');
 
-  check('再次打开 act-004 卡片', (await clickCard('11 月 15 日')).ok);
+  check('再次打开 act-004 卡片', (await clickCard(act004Day)).ok);
   await waitForPath('/activity/act-004');
   await scrollToText('报名与出勤');
   await sleep(350);
@@ -287,12 +289,12 @@ try {
   await scrollToText('重置活动演示数据');
   await sleep(350);
   check('点击重置活动演示数据', (await clickButton('重置活动演示数据')).ok);
-  check('重置成功提示出现', await waitForText('活动演示数据已重置'));
+  check('重置成功提示出现', await waitForText('活动演示数据、消息和挑战已重置'));
   const afterReset = await api('/health');
   check('重置后 API 回到 4 场 / 19 条报名', afterReset.activities === 4 && afterReset.signups === 19, JSON.stringify(afterReset));
   const resetAct001 = await api('/activities/act-001');
   check('重置后 act-001 回到 7/40', resetAct001.signupCount === 7);
-  await scrollToText('活动演示数据已重置');
+  await scrollToText('活动演示数据、消息和挑战已重置');
   await sleep(400);
   await screenshot('15-profile-reset-result');
 

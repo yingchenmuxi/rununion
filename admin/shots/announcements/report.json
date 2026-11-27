@@ -98,7 +98,7 @@
     {
       "name": "API 公告已发布并记录发布时间",
       "pass": true,
-      "detail": "{\"status\":\"published\",\"publishedAt\":\"2026-11-21T07:59:58.417Z\"}"
+      "detail": "{\"status\":\"published\",\"publishedAt\":\"2026-11-26T23:54:45.624Z\"}"
     },
     {
       "name": "后台置顶排在最前",
@@ -203,5 +203,5 @@
   ],
   "failures": [],
   "events": [],
-  "finishedAt": "2026-11-21T08:00:10.113Z"
+  "finishedAt": "2026-11-26T23:54:56.429Z"
 }

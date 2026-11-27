@@ -85,7 +85,7 @@ export default function ActivitiesScreen() {
 
       <View style={styles.countRow}>
         <Text style={styles.countText}>
-          {loading ? '正在加载活动…' : '共 ' + rows.length + ' 场 · 共享演示数据'}
+          {loading ? '正在加载活动…' : '共 ' + rows.length + ' 场 · 共享数据'}
         </Text>
         <Text style={styles.countHint}>点开看集合与报名状态</Text>
       </View>

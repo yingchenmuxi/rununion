@@ -1,16 +1,4 @@
 import type { PlatformRepository } from './platformRepository';
-import {
-  platformCities,
-  platformWeeklyTrend,
-  seedPlatformAccounts,
-  seedPlatformActivities,
-  seedPlatformClubs,
-  seedPlatformContent,
-  seedPlatformRecords,
-  seedPlatformReports,
-  seedPlatformUsers,
-  seedPlatformAuditLogs,
-} from './mock/platformMockData';
 import { PLATFORM_DISPLAY_NAME } from './mock/mockData';
 import type {
   ClubSettingsInput,
@@ -62,13 +50,13 @@ function formatPace(distanceKm: number, durationMin: number): string {
 }
 
 export class MockPlatformRepository implements PlatformRepository {
-  private clubs: PlatformClub[] = clone(seedPlatformClubs);
-  private users: PlatformUser[] = clone(seedPlatformUsers);
-  private content: PlatformContentItem[] = clone(seedPlatformContent);
-  private reports: PlatformReport[] = clone(seedPlatformReports);
-  private accounts: PlatformAccount[] = clone(seedPlatformAccounts);
-  private logs: PlatformAuditLog[] = clone(seedPlatformAuditLogs);
-  private records: RunRecord[] = clone(seedPlatformRecords);
+  private clubs: PlatformClub[] = [];
+  private users: PlatformUser[] = [];
+  private content: PlatformContentItem[] = [];
+  private reports: PlatformReport[] = [];
+  private accounts: PlatformAccount[] = [];
+  private logs: PlatformAuditLog[] = [];
+  private records: RunRecord[] = [];
 
   private addLog(action: string, target: string, detail: string): void {
     this.logs.unshift({
@@ -101,9 +89,9 @@ export class MockPlatformRepository implements PlatformRepository {
       highRiskReports: pendingReportList.filter((report) => report.priority === 'high').length,
       pendingClubList,
       pendingReportList,
-      weeklyTrend: platformWeeklyTrend,
-      cities: platformCities,
-      activities: seedPlatformActivities,
+      weeklyTrend: [],
+      cities: [],
+      activities: [],
     });
   }
 

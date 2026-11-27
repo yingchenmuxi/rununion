@@ -94,7 +94,7 @@ export default function HomeScreen() {
           <View style={styles.heroDivider} />
           <Stat value={stats.monthKm.toFixed(1)} label="本月 km" tone="onDark" />
           <View style={styles.heroDivider} />
-          <Stat value={'第 ' + mock.week.rank} label="队内参与" tone="onDark" />
+          <Stat value={mock.week.rank > 0 ? '第 ' + mock.week.rank : '未上榜'} label="队内参与" tone="onDark" />
         </View>
       </View>
 
@@ -135,22 +135,28 @@ export default function HomeScreen() {
               <Pill text="已认证" tone="green" />
             </View>
             <Text style={styles.clubMeta}>
-              {mock.club.members} 名成员 · 本周 {mock.club.weekKm} km
+              {mock.club.members > 0 ? mock.club.members + ' 名成员' : '还没有成员加入'} · 本周 {mock.club.weekKm} km
             </Text>
           </View>
         </View>
         <View style={styles.memberRow}>
-          <View style={styles.avatars}>
-            {['林', '周', '陈', '许'].map((name, index) => (
-              <View key={name} style={[styles.avatarStack, index > 0 && styles.avatarStackOverlap]}>
-                <Avatar label={name} size={30} tone={index} />
+          {mock.club.members > 0 ? (
+            <>
+              <View style={styles.avatars}>
+                {['林', '周', '陈', '许'].map((name, index) => (
+                  <View key={name} style={[styles.avatarStack, index > 0 && styles.avatarStackOverlap]}>
+                    <Avatar label={name} size={30} tone={index} />
+                  </View>
+                ))}
+                <View style={[styles.avatarStack, styles.avatarStackOverlap, styles.avatarMore]}>
+                  <Text style={styles.avatarMoreText}>+{Math.max(0, mock.club.members - 4)}</Text>
+                </View>
               </View>
-            ))}
-            <View style={[styles.avatarStack, styles.avatarStackOverlap, styles.avatarMore]}>
-              <Text style={styles.avatarMoreText}>+124</Text>
-            </View>
-          </View>
-          <Text style={styles.clubNote}>本周一起跑了 {mock.club.weekKm} km</Text>
+              <Text style={styles.clubNote}>本周一起跑了 {mock.club.weekKm} km</Text>
+            </>
+          ) : (
+            <Text style={styles.clubNote}>邀请同学加入后，就能一起记录跑量。</Text>
+          )}
         </View>
       </Card>
 
@@ -171,10 +177,17 @@ export default function HomeScreen() {
             <Text style={[styles.joinText, nextStatus && styles.joinTextDone]}>{nextLabel}</Text>
           </View>
         </Card>
-      ) : null}
+      ) : (
+        <Card>
+          <Text style={styles.emptyText}>本周还没有活动，等团长发布后就能报名。</Text>
+        </Card>
+      )}
 
       <SectionTitle title="最近记录" action="去开跑" onAction={() => router.push('/run')} />
       <Card>
+        {recentRuns.length === 0 ? (
+          <Text style={styles.emptyText}>还没有跑步记录，完成第一次开跑后会出现在这里。</Text>
+        ) : null}
         {recentRuns.slice(0, 3).map((run, index) => (
           <View key={run.id} style={[styles.runRow, index > 0 && styles.runRowLine]}>
             <View style={styles.runDate}>
@@ -193,7 +206,7 @@ export default function HomeScreen() {
       <SectionTitle title="我的成长" action="查看全部" onAction={() => router.push('/growth')} />
       <View style={styles.growthRow}>
         <Card style={styles.growthCard}>
-          <Text style={styles.growthValue}>{mock.pbs[1].result}</Text>
+          <Text style={styles.growthValue}>{mock.pbs[1]?.result ?? '待记录'}</Text>
           <Text style={styles.growthLabel}>5K 个人最好</Text>
         </Card>
         <Card style={styles.growthCard}>
@@ -382,4 +395,5 @@ const styles = StyleSheet.create({
   knowledgeBody: { fontSize: 12, lineHeight: 19, color: colors.muted, marginTop: 6 },
   readMore: { marginTop: 10 },
   readMoreText: { fontSize: 12, fontWeight: '700', color: colors.brand },
+  emptyText: { fontSize: 12, lineHeight: 19, color: colors.muted, paddingVertical: 8 },
 });

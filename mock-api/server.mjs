@@ -1,11 +1,21 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { extname, resolve, sep } from 'node:path';
 
 const PORT = Number(process.env.PORT || 8090);
 const HOST = process.env.HOST || '127.0.0.1';
 const ROOT = resolve(process.env.DIST_DIR || 'mobile/dist');
 const DATA_FILE = resolve('mock-api/data.json');
+const DATA_MODE_FILE = resolve(process.env.DATA_MODE_FILE || 'data-mode.txt');
+
+function dataMode() {
+  try {
+    return readFileSync(DATA_MODE_FILE, 'utf8').trim().toLowerCase();
+  } catch {
+    return 'demo';
+  }
+}
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -82,6 +92,10 @@ function monthRange(offset) {
 }
 
 function buildSeed() {
+  if (dataMode() === 'empty') {
+    return { members: [], activities: [], signups: [], notifications: [], invites: [], announcements: [], runs: [], challenges: [] };
+  }
+
   const members = [
     { id: 'm-001', name: '林小满', username: 'linxiaoman', grade: '高一', gender: '女', status: 'active', role: 'owner', joinedAt: '2026-09-01T08:00:00+08:00', lastActiveAt: '2026-11-17T06:40:00+08:00', weeklyKm: 18.6, totalKm: 126.4 },
     { id: 'm-002', name: '陈予安', username: 'chenyuan', grade: '初二', gender: '男', status: 'pending', role: 'member', joinedAt: '2026-11-16T20:12:00+08:00', lastActiveAt: '2026-11-16T20:12:00+08:00', weeklyKm: 0, totalKm: 0, note: '同班同学推荐，想参加周末环湖跑。' },

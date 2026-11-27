@@ -50,7 +50,7 @@ export function PlatformLayout() {
         <div className="sidebar-foot">
           <div className="sidebar-note">
             <Icon name="shield" size={16} />
-            <span>{DEMO_MODE ? '平台示例数据，变更只在本次会话生效' : '数据来自 PocketBase'}</span>
+            <span>{DEMO_MODE ? '平台数据已清空，当前为空状态' : '数据来自 PocketBase'}</span>
           </div>
           <div className="sidebar-version">V0.1 · 平台治理</div>
         </div>
@@ -64,7 +64,7 @@ export function PlatformLayout() {
             <strong>{current?.label ?? '平台总后台'}</strong>
           </div>
           <div className="topbar-actions">
-            {DEMO_MODE ? <span className="demo-pill">示例数据</span> : null}
+            {DEMO_MODE ? <span className="demo-pill">空白数据</span> : null}
             <div className="topbar-user">
               <Avatar name={user?.name ?? '平'} size="sm" tone="green" />
               <span>{user?.name ?? '平台管理员'}</span>

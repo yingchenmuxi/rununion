@@ -60,7 +60,7 @@ export default function ProfileScreen() {
       await resetDemo();
       await refreshNotifications();
       await refreshChallenges();
-      setResetMessage('活动演示数据、消息和挑战已重置，后台和手机端都回到初始状态。');
+      setResetMessage('共享数据已重置，后台和手机端保持一致。');
     } catch {
       setResetMessage('重置失败，请确认演示数据服务已启动。');
     } finally {
@@ -214,17 +214,17 @@ export default function ProfileScreen() {
         <Text style={styles.privacyNote}>未满 18 岁参加线下活动，需要监护人知情并确认活动风险。</Text>
       </Card>
 
-      <SectionTitle title="演示数据" />
+      <SectionTitle title="数据说明" />
       <Card style={styles.demoCard}>
         <View style={styles.demoTop}>
           <Text style={styles.demoTitle}>共享活动数据</Text>
           <Pill text="本地 Mock" tone="neutral" />
         </View>
         <Text style={styles.demoBody}>
-          社团后台的报名审核、赛后签到和手机端看到的是同一份数据。刷新不会恢复初始状态；重置后两边都会回到演示种子。
+          社团后台的报名审核、赛后签到和手机端看到的是同一份数据。刷新不会恢复初始状态；重置会清空本次新增的数据。
         </Text>
         <PrimaryButton
-          label={resetting ? '重置中…' : '重置活动演示数据'}
+          label={resetting ? '重置中…' : '清空本次新增数据'}
           variant="outline"
           disabled={resetting}
           onPress={() => void handleResetDemo()}

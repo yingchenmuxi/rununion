@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card, DemoNote, Pill, PrimaryButton, Screen, SectionTitle } from '@/components/qingrun-ui';
-import { colors, radius, space } from '@/constants/qingrun';
+import { colors, mock, radius, space } from '@/constants/qingrun';
 import { useActivities } from '@/features/activities/ActivityContext';
 import { formatActivityDate } from '@/features/activities/activityData';
 import { useAnnouncements } from '@/features/announcements/AnnouncementContext';
@@ -48,17 +48,17 @@ export default function ClubScreen() {
               <Text style={styles.clubName} numberOfLines={1}>康福外国语学校长跑社</Text>
               <Pill text="已认证" tone="green" />
             </View>
-            <Text style={styles.clubMeta}>128 名成员 · 本周 326 km · {activities.length} 场活动</Text>
+            <Text style={styles.clubMeta}>{mock.club.members > 0 ? mock.club.members + ' 名成员' : '还没有成员加入'} · 本周 {mock.club.weekKm} km · {activities.length} 场活动</Text>
           </View>
         </View>
         <View style={styles.heroStats}>
           <View style={styles.heroStat}>
-            <Text style={styles.heroStatValue}>128</Text>
+            <Text style={styles.heroStatValue}>{mock.club.members}</Text>
             <Text style={styles.heroStatLabel}>在册成员</Text>
           </View>
           <View style={styles.heroDivider} />
           <View style={styles.heroStat}>
-            <Text style={styles.heroStatValue}>326</Text>
+            <Text style={styles.heroStatValue}>{mock.club.weekKm}</Text>
             <Text style={styles.heroStatLabel}>本周公里</Text>
           </View>
           <View style={styles.heroDivider} />

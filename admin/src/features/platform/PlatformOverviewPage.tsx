@@ -47,7 +47,7 @@ export function PlatformOverviewPage() {
     <>
       <PageHeader
         title="全国社团，今天在发生什么？"
-        description="先看需要平台介入的事，再看整体运行情况。所有数字来自各社团已同步的演示数据。"
+        description="先看需要平台介入的事，再看整体运行情况。当前为空状态，接入真实数据后会显示各社团汇总。"
         actions={<Link to="/platform/moderation"><Button variant="secondary" icon="flag">处理举报</Button></Link>}
       />
 
@@ -130,15 +130,19 @@ export function PlatformOverviewPage() {
             <div><h2>近 7 天平台里程</h2><p>各社团已同步记录的合计，不含私密记录。</p></div>
             <span className="trend-total">{formatKm(data.weeklyKm)}</span>
           </div>
-          <div className="trend-chart">
-            {data.weeklyTrend.map((point) => (
-              <div className="trend-column" key={point.label}>
-                <span className="trend-value">{Math.round(point.km)}</span>
-                <div className="trend-bar"><span style={{ height: Math.max(8, (point.km / maxKm) * 100) + '%' }} /></div>
-                <span className="trend-label">{point.label}</span>
-              </div>
-            ))}
-          </div>
+          {data.weeklyTrend.length === 0 ? (
+            <EmptyState icon="activity" title="还没有平台里程" description="各社团同步跑步记录后，这里会显示近 7 天趋势。" />
+          ) : (
+            <div className="trend-chart">
+              {data.weeklyTrend.map((point) => (
+                <div className="trend-column" key={point.label}>
+                  <span className="trend-value">{Math.round(point.km)}</span>
+                  <div className="trend-bar"><span style={{ height: Math.max(8, (point.km / maxKm) * 100) + '%' }} /></div>
+                  <span className="trend-label">{point.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         <Card className="panel">
@@ -146,32 +150,40 @@ export function PlatformOverviewPage() {
             <div><h2>城市覆盖</h2><p>按社团成员数排序，先做密度再扩城市。</p></div>
             <span className="panel-head-icon"><Icon name="users" size={19} /></span>
           </div>
-          <div className="city-list">
-            {data.cities.slice(0, 6).map((city, index) => (
-              <div className="city-row" key={city.city}>
-                <span className="city-rank">{String(index + 1).padStart(2, '0')}</span>
-                <div className="city-copy">
-                  <div><strong>{city.city}</strong><span>{city.clubs} 个社团 · {city.users} 人</span></div>
-                  <div className="city-track"><span style={{ width: (city.users / maxCityUsers) * 100 + '%' }} /></div>
+          {data.cities.length === 0 ? (
+            <EmptyState icon="users" title="还没有城市数据" description="社团入驻并添加成员后，这里会显示城市覆盖。" />
+          ) : (
+            <div className="city-list">
+              {data.cities.slice(0, 6).map((city, index) => (
+                <div className="city-row" key={city.city}>
+                  <span className="city-rank">{String(index + 1).padStart(2, '0')}</span>
+                  <div className="city-copy">
+                    <div><strong>{city.city}</strong><span>{city.clubs} 个社团 · {city.users} 人</span></div>
+                    <div className="city-track"><span style={{ width: (city.users / maxCityUsers) * 100 + '%' }} /></div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
 
       <div className="split-grid split-grid-wide">
         <Card className="panel">
           <div className="panel-head"><div><h2>平台动态</h2><p>入驻、内容、举报和系统操作的最近变化。</p></div></div>
-          <div className="activity-list">
-            {data.activities.map((activity) => (
-              <div className="activity-item platform-activity-item" key={activity.id}>
-                <span className={'activity-icon ' + activityTone[activity.type]}><Icon name={activityIcon[activity.type]} size={15} /></span>
-                <div><strong>{activity.title}</strong><p>{activity.detail}</p></div>
-                <small>{relativeTime(activity.time)}</small>
-              </div>
-            ))}
-          </div>
+          {data.activities.length === 0 ? (
+            <EmptyState icon="activity" title="还没有平台动态" description="入驻、内容、举报和系统操作会出现在这里。" />
+          ) : (
+            <div className="activity-list">
+              {data.activities.map((activity) => (
+                <div className="activity-item platform-activity-item" key={activity.id}>
+                  <span className={'activity-icon ' + activityTone[activity.type]}><Icon name={activityIcon[activity.type]} size={15} /></span>
+                  <div><strong>{activity.title}</strong><p>{activity.detail}</p></div>
+                  <small>{relativeTime(activity.time)}</small>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         <div className="quick-links quick-links-stack">
