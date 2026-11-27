@@ -64,7 +64,6 @@ export function PlatformLayout() {
             <strong>{current?.label ?? '平台总后台'}</strong>
           </div>
           <div className="topbar-actions">
-            {DEMO_MODE ? <span className="demo-pill">空白数据</span> : null}
             <div className="topbar-user">
               <Avatar name={user?.name ?? '平'} size="sm" tone="green" />
               <span>{user?.name ?? '平台管理员'}</span>
