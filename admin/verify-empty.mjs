@@ -3,7 +3,7 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 
 const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
 const PORT = 9273;
-const ADMIN = 'http://127.0.0.1:8081';
+const ADMIN = process.env.ADMIN_BASE || 'http://127.0.0.1:8081';
 const OUT = 'E:/QPTapp/admin/shots/empty';
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
